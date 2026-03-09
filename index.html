@@ -704,7 +704,7 @@ Rules:
 
       const send = async (text) => {
         const t = text||input.trim();
-        if (!t||loading||stage!==XSTAGE.PROBLEM) return;
+        if (!t||loading||(stage!==XSTAGE.PROBLEM&&stage!==XSTAGE.URGENCY_CONFIRM)) return;
         setInput("");
         const nm = [...msgs,{role:"user",content:t}];
         setMsgs(nm);
@@ -842,7 +842,7 @@ Rules:
           )}
 
           {/* input */}
-          {stage===XSTAGE.PROBLEM&&(
+          {(stage===XSTAGE.PROBLEM||stage===XSTAGE.URGENCY_CONFIRM)&&(
             <div style={{padding:"7px 13px 15px",flexShrink:0}}>
               <div style={{display:"flex",gap:7,background:"#1a1a28",borderRadius:26,padding:"6px 6px 6px 15px",border:"1px solid #252535"}}>
                 <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Describe your issue..." style={{flex:1,background:"none",border:"none",outline:"none",color:"#e0e0f8",fontSize:13.5,fontFamily:"'DM Sans',sans-serif"}}/>
