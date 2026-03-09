@@ -856,7 +856,7 @@ Rules:
           {/* info form - fixed at bottom */}
           {stage===STAGE.INFO_FORM&&(
             <div style={{padding:"8px 13px 15px",flexShrink:0,overflowY:"auto",maxHeight:"60%"}}>
-              <InfoForm zip={zip} ac={ac} onSubmit={d=>{setInfo(d);setMsgs(p=>[...p,{role:"assistant",content:`Got it, ${d.legalName.split(" ")[0]}! Here are our open slots. ${urgency==="emergency"?"Emergency dispatch available right now.":"Pick whatever works."}`}]);setStage(STAGE.SLOTS);}}/>
+              <InfoForm zip={zip} ac={ac} bizState={settings.state} onSubmit={d=>{setInfo(d);setMsgs(p=>[...p,{role:"assistant",content:`Got it, ${d.legalName.split(" ")[0]}! Here are our open slots. ${urgency==="emergency"?"Emergency dispatch available right now.":"Pick whatever works."}`}]);setStage(STAGE.SLOTS);}}/>
             </div>
           )}
 
@@ -895,8 +895,8 @@ Rules:
       );
     }
 
-    function InfoForm({zip, ac, onSubmit}) {
-      const [f,setF]=useState({legalName:"",phone:"",street:"",city:"",state:"CO",zip});
+    function InfoForm({zip, ac, bizState, onSubmit}) {
+      const [f,setF]=useState({legalName:"",phone:"",street:"",city:"",state:bizState||"",zip});;
       const [err,setErr]=useState({});
       const [sub,setSub]=useState(false);
       const set=(k,v)=>setF(p=>({...p,[k]:v}));
@@ -924,7 +924,7 @@ Rules:
             <div><Lb c="Street Address"/><input value={f.street} onChange={e=>{set("street",e.target.value);setErr(v=>({...v,street:null}));}} placeholder="123 Main St" style={is("street")}/>{err.street&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err.street}</span>}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 46px 76px",gap:7}}>
               <div><Lb c="City"/><input value={f.city} onChange={e=>{set("city",e.target.value);setErr(v=>({...v,city:null}));}} placeholder="Denver" style={is("city")}/></div>
-              <div><Lb c="State"/><input value={f.state} readOnly style={{...is(),background:"#111120",color:"#505070"}}/></div>
+              <div><Lb c="State"/><input value={f.state} onChange={e=>set("state", formatState(e.target.value))} maxLength={2} placeholder="NY" style={is("state")}/></div>
               <div><Lb c="ZIP"/><input value={f.zip} onChange={e=>set("zip",e.target.value.replace(/\D/g,"").slice(0,5))} style={is("zip")}/></div>
             </div>
             <div style={{padding:"8px 11px",background:"#0d0d18",borderRadius:9,border:"1px solid #1e1e30",fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>🔒 Only shared with the assigned technician.</div>
