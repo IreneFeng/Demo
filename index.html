@@ -1044,23 +1044,10 @@ Rules:
     function KeyEntry({onKey}) {
       const [val, setVal] = useState("");
       const [err, setErr] = useState("");
-      const [loading, setLoading] = useState(false);
-
-      const submit = async () => {
+      const submit = () => {
         const k = val.trim();
         if (!k.startsWith("sk-ant-")) { setErr("Key should start with sk-ant-..."); return; }
-        setLoading(true); setErr("");
-        // Quick test call
-        try {
-          const r = await fetch("https://api.anthropic.com/v1/messages", {
-            method:"POST",
-            headers:{"Content-Type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-            body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:10,messages:[{role:"user",content:"hi"}]}),
-          });
-          const d = await r.json();
-          if (d.error) { setErr(d.error.message||"Invalid key"); setLoading(false); return; }
-          onKey(k);
-        } catch(e) { setErr("Connection failed. Check internet."); setLoading(false); }
+        onKey(k);
       };
 
       return (
@@ -1088,9 +1075,9 @@ Rules:
               {err && <div style={{marginTop:6,fontSize:12,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err}</div>}
             </div>
 
-            <button onClick={submit} disabled={!val.trim()||loading}
-              style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:val.trim()&&!loading?"pointer":"not-allowed",background:val.trim()&&!loading?"linear-gradient(135deg,#0ea5e9,#6366f1)":"#252535",color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:800,opacity:val.trim()&&!loading?1:0.5,transition:"all 0.2s"}}>
-              {loading?"Verifying...":"Enter Demo →"}
+            <button onClick={submit} disabled={!val.trim()}
+              style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:val.trim()?"pointer":"not-allowed",background:val.trim()?"linear-gradient(135deg,#0ea5e9,#6366f1)":"#252535",color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:800,opacity:val.trim()?1:0.5,transition:"all 0.2s"}}>
+              Enter Demo →
             </button>
 
             <div style={{marginTop:20,padding:"12px 14px",background:"#0c0c18",borderRadius:10,border:"1px solid #1e1e30",fontSize:11,color:"#404060",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
