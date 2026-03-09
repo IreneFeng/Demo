@@ -438,7 +438,11 @@
                 {[[t.bizName,"businessName",tmpl.name],[t.phone,"phone","+1 (555) 000-0000"],[t.city,"city","Denver"],[t.state,"state","CO"]].map(([label,key,ph])=>(
                   <div key={key}>
                     <label style={{fontSize:10,fontWeight:700,color:"#606080",letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:5,fontFamily:"'DM Sans',sans-serif"}}>{label}</label>
-                    <input value={s[key]} onChange={e=>upd(key, key==="phone" ? formatPhone(e.target.value) : e.target.value)} placeholder={ph} style={inp} type={key==="phone"?"tel":"text"}/>
+                    <input value={s[key]}
+                      onChange={e=>upd(key, key==="phone" ? formatPhone(e.target.value) : key==="state" ? formatState(e.target.value) : e.target.value)}
+                      placeholder={ph} style={{...inp, width: key==="state" ? 60 : undefined}}
+                      maxLength={key==="state"?2:undefined}
+                      type={key==="phone"?"tel":"text"}/>
                   </div>
                 ))}
                 <div style={{padding:13,background:"#13131f",borderRadius:12,border:"1px solid #1e1e30"}}>
@@ -1031,14 +1035,17 @@ Rules:
     const COLOR_PALETTE = ["#0ea5e9","#22c55e","#f97316","#a855f7","#ec4899","#f59e0b","#14b8a6","#ef4444"];
     const EMOJI_OPTIONS = ["🏢","💈","🌿","🐾","🍕","🔑","🚗","💄","🏋️","🎨","🧹","🪟","⚡","🌳","🧰","🏥","📦","🛁"];
 
-    // Auto-format phone to +1 (000) 000-0000
+    // Auto-format phone: type digits only → formats to +1 (000) 000-0000
     const formatPhone = (raw) => {
       const digits = raw.replace(/\D/g,"").replace(/^1/,"").slice(0,10);
-      if (digits.length === 0) return "";
+      if (!digits) return "";
       if (digits.length <= 3) return `+1 (${digits}`;
       if (digits.length <= 6) return `+1 (${digits.slice(0,3)}) ${digits.slice(3)}`;
       return `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
     };
+
+    // Enforce 2-letter uppercase state abbreviation
+    const formatState = (raw) => raw.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,2);
 
     function SetupScreen({onLaunch}) {
       const [type, setType] = useState("plumber");
@@ -1164,7 +1171,11 @@ Rules:
               {[["Business Name",name,setName,"e.g. ProFix Plumbing","text"],["Phone Number",phone,setPhone,"+1 (555) 000-0000","tel"],["City",city,setCity,"Denver","text"],["State",state,setState,"CO","text"]].map(([label,val,setter,ph,tp])=>(
                 <div key={label}>
                   <div style={{fontSize:10,fontWeight:700,color:"#505070",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>{label}</div>
-                  <input value={val} onChange={e=>setter(tp==="tel" ? formatPhone(e.target.value) : e.target.value)} placeholder={ph} type={tp} style={inp}
+                  <input value={val}
+                    onChange={e=>setter(tp==="tel" ? formatPhone(e.target.value) : label==="State" ? formatState(e.target.value) : e.target.value)}
+                    placeholder={ph} type={tp}
+                    maxLength={label==="State"?2:undefined}
+                    style={{...inp, width: label==="State" ? "calc(100% - 26px)" : "calc(100% - 26px)"}}
                     onFocus={e=>e.target.style.borderColor=ac}
                     onBlur={e=>e.target.style.borderColor="#252540"}/>
                 </div>
