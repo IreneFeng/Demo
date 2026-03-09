@@ -194,6 +194,75 @@
       return <span style={{padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:700,letterSpacing:"0.06em",background:x.bg,color:x.col,border:`1px solid ${x.br}`}}>{x.t}</span>;
     }
 
+    // ── PRICE RANGE HELPERS ──
+    // Parses "$100-$500" → {min:"100", max:"500"}
+    const parsePriceRange = (str) => {
+      if (!str) return {min:"", max:""};
+      const m = str.match(/\$?([\d,]+)\s*[-–]\s*\$?([\d,]+)/);
+      if (m) return {min:m[1].replace(/,/g,""), max:m[2].replace(/,/g,"")};
+      const single = str.match(/\$?([\d,]+)/);
+      if (single) return {min:single[1].replace(/,/g,""), max:""};
+      return {min:"", max:""};
+    };
+    const buildPriceRange = (min, max) => {
+      const a = min.replace(/\D/g,""), b = max.replace(/\D/g,"");
+      if (!a && !b) return "";
+      if (a && !b) return `$${a}`;
+      return `$${a}-$${b}`;
+    };
+    const fmtDigits = (v) => v.replace(/\D/g,"").slice(0,7);
+
+    // Price range editor for existing services
+    function PriceRange({svc, price, ac, lang, onChange}) {
+      const {min:initMin, max:initMax} = parsePriceRange(price);
+      const [mn, setMn] = useState(initMin);
+      const [mx, setMx] = useState(initMax);
+      const update = (newMn, newMx) => {
+        setMn(newMn); setMx(newMx);
+        onChange(buildPriceRange(newMn, newMx));
+      };
+      const inpStyle = {padding:"5px 9px",background:"#0d0d18",border:`1px solid ${ac}40`,borderRadius:8,color:ac,fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif",width:"100%"};
+      return (
+        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
+          <span style={{fontSize:10,color:"#505070",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"价格:":"Price:"}</span>
+          <div style={{display:"flex",alignItems:"center",gap:4,flex:1}}>
+            <span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif"}}>$</span>
+            <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder="min" style={inpStyle}/>
+            <span style={{fontSize:11,color:"#505070"}}>—</span>
+            <span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif"}}>$</span>
+            <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder="max" style={inpStyle}/>
+          </div>
+          {mn&&<span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",flexShrink:0}}>{buildPriceRange(mn,mx)}</span>}
+        </div>
+      );
+    }
+
+    // Price range editor for new service form (controlled)
+    function NewPriceRange({value, onChange, ac, lang}) {
+      const {min:initMin, max:initMax} = parsePriceRange(value);
+      const [mn, setMn] = useState(initMin);
+      const [mx, setMx] = useState(initMax);
+      useEffect(()=>{
+        if(!value){setMn("");setMx("");}
+      },[value]);
+      const update = (newMn, newMx) => {
+        setMn(newMn); setMx(newMx);
+        onChange(buildPriceRange(newMn, newMx));
+      };
+      const inpStyle = {padding:"7px 9px",background:"#0f0f1e",border:"1px solid #252540",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif",width:"100%"};
+      return (
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"报价:":"Price:"}</span>
+          <span style={{fontSize:12,color:"#606080"}}>$</span>
+          <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder={lang==="zh"?"最低":"min"} style={inpStyle}/>
+          <span style={{fontSize:11,color:"#505070"}}>—</span>
+          <span style={{fontSize:12,color:"#606080"}}>$</span>
+          <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder={lang==="zh"?"最高":"max"} style={inpStyle}/>
+          {mn&&<span style={{fontSize:11,color:"#606080",whiteSpace:"nowrap",flexShrink:0,fontFamily:"'DM Sans',sans-serif"}}>{buildPriceRange(mn,mx)}</span>}
+        </div>
+      );
+    }
+
     // ── SERVICE TAB ──
     function SvcTab({s, setS, ac, lang, t}) {
       const [newSvcName, setNewSvcName] = useState("");
@@ -264,12 +333,8 @@
                     </button>
                   </div>
                   {on && (
-                    <div style={{display:"flex",alignItems:"center",gap:7}}>
-                      <span style={{fontSize:10,color:"#505070",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",minWidth:60}}>{lang==="zh"?"价格范围:":"Price range:"}</span>
-                      <input value={price} onChange={e=>setS(p=>({...p,customPrices:{...p.customPrices,[svc]:e.target.value}}))}
-                        placeholder="e.g. $100-$500"
-                        style={{flex:1,padding:"5px 10px",background:"#0d0d18",border:`1px solid ${ac}40`,borderRadius:8,color:ac,fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif"}}/>
-                    </div>
+                    <PriceRange svc={svc} price={price} ac={ac} lang={lang}
+                      onChange={val=>setS(p=>({...p,customPrices:{...p.customPrices,[svc]:val}}))}/>
                   )}
                 </div>
               );
@@ -281,13 +346,11 @@
             <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>
               + {lang==="zh"?"添加新服务":"Add new service"}
             </div>
-            <div style={{display:"flex",gap:8,marginBottom:8}}>
+            <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:8}}>
               <input value={newSvcName} onChange={e=>setNewSvcName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addSvc()}
                 placeholder={lang==="zh"?"服务名称":"Service name"}
-                style={{...inp,flex:2}}/>
-              <input value={newSvcPrice} onChange={e=>setNewSvcPrice(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addSvc()}
-                placeholder={lang==="zh"?"报价":"e.g. $80-$200"}
-                style={{...inp,flex:1}}/>
+                style={inp}/>
+              <NewPriceRange value={newSvcPrice} onChange={setNewSvcPrice} ac={ac} lang={lang}/>
             </div>
             <button onClick={addSvc} disabled={!newSvcName.trim()}
               style={{width:"100%",padding:"8px",borderRadius:8,border:"none",cursor:newSvcName.trim()?"pointer":"not-allowed",background:newSvcName.trim()?ac:"#252535",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",opacity:newSvcName.trim()?1:0.4,transition:"all 0.2s"}}>
@@ -672,7 +735,7 @@ Rules:
           } else {
             setMsgs(p=>[...p,{role:"assistant",content:c.trim()}]);
           }
-        } catch(e){setMsgs(p=>[...p,{role:"assistant",content:`Connection error. Please call ${settings.phone}.`}]);}
+        } catch(e){setMsgs(p=>[...p,{role:"assistant",content:`Error: ${e.message||e}. Please call ${settings.phone}.`}]);}
         setLoading(false);
       };
 
