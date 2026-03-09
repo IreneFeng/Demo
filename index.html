@@ -789,14 +789,7 @@ Rules:
             {/* urgency confirm card — shown after AI detects urgency */}
             {stage===XSTAGE.URGENCY_CONFIRM&&<UrgencyConfirm detectedUrgency={detectedUrgency||urgency} ac={ac} onConfirm={handleUrgencyConfirm}/>}
 
-            {/* zip check */}
-            {stage===STAGE.ZIP_CHECK&&<ZipCard zips={settings.serviceZips} ac={ac} onResult={(ok,z)=>{setZip(z);if(ok){setMsgs(p=>[...p,{role:"assistant",content:`Great — ZIP ${z} is covered! I just need a few details to book your appointment.`}]);setStage(STAGE.INFO_FORM);}}}/>}
 
-            {/* info form */}
-            {stage===STAGE.INFO_FORM&&<InfoForm zip={zip} ac={ac} onSubmit={d=>{setInfo(d);setMsgs(p=>[...p,{role:"assistant",content:`Got it, ${d.legalName.split(" ")[0]}! Here are our open slots. ${urgency==="emergency"?"Emergency dispatch available right now.":"Pick whatever works."}`}]);setStage(STAGE.SLOTS);}}/>}
-
-            {/* slot picker */}
-            {stage===STAGE.SLOTS&&!booking&&<SlotPick slots={slots} urgency={urgency} ac={ac} onSelect={slot=>{const b={service:service||settings.services[0],day:slot.day,time:slot.emergency?"ASAP (30-60 min)":slot.time,urgency,info,at:new Date().toISOString()};setBooking(b);onBooked(b);setMsgs(p=>[...p,{role:"assistant",content:`You're all set, ${info&&info.legalName.split(" ")[0]}! 🎉 Confirmed for ${slot.day}${slot.emergency?" — emergency dispatch":" at "+slot.time}. SMS sent to ${info&&info.phone}.`}]);setStage(STAGE.CONFIRMED);}}/>}
 
             {/* confirmed */}
             {stage===STAGE.CONFIRMED&&booking&&(
@@ -841,7 +834,7 @@ Rules:
             </div>
           )}
 
-          {/* input */}
+          {/* input bar - shown during AI conversation */}
           {(stage===XSTAGE.PROBLEM||stage===XSTAGE.URGENCY_CONFIRM)&&(
             <div style={{padding:"7px 13px 15px",flexShrink:0}}>
               <div style={{display:"flex",gap:7,background:"#1a1a28",borderRadius:26,padding:"6px 6px 6px 15px",border:"1px solid #252535"}}>
@@ -850,6 +843,27 @@ Rules:
                   <Ico name="send" size={14}/>
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* zip check - fixed at bottom */}
+          {stage===STAGE.ZIP_CHECK&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0}}>
+              <ZipCard zips={settings.serviceZips} ac={ac} onResult={(ok,z)=>{setZip(z);if(ok){setMsgs(p=>[...p,{role:"assistant",content:`Great — ZIP ${z} is covered! I just need a few details to book your appointment.`}]);setStage(STAGE.INFO_FORM);}}}/>
+            </div>
+          )}
+
+          {/* info form - fixed at bottom */}
+          {stage===STAGE.INFO_FORM&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0,overflowY:"auto",maxHeight:"60%"}}>
+              <InfoForm zip={zip} ac={ac} onSubmit={d=>{setInfo(d);setMsgs(p=>[...p,{role:"assistant",content:`Got it, ${d.legalName.split(" ")[0]}! Here are our open slots. ${urgency==="emergency"?"Emergency dispatch available right now.":"Pick whatever works."}`}]);setStage(STAGE.SLOTS);}}/>
+            </div>
+          )}
+
+          {/* slot picker - fixed at bottom */}
+          {stage===STAGE.SLOTS&&!booking&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0}}>
+              <SlotPick slots={slots} urgency={urgency} ac={ac} onSelect={slot=>{const b={service:service||settings.services[0],day:slot.day,time:slot.emergency?"ASAP (30-60 min)":slot.time,urgency,info,at:new Date().toISOString()};setBooking(b);onBooked(b);setMsgs(p=>[...p,{role:"assistant",content:`You're all set, ${info&&info.legalName.split(" ")[0]}! 🎉 Confirmed for ${slot.day}${slot.emergency?" — emergency dispatch":" at "+slot.time}. SMS sent to ${info&&info.phone}.`}]);setStage(STAGE.CONFIRMED);}}/>
             </div>
           )}
         </div>
