@@ -33,7 +33,7 @@
   <script type="text/babel">
     const { useState, useRef, useEffect } = React;
 
-    // API key is entered at runtime via prompt — never stored in code
+    // API key stored in module scope — set via KeyEntry screen
     let ANTHROPIC_API_KEY = "";
 
     const URGENCY = { EMERGENCY: "emergency", HIGH: "high", NORMAL: "normal" };
@@ -1410,6 +1410,7 @@ Rules:
     function App() {
       // Demo flow: "intro" → "setup" → "main"
       const [screen, setScreen] = useState("intro");
+      const [apiReady, setApiReady] = useState(false);
       const [settings, setSettings] = useState(defaultSettings("plumber"));
       const [bookings, setBookings] = useState([]);
       const [chatKey, setChatKey] = useState(0);
@@ -1435,7 +1436,7 @@ Rules:
       const handleTryChat = () => { setChatKey(k=>k+1); setShowChat(true); };
 
       // Show key entry if not set
-      if (!ANTHROPIC_API_KEY) return <KeyEntry onKey={k=>{ANTHROPIC_API_KEY=k; setScreen("intro");}} />;
+      if (!apiReady) return <KeyEntry onKey={k=>{ANTHROPIC_API_KEY=k; setApiReady(true);}} />;
       if (screen==="intro") return <IntroScreen onStart={()=>setScreen("setup")}/>;
       if (screen==="setup") return <SetupScreen onLaunch={handleLaunch}/>;
 
