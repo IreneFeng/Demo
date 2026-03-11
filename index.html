@@ -122,6 +122,7 @@
       phone: tmpl.phone || "",
       city: "Denver", state: "CO",
       serviceZips: [...DENVER_ZIPS],
+    serviceDuration: 60,
       services: [...(tmpl.services||[])],
       customPrices: {...(tmpl.prices||{})},
       customEmoji: tmpl.emoji,
@@ -135,20 +136,29 @@
       },
     });};
 
-    function makeSlots(settings) {
+    function makeSlots(settings, bookedSlotIds=[]) {
       const slots = [], now = new Date();
       const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
       const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const durMin = settings.serviceDuration || 60; // minutes
+      const stepMin = durMin; // slot interval = duration
       for (let d = 0; d < 7; d++) {
         const day = new Date(now); day.setDate(now.getDate() + d);
         const dk = dayNames[day.getDay()], dh = settings.hours[dk];
         if (!dh || !dh.open) continue;
-        const sh = parseInt(dh.start), eh = parseInt(dh.end);
+        const sh = parseInt(dh.start) * 60; // minutes from midnight
+        const eh = parseInt(dh.end) * 60;
         const dl = d===0?"Today":d===1?"Tomorrow":`${dk} ${months[day.getMonth()]} ${day.getDate()}`;
-        HOURS_LIST.forEach(({label,h}) => {
-          if (h < sh || h >= eh || (d===0 && h <= now.getHours())) return;
-          slots.push({id:`s-${d}-${h}`, day:dl, time:label, booked:Math.random()<0.3});
-        });
+        for (let m = sh; m + stepMin <= eh; m += stepMin) {
+          const hh = Math.floor(m/60), mm = m%60;
+          if (d===0 && hh <= now.getHours()) continue;
+          const label = hh===0?"12:"+String(mm).padStart(2,"0")+" AM"
+            :hh<12?`${hh}:${String(mm).padStart(2,"0")} AM`
+            :hh===12?`12:${String(mm).padStart(2,"0")} PM`
+            :`${hh-12}:${String(mm).padStart(2,"0")} PM`;
+          const id = `s-${d}-${hh}-${mm}`;
+          slots.push({id, day:dl, time:label, booked: bookedSlotIds.includes(id)});
+        }
       }
       return slots;
     }
@@ -307,8 +317,33 @@
 
       const activeCount = allSvcs.filter(sv => isActive(sv)).length;
 
+      const DURATIONS = [
+        {label:"15 min", val:15},{label:"30 min", val:30},{label:"45 min", val:45},
+        {label:"1 hr",   val:60},{label:"1.5 hr", val:90},{label:"2 hr",  val:120},
+        {label:"3 hr",   val:180},{label:"4 hr",  val:240},
+      ];
+      const curDur = s.serviceDuration || 60;
+
       return (
         <div>
+          {/* Duration picker */}
+          <div style={{marginBottom:16,padding:"12px 14px",background:"#0f0f1e",border:`1px solid ${ac}30`,borderRadius:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>
+              ⏱ {lang==="zh"?"每次服务时长":"Service Duration"}
+            </div>
+            <div style={{fontSize:11,color:"#606080",marginBottom:10,fontFamily:"'DM Sans',sans-serif",lineHeight:1.5}}>
+              {lang==="zh"?"客户预约时间槽按此间隔排列":"Appointment slots will be spaced by this interval"}
+            </div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {DURATIONS.map(({label,val})=>(
+                <button key={val} onClick={()=>setS(p=>({...p,serviceDuration:val}))}
+                  style={{padding:"6px 12px",borderRadius:20,border:`1.5px solid ${val===curDur?ac:"#252535"}`,background:val===curDur?ac+"20":"transparent",color:val===curDur?ac:"#606080",fontSize:11.5,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s"}}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'DM Sans',sans-serif"}}>{t.activeServices}</div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {allSvcs.map(svc=>{
@@ -623,7 +658,7 @@
     // Stage extension: add URGENCY_SELECT before PROBLEM, URGENCY_CONFIRM after PROBLEM
     const XSTAGE = {...STAGE, URGENCY_SELECT:"urgency_select", URGENCY_CONFIRM:"urgency_confirm"};
 
-    function Chat({settings, onBooked}) {
+    function Chat({settings, bookedSlotIds=[], onBooked}) {
       // Support both built-in and custom business types
       const tmpl = TEMPLATES[settings.businessType] || {
         emoji: settings.customEmoji || "🏢",
@@ -632,7 +667,7 @@
         emergencyWords: settings.customEmergencyWords || [],
         greeting: settings.customGreeting || "How can I help you today?",
       };
-      const slots = makeSlots(settings);
+      const slots = makeSlots(settings, bookedSlotIds);
       const ac = tmpl.color;
       const [stage, setStage] = useState(XSTAGE.URGENCY_SELECT);
       const [msgs, setMsgs] = useState([]);
@@ -863,7 +898,7 @@ Rules:
           {/* slot picker - fixed at bottom */}
           {stage===STAGE.SLOTS&&!booking&&(
             <div style={{padding:"8px 13px 15px",flexShrink:0}}>
-              <SlotPick slots={slots} urgency={urgency} ac={ac} onSelect={slot=>{const b={service:service||settings.services[0],day:slot.day,time:slot.emergency?"ASAP (30-60 min)":slot.time,urgency,info,at:new Date().toISOString()};setBooking(b);onBooked(b);setMsgs(p=>[...p,{role:"assistant",content:`You're all set, ${info&&info.legalName.split(" ")[0]}! 🎉 Confirmed for ${slot.day}${slot.emergency?" — emergency dispatch":" at "+slot.time}. SMS sent to ${info&&info.phone}.`}]);setStage(STAGE.CONFIRMED);}}/>
+              <SlotPick slots={slots} urgency={urgency} ac={ac} onSelect={slot=>{const b={service:service||settings.services[0],day:slot.day,time:slot.emergency?"ASAP (30-60 min)":slot.time,urgency,info,at:new Date().toISOString(),slotId:slot.id};setBooking(b);onBooked(b);setMsgs(p=>[...p,{role:"assistant",content:`You're all set, ${info&&info.legalName.split(" ")[0]}! 🎉 Confirmed for ${slot.day}${slot.emergency?" — emergency dispatch":" at "+slot.time}. SMS sent to ${info&&info.phone}.`}]);setStage(STAGE.CONFIRMED);}}/>
             </div>
           )}
         </div>
@@ -1438,12 +1473,15 @@ Rules:
 
       const handleLaunch = (s) => { setSettings(s); setScreen("main"); setShowChat(false); };
 
+      const [bookedSlotIds, setBookedSlotIds] = useState([]);
+
       const handleBooked = (b) => {
         const id = Date.now().toString();
         b.id = id;
         setBookings(p=>[b,...p]);
+        if (b.slotId) setBookedSlotIds(p=>[...p, b.slotId]);
         setNewBookingId(id);
-        setShowChat(false); // return to dashboard
+        setShowChat(false);
         setTimeout(()=>setNewBookingId(null), 5000);
       };
 
@@ -1500,7 +1538,7 @@ Rules:
                     </button>
                   </div>
                   <div style={{flex:1,overflow:"hidden"}}>
-                    <Chat key={chatKey} settings={settings} onBooked={handleBooked}/>
+                    <Chat key={chatKey} settings={settings} bookedSlotIds={bookedSlotIds} onBooked={handleBooked}/>
                   </div>
                 </div>
               )}
@@ -1534,7 +1572,7 @@ Rules:
             })}
           </div>
           <div style={{flex:1,overflow:"hidden"}}>
-            {mobileView==="chat"&&<Chat key={chatKey} settings={settings} onBooked={handleBooked}/>}
+            {mobileView==="chat"&&<Chat key={chatKey} settings={settings} bookedSlotIds={bookedSlotIds} onBooked={handleBooked}/>}
             {mobileView==="settings"&&<Settings settings={settings} onSave={(ns)=>{setSettings(ns);setShowSettings(false);}} lang={lang}/>}
             {mobileView==="dashboard"&&<DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId}/>}
           </div>
