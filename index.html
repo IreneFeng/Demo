@@ -1007,15 +1007,39 @@ Rules:
     }
 
     // ── DASHBOARD ──
-    function Dash({bookings, settings, lang="en"}) {
+    function Dash({bookings, settings, lang="en", onUpdateBooking}) {
       const t = T[lang]||T.en;
       const [filt,setFilt]=useState("all");
       const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#0ea5e9"}, ac=tmpl.color;
       const ord={emergency:0,high:1,normal:2};
-      const sorted=[...bookings].sort((a,b)=>(ord[a.urgency]||3)-(ord[b.urgency]||3));
-      const shown=filt==="all"?sorted:sorted.filter(b=>b.urgency===filt);
+
+      const now = new Date();
+      const todayStr = now.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const days7 = Array.from({length:7},(_,i)=>{
+        const d=new Date(now); d.setDate(now.getDate()+i);
+        return {
+          key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
+          label: i===0?"Today":i===1?"Tmrw":`${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          date: d,
+        };
+      });
+
+      const active = bookings.filter(b=>b.status!=="completed"&&b.status!=="cancelled");
+      const sorted=[...active].sort((a,b)=>(ord[a.urgency]||3)-(ord[b.urgency]||3));
+      const todayBookings = sorted.filter(b=>b.day==="Today");
+      const shown = filt==="all"?sorted:sorted.filter(b=>b.urgency===filt);
+
+      const urgCol = u => u==="emergency"?"#ff4444":u==="high"?"#f97316":"#60a5fa";
+
+      // Weekly calendar: count active bookings per day label
+      const countByDay = {};
+      days7.forEach(({key})=>{ countByDay[key]=(active.filter(b=>b.day===key).length); });
+
       return (
         <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f",overflowY:"auto"}}>
+
+          {/* ── Header ── */}
           <div style={{padding:"16px 18px 0",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:13}}>
               <span style={{fontSize:20}}>{tmpl.emoji}</span>
@@ -1024,25 +1048,77 @@ Rules:
                 <div style={{fontSize:11,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
               </div>
             </div>
+
+            {/* ── Stats row ── */}
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9,marginBottom:13}}>
-              {[[t.bookings,bookings.length,"#60a5fa"],[t.emergency,bookings.filter(b=>b.urgency==="emergency").length,"#ff4444"],[t.today,bookings.filter(b=>b.day==="Today").length,"#22c55e"]].map(([l,v,c])=>(
+              {[
+                [lang==="zh"?"待完成预约":"Pending",active.length,"#60a5fa"],
+                [lang==="zh"?"紧急":"Emergency",active.filter(b=>b.urgency==="emergency").length,"#ff4444"],
+                [lang==="zh"?"今日":"Today",active.filter(b=>b.day==="Today").length,"#22c55e"],
+              ].map(([l,v,c])=>(
                 <div key={l} style={{background:"#13131f",borderRadius:11,padding:"11px 13px",border:"1px solid #1e1e30"}}>
                   <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Syne',sans-serif"}}>{v}</div>
                   <div style={{fontSize:10,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
                 </div>
               ))}
             </div>
+
+            {/* ── Filter tabs ── */}
             <div style={{display:"flex"}}>
               {[["all",t.filterAll],["emergency",t.filterEmerg],["high",t.filterUrgent],["normal",t.filterStd]].map(([k,l])=>(
                 <button key={k} onClick={()=>setFilt(k)} style={{padding:"8px 10px",border:"none",background:"transparent",cursor:"pointer",color:filt===k?ac:"#505070",fontSize:10,fontWeight:600,borderBottom:filt===k?`2px solid ${ac}`:"2px solid transparent",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{l}</button>
               ))}
             </div>
           </div>
-          <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:9}}>
+
+          <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
+
+            {/* ── Today's date + urgency summary ── */}
+            <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif"}}>
+                  📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[
+                  {label:"🚨 Emergency", count:todayBookings.filter(b=>b.urgency==="emergency").length, col:"#ff4444", bg:"#3d000030"},
+                  {label:"⚡ Urgent",    count:todayBookings.filter(b=>b.urgency==="high").length,      col:"#f97316", bg:"#2d1a0030"},
+                  {label:"📅 Regular",  count:todayBookings.filter(b=>b.urgency==="normal").length,     col:"#60a5fa", bg:"#001a2d30"},
+                ].map(({label,count,col,bg})=>(
+                  <div key={label} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:20,background:bg,border:`1px solid ${col}40`}}>
+                    <span style={{fontSize:11,color:col,fontWeight:700,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
+                    <span style={{fontSize:13,color:col,fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{count}</span>
+                  </div>
+                ))}
+                {todayBookings.length===0&&<span style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif"}}>No appointments today</span>}
+              </div>
+            </div>
+
+            {/* ── Weekly calendar ── */}
+            <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>7-Day Booking Calendar</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5}}>
+                {days7.map(({key,label,date})=>{
+                  const cnt = countByDay[key]||0;
+                  const isToday = key==="Today";
+                  return (
+                    <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
+                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#404060",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                      <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Booking list ── */}
             {shown.length===0
               ?<div style={{textAlign:"center",padding:"36px 0",color:"#404060",fontFamily:"'DM Sans',sans-serif",fontSize:14}}><div style={{fontSize:30,marginBottom:8}}>📭</div>{t.noBookings}</div>
               :shown.map((b,i)=>(
-                <div key={i} style={{background:"#13131f",border:"1px solid #1e1e30",borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${b.urgency==="emergency"?"#ff4444":b.urgency==="high"?"#f97316":"#60a5fa"}`,animation:"fadeUp 0.3s ease"}}>
+                <div key={b.id||i} style={{background:"#13131f",border:"1px solid #1e1e30",borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${urgCol(b.urgency)}`,animation:"fadeUp 0.3s ease"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
                     <div>
                       <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Syne',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
@@ -1050,13 +1126,27 @@ Rules:
                     </div>
                     <Badge level={b.urgency||"normal"} lang={lang}/>
                   </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>
+                  <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#505070",fontFamily:"'DM Sans',sans-serif",marginBottom:9}}>
                     <span>🕐 {b.day} · {b.time}</span>
                     {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
                     {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
                   </div>
-                  <div style={{marginTop:9,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
-                    <Ico name="cal" size={11}/> {t.calUpdated}
+                  <div style={{display:"flex",gap:7,alignItems:"center"}}>
+                    <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
+                      <Ico name="cal" size={11}/> {t.calUpdated}
+                    </div>
+                    <button onClick={()=>onUpdateBooking(b.id,"completed")}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
+                      onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
+                      ✓ Complete
+                    </button>
+                    <button onClick={()=>onUpdateBooking(b.id,"cancelled")}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
+                      onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
+                      ✕ Cancel
+                    </button>
                   </div>
                 </div>
               ))
@@ -1364,13 +1454,26 @@ Rules:
     }
 
     // Dash with "Try Your AI" CTA button
-    function DashWithCTA({bookings, settings, lang, onTryChat, newBookingId}) {
+    function DashWithCTA({bookings, settings, lang, onTryChat, newBookingId, onUpdateBooking}) {
       const t = T[lang]||T.en;
       const [filt,setFilt]=useState("all");
       const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#0ea5e9"}, ac=tmpl.color;
       const ord={emergency:0,high:1,normal:2};
-      const sorted=[...bookings].sort((a,b)=>(ord[a.urgency]||3)-(ord[b.urgency]||3));
+      const now = new Date();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const days7 = Array.from({length:7},(_,i)=>{
+        const d=new Date(now); d.setDate(now.getDate()+i);
+        return {
+          key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
+          label: i===0?"Today":i===1?"Tmrw":`${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+        };
+      });
+      const active = bookings.filter(b=>b.status!=="completed"&&b.status!=="cancelled");
+      const sorted=[...active].sort((a,b)=>(ord[a.urgency]||3)-(ord[b.urgency]||3));
       const shown=filt==="all"?sorted:sorted.filter(b=>b.urgency===filt);
+      const todayBookings=sorted.filter(b=>b.day==="Today");
+      const countByDay={};
+      days7.forEach(({key})=>{ countByDay[key]=active.filter(b=>b.day===key).length; });
 
       return (
         <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f",overflowY:"auto"}}>
@@ -1384,7 +1487,11 @@ Rules:
 
             </div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9,marginBottom:13}}>
-              {[[t.bookings,bookings.length,"#60a5fa"],[t.emergency,bookings.filter(b=>b.urgency==="emergency").length,"#ff4444"],[t.today,bookings.filter(b=>b.day==="Today"||b.day==="Tomorrow").length,"#22c55e"]].map(([l,v,c])=>(
+              {[
+                [lang==="zh"?"待完成":"Pending", active.length,"#60a5fa"],
+                [lang==="zh"?"紧急":"Emergency", active.filter(b=>b.urgency==="emergency").length,"#ff4444"],
+                [lang==="zh"?"今日":"Today", active.filter(b=>b.day==="Today").length,"#22c55e"],
+              ].map(([l,v,c])=>(
                 <div key={l} style={{background:"#13131f",borderRadius:11,padding:"11px 13px",border:"1px solid #1e1e30"}}>
                   <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Syne',sans-serif"}}>{v}</div>
                   <div style={{fontSize:10,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
@@ -1399,6 +1506,49 @@ Rules:
           </div>
 
           <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:9}}>
+
+            {/* Today date + urgency summary */}
+            {bookings.length>0&&(
+              <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:12,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif",marginBottom:8}}>
+                  📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+                </div>
+                <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                  {[
+                    {label:"🚨 Emergency",count:todayBookings.filter(b=>b.urgency==="emergency").length,col:"#ff4444"},
+                    {label:"⚡ Urgent",   count:todayBookings.filter(b=>b.urgency==="high").length,     col:"#f97316"},
+                    {label:"📅 Regular", count:todayBookings.filter(b=>b.urgency==="normal").length,    col:"#60a5fa"},
+                  ].map(({label,count,col})=>(
+                    <div key={label} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 10px",borderRadius:20,background:col+"15",border:`1px solid ${col}40`}}>
+                      <span style={{fontSize:11,color:col,fontWeight:700,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
+                      <span style={{fontSize:13,color:col,fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{count}</span>
+                    </div>
+                  ))}
+                  {todayBookings.length===0&&<span style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif"}}>No appointments today</span>}
+                </div>
+              </div>
+            )}
+
+            {/* Weekly calendar */}
+            {bookings.length>0&&(
+              <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>7-Day Booking Calendar</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5}}>
+                  {days7.map(({key,label})=>{
+                    const cnt=countByDay[key]||0, isToday=key==="Today";
+                    return (
+                      <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
+                        <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#404060",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                        <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* CTA to try the chat — only shown when no bookings yet */}
             {bookings.length===0&&(
               <div style={{background:"linear-gradient(135deg,rgba(14,165,233,0.08),rgba(99,102,241,0.08))",border:`1px solid ${ac}40`,borderRadius:14,padding:"18px 16px",textAlign:"center",animation:"fadeUp 0.4s ease"}}>
@@ -1434,8 +1584,22 @@ Rules:
                       {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
                       {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
                     </div>
-                    <div style={{marginTop:9,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
-                      <Ico name="cal" size={11}/> Google Calendar updated ✓
+                    <div style={{marginTop:9,display:"flex",gap:7,alignItems:"center"}}>
+                      <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
+                        <Ico name="cal" size={11}/> Google Calendar updated ✓
+                      </div>
+                      <button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"completed")}
+                        style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                        onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
+                        onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
+                        ✓ Complete
+                      </button>
+                      <button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"cancelled")}
+                        style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                        onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
+                        onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
+                        ✕ Cancel
+                      </button>
                     </div>
                   </div>
                 );
@@ -1485,6 +1649,10 @@ Rules:
         setTimeout(()=>setNewBookingId(null), 5000);
       };
 
+      const handleUpdateBooking = (id, status) => {
+        setBookings(p => p.map(b => b.id===id ? {...b, status} : b));
+      };
+
       const handleTryChat = () => { setChatKey(k=>k+1); setShowChat(true); };
 
       // Show key entry if not set
@@ -1522,7 +1690,7 @@ Rules:
               <div style={{flex:1,overflow:"hidden",borderRight:showChat?"1px solid #1a1a28":"none"}}>
                 {showSettings
                   ? <Settings settings={settings} onSave={(ns)=>{setSettings(ns);setShowSettings(false);}} lang={lang}/>
-                  : <DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId}/>
+                  : <DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId} onUpdateBooking={handleUpdateBooking}/>
                 }
               </div>
 
@@ -1574,7 +1742,7 @@ Rules:
           <div style={{flex:1,overflow:"hidden"}}>
             {mobileView==="chat"&&<Chat key={chatKey} settings={settings} bookedSlotIds={bookedSlotIds} onBooked={handleBooked}/>}
             {mobileView==="settings"&&<Settings settings={settings} onSave={(ns)=>{setSettings(ns);setShowSettings(false);}} lang={lang}/>}
-            {mobileView==="dashboard"&&<DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId}/>}
+            {mobileView==="dashboard"&&<DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId} onUpdateBooking={handleUpdateBooking}/>}
           </div>
         </div>
       );
