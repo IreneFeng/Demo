@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Annie the Agent — AI Booking for Home Service Businesses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #06060f;
+      --bg2: #0c0c1a;
+      --bg3: #0f0f1e;
+      --border: #1a1a2e;
+      --accent: #0ea5e9;
+      --accent2: #6366f1;
+      --green: #22c55e;
+      --red: #ff4444;
+      --orange: #f97316;
+      --text: #e8e8f8;
+      --muted: #505070;
+      --muted2: #2a2a40;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+    /* Noise overlay */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: 0.35;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(6,6,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .nav-logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { padding: 9px 20px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; font-family: 'Syne', sans-serif; transition: all 0.2s; box-shadow: 0 0 20px rgba(14,165,233,0.3); }
+    .nav-cta:hover { background: #0284c7; box-shadow: 0 0 30px rgba(14,165,233,0.5); }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 120px 48px 80px;
+      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(14,165,233,0.07) 0%, transparent 70%),
+                  radial-gradient(ellipse 60% 50% at 20% 80%, rgba(99,102,241,0.06) 0%, transparent 70%);
+    }
+    .hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 20px; font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 24px; }
+    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; color: #fff; margin-bottom: 20px; }
+    h1 .accent { color: var(--accent); }
+    .hero-sub { font-size: 18px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; max-width: 480px; }
+    .hero-btns { display: flex; gap: 14px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
+    .btn-primary { padding: 14px 28px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; font-family: 'Syne', sans-serif; box-shadow: 0 0 30px rgba(14,165,233,0.35); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(14,165,233,0.5); }
+    .btn-ghost { padding: 14px 28px; border: 1px solid var(--border); color: var(--muted); border-radius: 10px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .hero-trust { font-size: 12px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+    .hero-trust span::before { content: '✓ '; color: var(--green); }
+
+    /* Avatar area */
+    .hero-visual { position: relative; display: flex; justify-content: center; align-items: flex-end; }
+    .avatar-glow {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 320px; height: 420px; border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(14,165,233,0.18) 0%, transparent 70%);
+      filter: blur(20px);
+    }
+    .avatar-img { position: relative; z-index: 2; width: 340px; max-width: 100%; filter: drop-shadow(0 20px 60px rgba(14,165,233,0.2)); }
+    .chat-bubble {
+      position: absolute; top: 40px; left: -20px; z-index: 3;
+      background: rgba(15,15,30,0.95); border: 1px solid rgba(14,165,233,0.4);
+      border-radius: 16px; padding: 12px 16px; backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(14,165,233,0.1);
+      animation: float 4s ease-in-out infinite;
+      max-width: 220px;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .chat-bubble-name { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; font-family: 'Syne', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+    .chat-bubble-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .chat-bubble-stat { margin-top: 8px; display: flex; gap: 8px; }
+    .stat-chip { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif; }
+
+    /* ── TRUST BAR ── */
+    .trust-bar { padding: 18px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg2); }
+    .trust-bar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); flex-wrap: wrap; justify-content: center; }
+    .trust-bar strong { color: var(--muted); font-weight: 600; margin-right: 4px; }
+    .trust-sep { color: var(--muted2); }
+
+    /* ── PROBLEM/SOLUTION ── */
+    .problem-solution { padding: 100px 48px; }
+    .ps-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    .ps-col { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 36px; }
+    .ps-col.good { border-color: rgba(14,165,233,0.3); background: linear-gradient(135deg, rgba(14,165,233,0.05), rgba(99,102,241,0.05)); }
+    .ps-header { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+    .ps-col.bad .ps-header { color: var(--muted); }
+    .ps-col.good .ps-header { color: var(--accent); }
+    .ps-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 14px; line-height: 1.6; color: var(--muted); }
+    .ps-col.good .ps-item { color: var(--text); }
+    .ps-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+    .ps-col.bad .ps-icon { background: rgba(255,68,68,0.15); }
+    .ps-col.good .ps-icon { background: rgba(34,197,94,0.15); }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 100px 48px; background: var(--bg2); }
+    .how-inner { max-width: 1200px; margin: 0 auto; }
+    .section-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+    .section-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 800; color: #fff; margin-bottom: 16px; }
+    .section-sub { font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.7; margin-bottom: 60px; }
+    .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; position: relative; }
+    .steps::before { content: ''; position: absolute; top: 32px; left: calc(16.66% + 24px); right: calc(16.66% + 24px); height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0.3; }
+    .step { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 28px; position: relative; transition: border-color 0.2s; }
+    .step:hover { border-color: rgba(14,165,233,0.4); }
+    .step-num { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 20px; }
+    .step h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .step p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+    /* ── FEATURES ── */
+    .features { padding: 100px 48px; }
+    .features-inner { max-width: 1200px; margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .feature-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: all 0.2s; }
+    .feature-card:hover { border-color: rgba(14,165,233,0.3); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .feature-icon { font-size: 28px; margin-bottom: 14px; }
+    .feature-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── PRICING ── */
+    .pricing { padding: 100px 48px; background: var(--bg2); }
+    .pricing-inner { max-width: 1100px; margin: 0 auto; }
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 60px; }
+    .price-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 36px; position: relative; transition: all 0.2s; }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured { border-color: rgba(14,165,233,0.5); background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.08)); box-shadow: 0 0 60px rgba(14,165,233,0.12); }
+    .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 10px; font-family: 'Syne', sans-serif; white-space: nowrap; }
+    .price-tier { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+    .price-amount { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px; }
+    .price-amount span { font-size: 18px; color: var(--muted); font-weight: 400; }
+    .price-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; margin-top: 6px; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .price-features li { font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; font-size: 12px; }
+    .btn-price { display: block; width: 100%; padding: 13px; border-radius: 10px; text-align: center; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+    .btn-price-outline { border: 1px solid var(--border); color: var(--muted); }
+    .btn-price-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-price-filled { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 24px rgba(14,165,233,0.3); }
+    .btn-price-filled:hover { box-shadow: 0 0 36px rgba(14,165,233,0.5); transform: translateY(-1px); }
+    .pricing-note { text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); }
+
+    /* ── FINAL CTA ── */
+    .final-cta {
+      padding: 120px 48px;
+      background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(14,165,233,0.1) 0%, rgba(99,102,241,0.07) 50%, transparent 100%);
+      text-align: center; position: relative; overflow: hidden;
+    }
+    .final-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent, rgba(6,6,15,0.5));
+      pointer-events: none;
+    }
+    .final-cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+    .final-cta h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4vw, 52px); font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.1; }
+    .final-cta p { font-size: 17px; color: var(--muted); margin-bottom: 40px; line-height: 1.7; }
+    .final-cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer { padding: 40px 48px; border-top: 1px solid var(--border); background: var(--bg); }
+    .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .footer-logo { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #fff; }
+    .footer-logo span { color: var(--accent); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { font-size: 12px; color: var(--muted2); }
+
+    /* ── FADE IN ANIMATION ── */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+      .hero-visual { order: -1; }
+      .avatar-img { width: 260px; }
+      .chat-bubble { left: 0; top: 20px; }
+      .trust-bar { padding: 16px 20px; }
+      .problem-solution, .how, .features, .pricing, .final-cta { padding: 70px 20px; }
+      .ps-inner, .steps, .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+      .steps::before { display: none; }
+      footer { padding: 32px 20px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">Annie<span> the Agent</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="demo.html">Demo</a></li>
+  </ul>
+  <a href="demo.html" class="nav-cta">Try Free →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content fade-up">
+      <div class="hero-badge">AI Booking Agent · Live 24/7</div>
+      <h1>Annie books your<br/><span class="accent">appointments.</span><br/>You focus on the job.</h1>
+      <p class="hero-sub">AI booking agent for home service businesses — answers every customer, detects emergencies, confirms your service area, and schedules automatically.</p>
+      <div class="hero-btns">
+        <a href="demo.html" class="btn-primary">Launch Demo →</a>
+        <a href="#how-it-works" class="btn-ghost">See how it works</a>
+      </div>
+      <div class="hero-trust">
+        <span>2-min setup</span>
+        <span>No credit card</span>
+        <span>Any home service business</span>
+      </div>
+    </div>
+    <div class="hero-visual fade-up" style="transition-delay:0.15s">
+      <div class="avatar-glow"></div>
+      <div class="chat-bubble">
+        <div class="chat-bubble-name">Annie · Just now</div>
+        <div class="chat-bubble-text">Hi, I'm Annie! I just booked you 3 appointments 🎉</div>
+        <div class="chat-bubble-stat">
+          <span class="stat-chip" style="background:rgba(255,68,68,0.15);color:#ff4444;">🚨 1 Emergency</span>
+          <span class="stat-chip" style="background:rgba(34,197,94,0.15);color:#22c55e;">📅 2 Regular</span>
+        </div>
+      </div>
+      <img src="annie-avatar.png" alt="Annie the Agent" class="avatar-img"/>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-bar-inner">
+    <strong>Built for:</strong>
+    🔧 Plumbers <span class="trust-sep">·</span>
+    ❄️ HVAC <span class="trust-sep">·</span>
+    🏠 Remodelers <span class="trust-sep">·</span>
+    ✂️ Salons <span class="trust-sep">·</span>
+    🐾 Pet Services <span class="trust-sep">·</span>
+    and any local service business
+  </div>
+</div>
+
+<!-- PROBLEM / SOLUTION -->
+<section class="problem-solution" id="features">
+  <div class="ps-inner">
+    <div class="ps-col bad fade-up">
+      <div class="ps-header">😮‍💨 Without Annie</div>
+      <div class="ps-item">
+        <div class="ps-icon">✕</div>
+        <span>You miss calls while on a job site — customers move on</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✕</div>
+        <span>Customers text at midnight expecting an instant answer</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✕</div>
+        <span>Scheduling back-and-forth eats hours of your week</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✕</div>
+        <span>Emergency jobs get buried in a full voicemail box</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✕</div>
+        <span>Out-of-area customers waste your time before you realize</span>
+      </div>
+    </div>
+    <div class="ps-col good fade-up" style="transition-delay:0.1s">
+      <div class="ps-header">✨ With Annie</div>
+      <div class="ps-item">
+        <div class="ps-icon">✓</div>
+        <span>Annie responds instantly, 24/7 — even when you can't pick up</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✓</div>
+        <span>Customers chat naturally and get booked in minutes</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✓</div>
+        <span>Annie asks the right questions and fills your calendar automatically</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✓</div>
+        <span>Emergency requests are flagged, prioritized, and shown instantly</span>
+      </div>
+      <div class="ps-item">
+        <div class="ps-icon">✓</div>
+        <span>ZIP code enforcement means only customers you can serve get booked</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how-it-works">
+  <div class="how-inner">
+    <div class="fade-up">
+      <div class="section-label">How It Works</div>
+      <div class="section-title">From first message to confirmed booking — in minutes.</div>
+      <div class="section-sub">Annie handles the entire booking flow so you never have to interrupt your work.</div>
+    </div>
+    <div class="steps">
+      <div class="step fade-up">
+        <div class="step-num">1</div>
+        <h3>Customer reaches out</h3>
+        <p>A customer visits your Annie booking link and describes their problem in natural language — just like texting a person.</p>
+      </div>
+      <div class="step fade-up" style="transition-delay:0.1s">
+        <div class="step-num">2</div>
+        <h3>Annie qualifies & schedules</h3>
+        <p>Annie detects urgency, identifies the service needed, confirms the ZIP code is in your coverage area, collects customer info, and offers available time slots based on your real hours.</p>
+      </div>
+      <div class="step fade-up" style="transition-delay:0.2s">
+        <div class="step-num">3</div>
+        <h3>You see it instantly</h3>
+        <p>A new booking appears on your merchant dashboard. Emergency jobs are flagged in red. Regular jobs are sorted by date and time. Complete or cancel with one click.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-inner">
+    <div class="fade-up" style="text-align:center;margin-bottom:60px">
+      <div class="section-label">Features</div>
+      <div class="section-title">Everything your booking system needs.</div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon">🚨</div>
+        <h3>Emergency Detection</h3>
+        <p>Annie instantly flags urgent jobs and separates them from standard bookings so nothing critical gets missed.</p>
+      </div>
+      <div class="feature-card fade-up" style="transition-delay:0.05s">
+        <div class="feature-icon">📅</div>
+        <h3>Smart Time Slots</h3>
+        <p>Slots are generated based on your actual hours and how long each service takes — 30 min to 4 hours.</p>
+      </div>
+      <div class="feature-card fade-up" style="transition-delay:0.1s">
+        <div class="feature-icon">📍</div>
+        <h3>ZIP Code Coverage</h3>
+        <p>Annie only books customers within your service area. Out-of-area requests are redirected automatically.</p>
+      </div>
+      <div class="feature-card fade-up" style="transition-delay:0.15s">
+        <div class="feature-icon">💬</div>
+        <h3>Natural AI Conversation</h3>
+        <p>Customers chat like they're texting a real person. Annie handles the rest — no forms, no friction.</p>
+      </div>
+      <div class="feature-card fade-up" style="transition-delay:0.2s">
+        <div class="feature-icon">📊</div>
+        <h3>Live Merchant Dashboard</h3>
+        <p>See all bookings in real time. Complete, cancel, or restore appointments with one click. 7-day calendar view included.</p>
+      </div>
+      <div class="feature-card fade-up" style="transition-delay:0.25s">
+        <div class="feature-icon">🌐</div>
+        <h3>Bilingual Support</h3>
+        <p>Full English and Chinese language support for both merchants and customers — toggle instantly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="fade-up" style="text-align:center">
+      <div class="section-label">Pricing</div>
+      <div class="section-title">Simple pricing. No surprises.</div>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card fade-up">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">$49<span>/mo</span></div>
+        <div class="price-desc">Perfect for getting started</div>
+        <ul class="price-features">
+          <li>1 business</li>
+          <li>Up to 50 bookings/month</li>
+          <li>AI chat + dashboard</li>
+          <li>ZIP coverage enforcement</li>
+          <li>Email support</li>
+        </ul>
+        <a href="demo.html" class="btn-price btn-price-outline">Get Started</a>
+      </div>
+      <div class="price-card featured fade-up" style="transition-delay:0.1s">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-tier">Pro</div>
+        <div class="price-amount">$99<span>/mo</span></div>
+        <div class="price-desc">For growing businesses</div>
+        <ul class="price-features">
+          <li>1 business</li>
+          <li>Unlimited bookings</li>
+          <li>Emergency priority flagging</li>
+          <li>Bilingual (EN + ZH)</li>
+          <li>7-day booking calendar</li>
+          <li>Phone support</li>
+        </ul>
+        <a href="demo.html" class="btn-price btn-price-filled">Start Free Trial</a>
+      </div>
+      <div class="price-card fade-up" style="transition-delay:0.2s">
+        <div class="price-tier">Agency</div>
+        <div class="price-amount">$249<span>/mo</span></div>
+        <div class="price-desc">For multi-location businesses</div>
+        <ul class="price-features">
+          <li>Up to 5 businesses</li>
+          <li>Everything in Pro</li>
+          <li>White-label option</li>
+          <li>Dedicated onboarding</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="demo.html" class="btn-price btn-price-outline">Contact Us</a>
+      </div>
+    </div>
+    <div class="pricing-note fade-up">14-day free trial on all plans · Cancel anytime · No credit card required to start</div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="final-cta-inner fade-up">
+    <div class="section-label" style="text-align:center">Ready?</div>
+    <h2>Your next booking<br/>is waiting.</h2>
+    <p>Annie is live and ready to demo right now. See exactly how it works for your business — no setup required.</p>
+    <div class="final-cta-btns">
+      <a href="demo.html" class="btn-primary" style="font-size:16px;padding:16px 36px;">Launch Annie Demo →</a>
+      <a href="/cdn-cgi/l/email-protection#2149444d4d4e61404f4f48445549444046444f550f424e4c" class="btn-ghost" style="font-size:16px;padding:16px 36px;">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Annie<span> the Agent</span></div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="demo.html">Demo</a>
+      <a href="/cdn-cgi/l/email-protection#ff979a939390bf9e9191969a8b979a9e989a918bd19c9092">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 Annie the Agent. All rights reserved.</div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // Scroll fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => {
+      
