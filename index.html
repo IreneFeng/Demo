@@ -1455,7 +1455,7 @@ Rules:
 
     // Dash with "Try Your AI" CTA button
     // ── BOOKING CARD (reusable) ──
-    function BookingCard({b, ac, lang, onUpdateBooking, isNew=false}) {
+    function BookingCard({b, ac, lang, onUpdateBooking, isNew=false, showRestore=false}) {
       return (
         <div style={{background:isNew?"#0d1a0d":"#13131f",border:`1px solid ${isNew?"#22c55e60":"#1e1e30"}`,borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${b.urgency==="emergency"?"#ff4444":b.urgency==="high"?"#f97316":"#60a5fa"}`,animation:isNew?"newBooking 0.6s ease":"fadeUp 0.3s ease",position:"relative"}}>
           {isNew&&<div style={{position:"absolute",top:8,right:10,fontSize:10,fontWeight:700,color:"#22c55e",fontFamily:"'DM Sans',sans-serif",background:"#22c55e18",padding:"2px 8px",borderRadius:10,border:"1px solid #22c55e40"}}>✨ New</div>}
@@ -1475,18 +1475,24 @@ Rules:
             <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
               <Ico name="cal" size={11}/> Google Calendar updated ✓
             </div>
-            <button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"completed")}
+            {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"completed")}
               style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
               onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
               onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
               ✓ Complete
-            </button>
-            <button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"cancelled")}
+            </button>}
+            {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"cancelled")}
               style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
               onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
               onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
               ✕ Cancel
-            </button>
+            </button>}
+            {showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"pending")}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #a78bfa40",background:"#1a0030",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#a78bfa";e.currentTarget.style.color="#000";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#1a0030";e.currentTarget.style.color="#a78bfa";}}>
+              ↩ Restore
+            </button>}
           </div>
         </div>
       );
@@ -1515,7 +1521,9 @@ Rules:
       const [calDay, setCalDay] = useState(null);
       // Pending section
       const [pendingOpen, setPendingOpen] = useState(false);
-      const [pendingGroup, setPendingGroup] = useState(null); // "emergency"|"high"|"normal"|null
+      const [pendingGroup, setPendingGroup] = useState(null);
+      const [archiveTab, setArchiveTab] = useState(null); // null|"completed"|"cancelled"
+      const [archiveGroup, setArchiveGroup] = useState(null);
 
       // Sort by time for pending list
       const timeToMin = (b) => {
@@ -1626,7 +1634,7 @@ Rules:
                   })}
                 </div>
                 {calDay&&(()=>{
-                  const dayBookings=active.filter(b=>b.day===calDay);
+                  const dayBookings=[...active.filter(b=>b.day===calDay)].sort((a,b)=>timeToMin(a)-timeToMin(b));
                   return (
                     <div style={{borderTop:"1px solid #1e1e30",paddingTop:10}}>
                       <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>{calDay}</div>
@@ -1640,53 +1648,116 @@ Rules:
               </div>
             )}
 
-            {/* ── PENDING accordion ── */}
-            {bookings.length>0&&(
-              <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,overflow:"hidden"}}>
-                {/* Header */}
-                <button onClick={()=>{setPendingOpen(o=>!o); setPendingGroup(null);}}
-                  style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <span style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif"}}>Pending</span>
-                    <span style={{fontSize:16,fontWeight:800,color:"#60a5fa",fontFamily:"'Syne',sans-serif",background:"#60a5fa20",padding:"1px 10px",borderRadius:12}}>{active.length}</span>
-                  </div>
-                  <span style={{fontSize:11,color:"#505070"}}>{pendingOpen?"▲":"▼"}</span>
-                </button>
+            {/* ── PENDING / COMPLETED / CANCELLED row ── */}
+            {bookings.length>0&&(()=>{
+              const completed = [...bookings.filter(b=>b.status==="completed")].sort((a,b)=>timeToMin(a)-timeToMin(b));
+              const cancelled = [...bookings.filter(b=>b.status==="cancelled")].sort((a,b)=>timeToMin(a)-timeToMin(b));
 
-                {pendingOpen&&(
-                  <div style={{borderTop:"1px solid #1e1e30",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
-                    {[
-                      {key:"emergency", label:"🚨 Emergency", col:"#ff4444"},
-                      {key:"high",      label:"⚡ Urgent",    col:"#f97316"},
-                      {key:"normal",    label:"📅 Regular",   col:"#60a5fa"},
-                    ].map(({key,label,col})=>{
-                      const grp = sortedActive.filter(b=>b.urgency===key);
-                      const isOpen = pendingGroup===key;
-                      return (
-                        <div key={key} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${col}30`}}>
-                          <button onClick={()=>setPendingGroup(isOpen?null:key)}
-                            style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:8}}>
-                              <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
-                              <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{grp.length}</span>
-                            </div>
-                            <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
-                          </button>
-                          {isOpen&&(
-                            <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
-                              {grp.length===0
-                                ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
-                                :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
-                              }
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+              const ArchiveSection = ({tab, label, col, items}) => {
+                const isTabOpen = archiveTab===tab;
+                return (
+                  <div style={{background:"#0f0f1e",border:`1px solid ${col}30`,borderRadius:12,overflow:"hidden"}}>
+                    <button onClick={()=>{setArchiveTab(isTabOpen?null:tab); setArchiveGroup(null);}}
+                      style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:13,fontWeight:700,color:col,fontFamily:"'Syne',sans-serif"}}>{label}</span>
+                        <span style={{fontSize:14,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 10px",borderRadius:12}}>{items.length}</span>
+                      </div>
+                      <span style={{fontSize:11,color:col,opacity:0.6}}>{isTabOpen?"▲":"▼"}</span>
+                    </button>
+                    {isTabOpen&&(
+                      <div style={{borderTop:`1px solid ${col}20`,padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                        {items.length===0
+                          ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                          :[
+                            {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
+                            {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
+                            {key:"normal",   label:"📅 Regular",  col:"#60a5fa"},
+                          ].map(({key,label:gl,col:gc})=>{
+                            const grp=items.filter(b=>b.urgency===key);
+                            const isOpen=archiveGroup===`${tab}-${key}`;
+                            return (
+                              <div key={key} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${gc}30`}}>
+                                <button onClick={()=>setArchiveGroup(isOpen?null:`${tab}-${key}`)}
+                                  style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${gc}15`:"transparent",border:"none",cursor:"pointer"}}>
+                                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                    <span style={{fontSize:12,fontWeight:700,color:gc,fontFamily:"'DM Sans',sans-serif"}}>{gl}</span>
+                                    <span style={{fontSize:12,fontWeight:800,color:gc,background:`${gc}20`,padding:"1px 8px",borderRadius:10,fontFamily:"'Syne',sans-serif"}}>{grp.length}</span>
+                                  </div>
+                                  <span style={{fontSize:10,color:gc,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
+                                </button>
+                                {isOpen&&(
+                                  <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${gc}08`}}>
+                                    {grp.length===0
+                                      ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                                      :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} showRestore={true}/>)
+                                    }
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        }
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            )}
+                );
+              };
+
+              return (
+                <>
+                  {/* Pending */}
+                  <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,overflow:"hidden"}}>
+                    <button onClick={()=>{setPendingOpen(o=>!o); setPendingGroup(null);}}
+                      style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif"}}>Pending</span>
+                        <span style={{fontSize:16,fontWeight:800,color:"#60a5fa",fontFamily:"'Syne',sans-serif",background:"#60a5fa20",padding:"1px 10px",borderRadius:12}}>{active.length}</span>
+                      </div>
+                      <span style={{fontSize:11,color:"#505070"}}>{pendingOpen?"▲":"▼"}</span>
+                    </button>
+                    {pendingOpen&&(
+                      <div style={{borderTop:"1px solid #1e1e30",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                        {[
+                          {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
+                          {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
+                          {key:"normal",   label:"📅 Regular",  col:"#60a5fa"},
+                        ].map(({key,label,col})=>{
+                          const grp=sortedActive.filter(b=>b.urgency===key);
+                          const isOpen=pendingGroup===key;
+                          return (
+                            <div key={key} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${col}30`}}>
+                              <button onClick={()=>setPendingGroup(isOpen?null:key)}
+                                style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                  <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
+                                  <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{grp.length}</span>
+                                </div>
+                                <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
+                              </button>
+                              {isOpen&&(
+                                <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
+                                  {grp.length===0
+                                    ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                                    :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Completed */}
+                  <ArchiveSection tab="completed" label="✓ Completed" col="#22c55e" items={completed}/>
+
+                  {/* Cancelled */}
+                  <ArchiveSection tab="cancelled" label="✕ Cancelled" col="#ff4444" items={cancelled}/>
+                </>
+              );
+            })()}
 
             {/* Book another */}
             {bookings.length>0&&(
@@ -1732,7 +1803,7 @@ Rules:
       };
 
       const handleUpdateBooking = (id, status) => {
-        setBookings(p => p.map(b => b.id===id ? {...b, status} : b));
+        setBookings(p => p.map(b => b.id===id ? {...b, status: status==="pending" ? undefined : status} : b));
       };
 
       const handleTryChat = () => { setChatKey(k=>k+1); setShowChat(true); };
