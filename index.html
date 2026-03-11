@@ -24,7 +24,7 @@
   </style>
 </head>
 <body>
-  <div id="root"><div id="loading" style="color:#505070;padding:40px;font-family:monospace;background:#06060f;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:14px;">Loading Bookio...</div></div>
+  <div id="root"><div id="loading" style="color:#505070;padding:40px;font-family:monospace;background:#06060f;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:14px;">Loading Annie the Agent...</div></div>
   <script>
     window.onerror = function(msg, src, line, col, err) {
       document.getElementById("root").innerHTML = '<div style="color:#ff4444;padding:40px;font-family:monospace;background:#0a0010;min-height:100vh;white-space:pre-wrap;"><h2 style=\"margin-bottom:16px\">Error on line ' + line + ':</h2>' + msg + '\n\n' + (err && err.stack || '') + '</div>';
@@ -685,13 +685,13 @@
       const handleUrgencySelect = (level) => {
         setUrgency(level);
         const greetMap = {
-          emergency: `🚨 Got it — you've marked this as an emergency. I'll make sure we get to you fast.
+          emergency: `🚨 Hi, this is Annie — your AI booking agent for ${settings.businessName}. I see you've marked this as an emergency. I'll make sure we get to you fast.
 
 ${tmpl.greeting} What's happening right now?`,
-          high: `⚡ Understood — urgent request. We'll do our best to get someone out today.
+          high: `⚡ Hi, this is Annie — your AI booking agent for ${settings.businessName}. I see this is urgent. We'll do our best to get someone out today.
 
 ${tmpl.greeting} What's going on?`,
-          normal: `👋 Hi! I'm the AI assistant for ${settings.businessName}.
+          normal: `👋 Hi, this is Annie — your AI booking agent for ${settings.businessName}.
 
 ${tmpl.greeting} What can I help you with today?`,
         };
@@ -712,7 +712,7 @@ ${tmpl.greeting} What can I help you with today?`,
       }).join(", ");
       const emergWords = tmpl.emergencyWords && tmpl.emergencyWords.length ? tmpl.emergencyWords.join(", ") : "urgent, emergency, asap, broken, no heat, no water, flooding, leak";
 
-      const sys = `You are a booking assistant for ${settings.businessName}, a ${tmpl.label} business in ${settings.city}, ${settings.state}.
+      const sys = `You are Annie, an AI booking agent for ${settings.businessName}, a ${tmpl.label} business in ${settings.city}, ${settings.state}. Always refer to yourself as Annie.
 
 ACTIVE SERVICES (with price ranges): ${svcWithPrices || "General services"}
 
@@ -1194,7 +1194,7 @@ Rules:
           <div style={{width:"100%",maxWidth:420,animation:"fadeUp 0.4s ease"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:28,fontWeight:800,color:"#fff",marginBottom:10}}>
-                book<span style={{color:"#0ea5e9"}}>io</span>
+                Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
               </div>
               <div style={{fontSize:14,color:"#505070",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
                 Enter your Anthropic API key to run the demo.<br/>
@@ -1246,7 +1246,7 @@ Rules:
 
             {/* logo */}
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(48px,8vw,77px)",fontWeight:800,color:"#fff",letterSpacing:"-0.03em",marginBottom:16,lineHeight:1}}>
-              book<span style={{color:"#0ea5e9"}}>io</span>
+              Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
             </div>
 
             <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(22px,4vw,35px)",fontWeight:700,color:"#c0c0e0",lineHeight:1.3,marginBottom:18,letterSpacing:"-0.01em"}}>
@@ -1353,7 +1353,7 @@ Rules:
           <div style={{width:"100%",maxWidth:500,animation:"fadeUp 0.5s ease both"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>
-                book<span style={{color:"#0ea5e9"}}>io</span>
+                Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
               </div>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:"#f0f0ff",marginBottom:8}}>Set up your AI agent</div>
               <div style={{fontSize:14,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>Takes 60 seconds. You can change everything later.</div>
@@ -1820,7 +1820,7 @@ Rules:
             {/* top bar */}
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"7px 20px",flexShrink:0}}>
               <div style={{display:"flex",alignItems:"center",gap:14}}>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.01em"}}>book<span style={{color:ac}}>io</span></div>
+                <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.01em"}}>Annie<span style={{color:ac}}> the Agent</span></div>
                 <div style={{width:1,height:16,background:"#1e1e30"}}/>
                 <button onClick={()=>setScreen("setup")} style={{fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif",background:"none",border:"none",cursor:"pointer",padding:0}}
                   onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
@@ -1873,7 +1873,7 @@ Rules:
       return (
         <div style={{maxWidth:430,margin:"0 auto",height:"100dvh",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"9px 14px",flexShrink:0}}>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:"#fff"}}>book<span style={{color:ac}}>io</span></div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:"#fff"}}>Annie<span style={{color:ac}}> the Agent</span></div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <LangToggle lang={lang} setLang={setLang} ac={ac}/>
               <button onClick={()=>setScreen("setup")} style={{fontSize:10,color:"#505070",fontFamily:"'DM Sans',sans-serif",background:"none",border:"1px solid #252535",borderRadius:8,cursor:"pointer",padding:"4px 8px"}}>← Setup</button>
