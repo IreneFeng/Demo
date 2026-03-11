@@ -1474,6 +1474,7 @@ Rules:
       const todayBookings=sorted.filter(b=>b.day==="Today");
       const countByDay={};
       days7.forEach(({key})=>{ countByDay[key]=active.filter(b=>b.day===key).length; });
+      const [calDay, setCalDay] = useState(null);
 
       return (
         <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f",overflowY:"auto"}}>
@@ -1529,23 +1530,47 @@ Rules:
               </div>
             )}
 
-            {/* Weekly calendar */}
+            {/* Weekly calendar — clickable */}
             {bookings.length>0&&(
               <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
                 <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>7-Day Booking Calendar</div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5,marginBottom: calDay ? 12 : 0}}>
                   {days7.map(({key,label})=>{
-                    const cnt=countByDay[key]||0, isToday=key==="Today";
+                    const cnt=countByDay[key]||0, isToday=key==="Today", isSel=calDay===key;
                     return (
-                      <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
-                        <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#404060",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
-                        <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt}</span>
+                      <div key={key} onClick={()=>setCalDay(isSel?null:key)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,cursor:"pointer",background:isSel?`${ac}30`:isToday?`${ac}15`:"transparent",border:isSel?`1px solid ${ac}`:isToday?`1px solid ${ac}40`:"1px solid transparent",transition:"all 0.15s"}}
+                        onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background=`${ac}10`;}}
+                        onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isToday?`${ac}15`:"transparent";}}>
+                        <div style={{fontSize:9,fontWeight:700,color:isSel||isToday?ac:"#505070",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                        <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?(isSel?ac:`${ac}80`):"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt||""}</span>
                         </div>
                       </div>
                     );
                   })}
                 </div>
+                {/* Selected day's bookings */}
+                {calDay&&(()=>{
+                  const dayBookings = active.filter(b=>b.day===calDay);
+                  return (
+                    <div style={{borderTop:"1px solid #1e1e30",paddingTop:10}}>
+                      <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>{calDay}</div>
+                      {dayBookings.length===0
+                        ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"8px 0"}}>No appointments</div>
+                        :dayBookings.map((b,i)=>(
+                          <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",borderRadius:9,background:"#13131f",border:`1px solid ${b.urgency==="emergency"?"#ff444440":b.urgency==="high"?"#f9731640":"#60a5fa40"}`,marginBottom:6}}>
+                            <div style={{width:3,alignSelf:"stretch",borderRadius:4,background:b.urgency==="emergency"?"#ff4444":b.urgency==="high"?"#f97316":"#60a5fa",flexShrink:0}}/>
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:12,fontWeight:700,color:"#e0e0f0",fontFamily:"'DM Sans',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
+                              <div style={{fontSize:11,color:"#606080",fontFamily:"'DM Sans',sans-serif"}}>{b.service} · {b.time}</div>
+                            </div>
+                            <Badge level={b.urgency||"normal"} lang={lang}/>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  );
+                })()}
               </div>
             )}
 
