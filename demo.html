@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Booking Agent Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -13,7 +13,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; background: #080810; }
     ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-thumb { background: #252535; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: #2a2d4a; border-radius: 2px; }
     select { appearance: none; -webkit-appearance: none; }
     @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
     @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -24,7 +24,7 @@
   </style>
 </head>
 <body>
-  <div id="root"><div id="loading" style="color:#505070;padding:40px;font-family:monospace;background:#06060f;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:14px;">Loading Annie the Agent...</div></div>
+  <div id="root"><div id="loading" style="color:#6b6f9a;padding:40px;font-family:monospace;background:#05071a;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:14px;">Loading Annie the Agent...</div></div>
   <script>
     window.onerror = function(msg, src, line, col, err) {
       document.getElementById("root").innerHTML = '<div style="color:#ff4444;padding:40px;font-family:monospace;background:#0a0010;min-height:100vh;white-space:pre-wrap;"><h2 style=\"margin-bottom:16px\">Error on line ' + line + ':</h2>' + msg + '\n\n' + (err && err.stack || '') + '</div>';
@@ -41,7 +41,7 @@
 
     const TEMPLATES = {
       plumber: {
-        emoji: "🔧", label: "Plumber", color: "#0ea5e9",
+        emoji: "🔧", label: "Plumber", color: "#38bdf8",
         name: "ProFix Plumbing", phone: "+1 (555) 847-2291",
         services: ["Emergency Leak Repair","Drain Cleaning","Pipe Installation","Water Heater","Sewer Line","Faucet & Fixture"],
         prices: {"Emergency Leak Repair":"$150-$400","Drain Cleaning":"$80-$200","Pipe Installation":"$200-$800","Water Heater":"$300-$1,200","Sewer Line":"$500-$2,000","Faucet & Fixture":"$75-$200"},
@@ -228,18 +228,18 @@
         setMn(newMn); setMx(newMx);
         onChange(buildPriceRange(newMn, newMx));
       };
-      const inpStyle = {padding:"5px 9px",background:"#0d0d18",border:`1px solid ${ac}40`,borderRadius:8,color:ac,fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif",width:"100%"};
+      const inpStyle = {padding:"5px 9px",background:"#0b0d1e",border:`1px solid ${ac}40`,borderRadius:8,color:ac,fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"};
       return (
         <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
-          <span style={{fontSize:10,color:"#505070",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"价格:":"Price:"}</span>
+          <span style={{fontSize:10,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"价格:":"Price:"}</span>
           <div style={{display:"flex",alignItems:"center",gap:4,flex:1}}>
-            <span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif"}}>$</span>
+            <span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>$</span>
             <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder="min" style={inpStyle}/>
-            <span style={{fontSize:11,color:"#505070"}}>—</span>
-            <span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif"}}>$</span>
+            <span style={{fontSize:11,color:"#6b6f9a"}}>—</span>
+            <span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>$</span>
             <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder="max" style={inpStyle}/>
           </div>
-          {mn&&<span style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",flexShrink:0}}>{buildPriceRange(mn,mx)}</span>}
+          {mn&&<span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap",flexShrink:0}}>{buildPriceRange(mn,mx)}</span>}
         </div>
       );
     }
@@ -256,16 +256,16 @@
         setMn(newMn); setMx(newMx);
         onChange(buildPriceRange(newMn, newMx));
       };
-      const inpStyle = {padding:"7px 9px",background:"#0f0f1e",border:"1px solid #252540",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif",width:"100%"};
+      const inpStyle = {padding:"7px 9px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"};
       return (
         <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <span style={{fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"报价:":"Price:"}</span>
-          <span style={{fontSize:12,color:"#606080"}}>$</span>
+          <span style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"报价:":"Price:"}</span>
+          <span style={{fontSize:12,color:"#757aa8"}}>$</span>
           <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder={lang==="zh"?"最低":"min"} style={inpStyle}/>
-          <span style={{fontSize:11,color:"#505070"}}>—</span>
-          <span style={{fontSize:12,color:"#606080"}}>$</span>
+          <span style={{fontSize:11,color:"#6b6f9a"}}>—</span>
+          <span style={{fontSize:12,color:"#757aa8"}}>$</span>
           <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder={lang==="zh"?"最高":"max"} style={inpStyle}/>
-          {mn&&<span style={{fontSize:11,color:"#606080",whiteSpace:"nowrap",flexShrink:0,fontFamily:"'DM Sans',sans-serif"}}>{buildPriceRange(mn,mx)}</span>}
+          {mn&&<span style={{fontSize:11,color:"#757aa8",whiteSpace:"nowrap",flexShrink:0,fontFamily:"'Inter',sans-serif"}}>{buildPriceRange(mn,mx)}</span>}
         </div>
       );
     }
@@ -274,7 +274,7 @@
     function SvcTab({s, setS, ac, lang, t}) {
       const [newSvcName, setNewSvcName] = useState("");
       const [newSvcPrice, setNewSvcPrice] = useState("");
-      const inp = {padding:"7px 10px",background:"#0f0f1e",border:"1px solid #252540",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'DM Sans',sans-serif"};
+      const inp = {padding:"7px 10px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif"};
 
       // All services = preset services from template + any custom-added ones
       // We track "allServices" as s.customServices (user-added) merged with template defaults
@@ -327,36 +327,36 @@
       return (
         <div>
           {/* Duration picker */}
-          <div style={{marginBottom:16,padding:"12px 14px",background:"#0f0f1e",border:`1px solid ${ac}30`,borderRadius:12}}>
-            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>
+          <div style={{marginBottom:16,padding:"12px 14px",background:"#0c0e24",border:`1px solid ${ac}30`,borderRadius:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
               ⏱ {lang==="zh"?"每次服务时长":"Service Duration"}
             </div>
-            <div style={{fontSize:11,color:"#606080",marginBottom:10,fontFamily:"'DM Sans',sans-serif",lineHeight:1.5}}>
+            <div style={{fontSize:11,color:"#757aa8",marginBottom:10,fontFamily:"'Inter',sans-serif",lineHeight:1.5}}>
               {lang==="zh"?"客户预约时间槽按此间隔排列":"Appointment slots will be spaced by this interval"}
             </div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
               {DURATIONS.map(({label,val})=>(
                 <button key={val} onClick={()=>setS(p=>({...p,serviceDuration:val}))}
-                  style={{padding:"6px 12px",borderRadius:20,border:`1.5px solid ${val===curDur?ac:"#252535"}`,background:val===curDur?ac+"20":"transparent",color:val===curDur?ac:"#606080",fontSize:11.5,fontWeight:600,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s"}}>
+                  style={{padding:"6px 12px",borderRadius:20,border:`1.5px solid ${val===curDur?ac:"#2a2d4a"}`,background:val===curDur?ac+"20":"transparent",color:val===curDur?ac:"#757aa8",fontSize:11.5,fontWeight:600,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s"}}>
                   {label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'DM Sans',sans-serif"}}>{t.activeServices}</div>
+          <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Inter',sans-serif"}}>{t.activeServices}</div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             {allSvcs.map(svc=>{
               const on = isActive(svc);
               const price = s.customPrices?.[svc] || "";
               return (
-                <div key={svc} style={{background:on?"#13131f":"#0d0d18",border:`1.5px solid ${on?ac+"60":"#1a1a28"}`,borderRadius:12,padding:"11px 13px",transition:"all 0.2s"}}>
+                <div key={svc} style={{background:on?"#111428":"#0b0d1e",border:`1.5px solid ${on?ac+"60":"#1a1a28"}`,borderRadius:12,padding:"11px 13px",transition:"all 0.2s"}}>
                   <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:on?8:0}}>
                     <div style={{display:"flex",alignItems:"center",gap:9,flex:1,cursor:"pointer"}} onClick={()=>toggleSvc(svc)}>
-                      <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${on?ac:"#252535"}`,background:on?ac:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
+                      <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${on?ac:"#2a2d4a"}`,background:on?ac:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
                         {on&&<Ico name="ok" size={11}/>}
                       </div>
-                      <div style={{fontSize:13,fontWeight:600,color:on?"#d0d0f0":"#404060",fontFamily:"'DM Sans',sans-serif"}}>{svc}</div>
+                      <div style={{fontSize:13,fontWeight:600,color:on?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif"}}>{svc}</div>
                     </div>
                     <button onClick={()=>deleteSvc(svc)} style={{background:"none",border:"none",color:"#303050",cursor:"pointer",padding:4,display:"flex",borderRadius:6,transition:"color 0.2s"}}
                       onMouseEnter={e=>e.currentTarget.style.color="#ff4444"}
@@ -374,8 +374,8 @@
           </div>
 
           {/* Add new service */}
-          <div style={{marginTop:14,padding:"13px",background:"#0c0c18",border:`1px solid ${ac}25`,borderRadius:12}}>
-            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>
+          <div style={{marginTop:14,padding:"13px",background:"#0a0c20",border:`1px solid ${ac}25`,borderRadius:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
               + {lang==="zh"?"添加新服务":"Add new service"}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:8}}>
@@ -385,12 +385,12 @@
               <NewPriceRange value={newSvcPrice} onChange={setNewSvcPrice} ac={ac} lang={lang}/>
             </div>
             <button onClick={addSvc} disabled={!newSvcName.trim()}
-              style={{width:"100%",padding:"8px",borderRadius:8,border:"none",cursor:newSvcName.trim()?"pointer":"not-allowed",background:newSvcName.trim()?ac:"#252535",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",opacity:newSvcName.trim()?1:0.4,transition:"all 0.2s"}}>
+              style={{width:"100%",padding:"8px",borderRadius:8,border:"none",cursor:newSvcName.trim()?"pointer":"not-allowed",background:newSvcName.trim()?ac:"#2a2d4a",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",opacity:newSvcName.trim()?1:0.4,transition:"all 0.2s"}}>
               {lang==="zh"?"添加服务":"Add Service"}
             </button>
           </div>
 
-          <div style={{marginTop:10,padding:"9px 12px",background:"#13131f",borderRadius:10,border:"1px solid #1e1e30",fontSize:12,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>
+          <div style={{marginTop:10,padding:"9px 12px",background:"#111428",borderRadius:10,border:"1px solid #262950",fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>
             {activeCount} {t.of} {allSvcs.length} {t.servicesActive}
           </div>
         </div>
@@ -428,22 +428,22 @@
 
       return (
         <div>
-          <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>{t.serviceZips}</div>
-          <p style={{fontSize:12,color:"#606080",marginBottom:12,fontFamily:"'DM Sans',sans-serif",lineHeight:1.6}}>
+          <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>{t.serviceZips}</div>
+          <p style={{fontSize:12,color:"#757aa8",marginBottom:12,fontFamily:"'Inter',sans-serif",lineHeight:1.6}}>
             <strong style={{color:"#d0d0f0"}}>{s.serviceZips.length} ZIPs</strong> {lang==="zh"?"个邮编已覆盖":"covered"}. {lang==="zh"?"范围外客户会被自动提示。":"Customers outside are redirected automatically."}
           </p>
 
           {/* Auto-generate from address */}
-          <div style={{marginBottom:14,padding:"12px 14px",background:"#0f0f1e",border:`1px solid ${ac}30`,borderRadius:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:ac,marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:`1px solid ${ac}30`,borderRadius:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:ac,marginBottom:6,fontFamily:"'Inter',sans-serif"}}>
               📍 {lang==="zh"?"根据商家地址自动生成邮编":"Auto-generate ZIPs from business address"}
             </div>
-            <div style={{fontSize:11,color:"#505070",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>
+            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
               {lang==="zh"
                 ? `当前地址: ${s.city||"—"}, ${s.state||"—"} · 在Business标签修改地址`
                 : `Current: ${s.city||"—"}, ${s.state||"—"} · Edit in Business tab`}
             </div>
-            <button onClick={autoGenZips} disabled={autoStatus==="loading"} style={{width:"100%",padding:"9px",borderRadius:10,border:`1px solid ${ac}60`,background:autoStatus==="loading"?`${ac}10`:`${ac}18`,color:autoStatus==="loading"?"#606080":ac,cursor:autoStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <button onClick={autoGenZips} disabled={autoStatus==="loading"} style={{width:"100%",padding:"9px",borderRadius:10,border:`1px solid ${ac}60`,background:autoStatus==="loading"?`${ac}10`:`${ac}18`,color:autoStatus==="loading"?"#757aa8":ac,cursor:autoStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
               {autoStatus==="loading"
                 ? <><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {lang==="zh"?"查询中...":"Searching..."}</>
                 : autoStatus==="done"
@@ -458,21 +458,21 @@
           {/* Manual add */}
           <div style={{display:"flex",gap:8,marginBottom:10}}>
             <input value={zipIn} onChange={e=>setZipIn(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>e.key==="Enter"&&addZip()} placeholder={t.addZip} maxLength={5} style={{...inp,flex:1}} />
-            <button onClick={addZip} disabled={zipIn.length!==5} style={{padding:"9px 14px",borderRadius:10,border:"none",cursor:zipIn.length===5?"pointer":"not-allowed",background:zipIn.length===5?ac:"#252535",color:"#fff",opacity:zipIn.length===5?1:0.4}}>
+            <button onClick={addZip} disabled={zipIn.length!==5} style={{padding:"9px 14px",borderRadius:10,border:"none",cursor:zipIn.length===5?"pointer":"not-allowed",background:zipIn.length===5?ac:"#2a2d4a",color:"#fff",opacity:zipIn.length===5?1:0.4}}>
               <Ico name="plus" size={15}/>
             </button>
           </div>
 
           {/* Quick presets + clear */}
           <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
-            <button onClick={clearAll} style={{padding:"4px 11px",borderRadius:14,border:"1px solid #3d0000",background:"transparent",color:"#ff4444",fontSize:11,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>{t.clearAll}</button>
+            <button onClick={clearAll} style={{padding:"4px 11px",borderRadius:14,border:"1px solid #3d0000",background:"transparent",color:"#ff4444",fontSize:11,cursor:"pointer",fontFamily:"'Inter',sans-serif"}}>{t.clearAll}</button>
           </div>
 
           {/* ZIP list */}
           <div style={{maxHeight:220,overflowY:"auto",display:"flex",flexWrap:"wrap",gap:6}}>
             {s.serviceZips.sort().map(z=>(
-              <div key={z} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 9px",background:"#13131f",border:"1px solid #252535",borderRadius:20,fontSize:12,color:"#d0d0f0",fontFamily:"'DM Sans',sans-serif"}}>
-                {z}<button onClick={()=>delZip(z)} style={{background:"none",border:"none",color:"#505070",cursor:"pointer",display:"flex",padding:0}}><Ico name="x" size={10}/></button>
+              <div key={z} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 9px",background:"#111428",border:"1px solid #2a2d4a",borderRadius:20,fontSize:12,color:"#d0d0f0",fontFamily:"'Inter',sans-serif"}}>
+                {z}<button onClick={()=>delZip(z)} style={{background:"none",border:"none",color:"#6b6f9a",cursor:"pointer",display:"flex",padding:0}}><Ico name="x" size={10}/></button>
               </div>
             ))}
           </div>
@@ -487,7 +487,7 @@
       const [tab, setTab] = useState("biz");
       const [saved, setSaved] = useState(false);
       const [zipIn, setZipIn] = useState("");
-      const tmpl = TEMPLATES[s.businessType] || {emoji:s.customEmoji||"🏢",label:s.customLabel||s.businessType,color:s.customColor||"#0ea5e9",services:[],prices:{}};
+      const tmpl = TEMPLATES[s.businessType] || {emoji:s.customEmoji||"🏢",label:s.customLabel||s.businessType,color:s.customColor||"#38bdf8",services:[],prices:{}};
       const ac = tmpl.color;
       const upd = (k,v) => setS(p=>({...p,[k]:v}));
       const updH = (d,f,v) => setS(p=>({...p,hours:{...p.hours,[d]:{...p.hours[d],[f]:v}}}));
@@ -495,35 +495,46 @@
       const addZip = () => { const z=zipIn.trim(); if(z.length===5&&/^\d+$/.test(z)&&!s.serviceZips.includes(z)){setS(p=>({...p,serviceZips:[...p.serviceZips,z]}));setZipIn("");} };
       const delZip = (z) => setS(p=>({...p,serviceZips:p.serviceZips.filter(x=>x!==z)}));
       const togSvc = (v) => setS(p=>({...p,services:p.services.includes(v)?p.services.filter(x=>x!==v):[...p.services,v]}));
-      const inp = {padding:"9px 12px",background:"#1a1a2a",border:"1px solid #252540",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'DM Sans',sans-serif"};
+      const inp = {padding:"9px 12px",background:"#181b35",border:"1px solid #2a2d52",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'Inter',sans-serif"};
       const tabs = [["biz",t.tabBiz],["hrs",t.tabHrs],["svc",t.tabSvc],["area",t.tabArea]];
 
       return (
-        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f"}}>
-          <div style={{padding:"16px 18px 0",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0}}>
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818"}}>
+          <div style={{padding:"16px 18px 0",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
               <div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{t.settingsTitle}</div>
-                <div style={{fontSize:11,color:"#505070",marginTop:3,fontFamily:"'DM Sans',sans-serif"}}>{t.settingsSubtitle}</div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{t.settingsTitle}</div>
+                <div style={{fontSize:11,color:"#6b6f9a",marginTop:3,fontFamily:"'Inter',sans-serif"}}>{t.settingsSubtitle}</div>
               </div>
-              <button onClick={save} style={{padding:"8px 16px",borderRadius:10,border:"none",cursor:"pointer",background:saved?"#22c55e":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",transition:"all 0.3s"}}>
+              <button onClick={save} style={{padding:"8px 16px",borderRadius:10,border:"none",cursor:"pointer",background:saved?"#22c55e":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.3s"}}>
                 {saved?t.saved:t.save}
               </button>
             </div>
-            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14,padding:"10px 12px",background:"#0c0c18",borderRadius:10,border:`1px solid ${ac}30`}}>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14,padding:"10px 12px",background:"#0a0c20",borderRadius:10,border:`1px solid ${ac}30`}}>
               <div style={{fontSize:20}}>{tmpl.emoji}</div>
               <div>
-                <div style={{fontSize:13,fontWeight:700,color:"#e0e0f8",fontFamily:"'Syne',sans-serif"}}>{s.businessName||tmpl.label}</div>
-                <div style={{fontSize:11,color:ac,fontFamily:"'DM Sans',sans-serif"}}>{tmpl.label}</div>
+                <div style={{fontSize:13,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{s.businessName||tmpl.label}</div>
+                <div style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>{tmpl.label}</div>
               </div>
-              <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",display:"flex",alignItems:"center",gap:4,fontFamily:"'DM Sans',sans-serif"}}>
+              <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",display:"flex",alignItems:"center",gap:4,fontFamily:"'Inter',sans-serif"}}>
                 <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>AI Live
               </div>
             </div>
-            <div style={{display:"flex",overflowX:"auto"}}>
-              {tabs.map(([k,l])=>(
-                <button key={k} onClick={()=>setTab(k)} style={{padding:"9px 14px",border:"none",background:"transparent",cursor:"pointer",color:tab===k?ac:"#505070",fontSize:11,fontWeight:600,borderBottom:tab===k?`2px solid ${ac}`:"2px solid transparent",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",transition:"color 0.2s"}}>{l}</button>
-              ))}
+            <div style={{display:"flex",gap:6,padding:"0 2px 14px"}}>
+              {tabs.map(([k,l])=>{
+                const active = tab===k;
+                return (
+                  <button key={k} onClick={()=>setTab(k)}
+                    style={{flex:1,padding:"8px 4px",borderRadius:10,border:`1.5px solid ${active?ac:"#222645"}`,background:active?`${ac}18`:"#0a0c20",cursor:"pointer",
+                      color:active?ac:"#6b6f9a",fontSize:10.5,fontWeight:700,
+                      fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap",
+                      transition:"all 0.18s",textAlign:"center",
+                      boxShadow:active?`0 0 16px ${ac}40`:"none",
+                      transform:active?"translateY(-1px)":"none"}}>
+                    {l}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -532,7 +543,7 @@
               <div style={{display:"flex",flexDirection:"column",gap:13}}>
                 {[[t.bizName,"businessName",tmpl.name],[t.phone,"phone","+1 (555) 000-0000"],[t.city,"city","Denver"],[t.state,"state","CO"]].map(([label,key,ph])=>(
                   <div key={key}>
-                    <label style={{fontSize:10,fontWeight:700,color:"#606080",letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:5,fontFamily:"'DM Sans',sans-serif"}}>{label}</label>
+                    <label style={{fontSize:10,fontWeight:700,color:"#757aa8",letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:5,fontFamily:"'Inter',sans-serif"}}>{label}</label>
                     <input value={s[key]}
                       onChange={e=>upd(key, key==="phone" ? formatPhone(e.target.value) : key==="state" ? formatState(e.target.value) : e.target.value)}
                       placeholder={ph} style={{...inp, width: key==="state" ? 60 : undefined}}
@@ -540,13 +551,13 @@
                       type={key==="phone"?"tel":"text"}/>
                   </div>
                 ))}
-                <div style={{padding:13,background:"#13131f",borderRadius:12,border:"1px solid #1e1e30"}}>
-                  <div style={{fontSize:11,color:"#505070",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>Customer sees:</div>
+                <div style={{padding:13,background:"#111428",borderRadius:12,border:"1px solid #262950"}}>
+                  <div style={{fontSize:11,color:"#6b6f9a",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>Customer sees:</div>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
                     <div style={{width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{tmpl.emoji}</div>
                     <div>
-                      <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Syne',sans-serif"}}>{s.businessName}</div>
-                      <div style={{fontSize:11,color:"#606080",fontFamily:"'DM Sans',sans-serif"}}>{s.phone} · {s.city}, {s.state}</div>
+                      <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{s.businessName}</div>
+                      <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif"}}>{s.phone} · {s.city}, {s.state}</div>
                     </div>
                   </div>
                 </div>
@@ -554,28 +565,28 @@
             )}
             {tab==="hrs" && (
               <div>
-                <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'DM Sans',sans-serif"}}>Operating Hours</div>
+                <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Inter',sans-serif"}}>Operating Hours</div>
                 <div style={{display:"flex",flexDirection:"column",gap:7}}>
                   {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>{
                     const h=s.hours[day];
                     return (
-                      <div key={day} style={{background:"#13131f",borderRadius:11,border:`1px solid ${h.open?"#252535":"#181828"}`,padding:"11px 13px",opacity:h.open?1:0.5}}>
+                      <div key={day} style={{background:"#111428",borderRadius:11,border:`1px solid ${h.open?"#2a2d4a":"#161930"}`,padding:"11px 13px",opacity:h.open?1:0.5}}>
                         <div style={{display:"flex",alignItems:"center",gap:10}}>
-                          <button onClick={()=>updH(day,"open",!h.open)} style={{width:34,height:19,borderRadius:10,border:"none",cursor:"pointer",background:h.open?ac:"#252535",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                          <button onClick={()=>updH(day,"open",!h.open)} style={{width:34,height:19,borderRadius:10,border:"none",cursor:"pointer",background:h.open?ac:"#2a2d4a",position:"relative",transition:"background 0.2s",flexShrink:0}}>
                             <span style={{position:"absolute",top:2,left:h.open?16:2,width:15,height:15,borderRadius:"50%",background:"#fff",transition:"left 0.2s",display:"block"}} />
                           </button>
-                          <span style={{fontSize:12,fontWeight:700,color:h.open?"#d0d0f0":"#404060",fontFamily:"'DM Sans',sans-serif",minWidth:28}}>{day}</span>
+                          <span style={{fontSize:12,fontWeight:700,color:h.open?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif",minWidth:28}}>{day}</span>
                           {h.open?(
                             <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
                               <select value={h.start} onChange={e=>updH(day,"start",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
                                 {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
                               </select>
-                              <span style={{color:"#505070",fontSize:11}}>-</span>
+                              <span style={{color:"#6b6f9a",fontSize:11}}>-</span>
                               <select value={h.end} onChange={e=>updH(day,"end",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
                                 {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
                               </select>
                             </div>
-                          ):<span style={{fontSize:11,color:"#404060",fontFamily:"'DM Sans',sans-serif"}}>Closed</span>}
+                          ):<span style={{fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>Closed</span>}
                         </div>
                       </div>
                     );
@@ -603,7 +614,7 @@
       ];
       return (
         <div style={{padding:"6px 4px",animation:"fadeUp 0.3s ease"}}>
-          <div style={{fontSize:13,color:"#a0a0c0",fontFamily:"'DM Sans',sans-serif",marginBottom:12,lineHeight:1.5}}>
+          <div style={{fontSize:13,color:"#a0a0c0",fontFamily:"'Inter',sans-serif",marginBottom:12,lineHeight:1.5}}>
             Before we start — how urgent is your situation?
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
@@ -614,8 +625,8 @@
                 onMouseLeave={e=>{e.currentTarget.style.borderColor=o.border+"40";e.currentTarget.style.background=o.bg+"80";}}>
                 <span style={{fontSize:22,flexShrink:0}}>{o.emoji}</span>
                 <div>
-                  <div style={{fontSize:13,fontWeight:700,color:o.col,fontFamily:"'Syne',sans-serif"}}>{o.label}</div>
-                  <div style={{fontSize:11,color:"#606080",fontFamily:"'DM Sans',sans-serif",marginTop:2}}>{o.sub}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:o.col,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{o.label}</div>
+                  <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginTop:2}}>{o.sub}</div>
                 </div>
                 <div style={{marginLeft:"auto",color:o.border+"80",fontSize:16}}>›</div>
               </button>
@@ -634,8 +645,8 @@
       ];
       const detected = opts.find(o=>o.key===detectedUrgency)||opts[0];
       return (
-        <div style={{background:"#13131f",border:`1.5px solid ${detected.border}`,borderRadius:14,padding:"13px 14px",animation:"fadeUp 0.3s ease"}}>
-          <div style={{fontSize:12,color:"#808098",fontFamily:"'DM Sans',sans-serif",marginBottom:10}}>
+        <div style={{background:"#111428",border:`1.5px solid ${detected.border}`,borderRadius:14,padding:"13px 14px",animation:"fadeUp 0.3s ease"}}>
+          <div style={{fontSize:12,color:"#808098",fontFamily:"'Inter',sans-serif",marginBottom:10}}>
             Based on what you described — does this match?
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:7}}>
@@ -645,8 +656,8 @@
                 onMouseEnter={e=>{e.currentTarget.style.background=o.bg;}}
                 onMouseLeave={e=>{e.currentTarget.style.background=o.key===detectedUrgency?o.bg:"transparent";}}>
                 <span style={{fontSize:16}}>{o.emoji}</span>
-                <span style={{fontSize:12.5,fontWeight:600,color:o.col,fontFamily:"'DM Sans',sans-serif"}}>{o.label}</span>
-                {o.key===detectedUrgency&&<span style={{marginLeft:"auto",fontSize:10,color:o.col,fontFamily:"'DM Sans',sans-serif"}}>AI detected</span>}
+                <span style={{fontSize:12.5,fontWeight:600,color:o.col,fontFamily:"'Inter',sans-serif"}}>{o.label}</span>
+                {o.key===detectedUrgency&&<span style={{marginLeft:"auto",fontSize:10,color:o.col,fontFamily:"'Inter',sans-serif"}}>AI detected</span>}
               </button>
             ))}
           </div>
@@ -663,7 +674,7 @@
       const tmpl = TEMPLATES[settings.businessType] || {
         emoji: settings.customEmoji || "🏢",
         label: settings.customLabel || settings.businessType,
-        color: settings.customColor || "#0ea5e9",
+        color: settings.customColor || "#38bdf8",
         emergencyWords: settings.customEmergencyWords || [],
         greeting: settings.customGreeting || "How can I help you today?",
       };
@@ -778,12 +789,12 @@ Rules:
       return (
         <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#0c0c16"}}>
           {/* header */}
-          <div style={{padding:"11px 16px 0",background:"#10101c",borderBottom:"1px solid #1e1e30",flexShrink:0}}>
+          <div style={{padding:"11px 16px 0",background:"#10101c",borderBottom:"1px solid #222645",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:11}}>
               <div style={{display:"flex",alignItems:"center",gap:9}}>
                 <div style={{width:35,height:35,borderRadius:10,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17}}>{tmpl.emoji}</div>
                 <div>
-                  <div style={{fontSize:13,fontWeight:700,color:"#f0f0ff",fontFamily:"'Syne',sans-serif"}}>{settings.businessName}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{settings.businessName}</div>
                   <div style={{fontSize:10,color:"#22c55e",display:"flex",alignItems:"center",gap:4}}>
                     <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>AI Online 24/7
                   </div>
@@ -796,12 +807,12 @@ Rules:
               {steps.map((s,i)=>(
                 <div key={s} style={{display:"flex",alignItems:"center",flex:i<steps.length-1?1:0}}>
                   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                    <div style={{width:19,height:19,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:i<cur?"#22c55e":i===cur?ac:"#1a1a2a",border:`2px solid ${i<cur?"#22c55e":i===cur?ac:"#252540"}`,fontSize:8,fontWeight:700,color:i<=cur?"#fff":"#404060",transition:"all 0.3s"}}>
+                    <div style={{width:19,height:19,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:i<cur?"#22c55e":i===cur?ac:"#181b35",border:`2px solid ${i<cur?"#22c55e":i===cur?ac:"#2a2d52"}`,fontSize:8,fontWeight:700,color:i<=cur?"#fff":"#52558a",transition:"all 0.3s"}}>
                       {i<cur?"✓":i+1}
                     </div>
-                    <span style={{fontSize:8,color:i===cur?ac:i<cur?"#22c55e":"#353550",fontFamily:"'DM Sans',sans-serif",fontWeight:600,whiteSpace:"nowrap"}}>{s}</span>
+                    <span style={{fontSize:8,color:i===cur?ac:i<cur?"#22c55e":"#353550",fontFamily:"'Inter',sans-serif",fontWeight:600,whiteSpace:"nowrap"}}>{s}</span>
                   </div>
-                  {i<steps.length-1&&<div style={{flex:1,height:1.5,background:i<cur?"#22c55e40":"#1a1a2a",margin:"0 3px",marginBottom:11,transition:"background 0.3s"}}/>}
+                  {i<steps.length-1&&<div style={{flex:1,height:1.5,background:i<cur?"#22c55e40":"#181b35",margin:"0 3px",marginBottom:11,transition:"background 0.3s"}}/>}
                 </div>
               ))}
             </div>
@@ -811,8 +822,8 @@ Rules:
           <div style={{flex:1,overflowY:"auto",padding:"14px 13px",display:"flex",flexDirection:"column",gap:11}}>
             {msgs.map((m,i)=>(
               <div key={i} style={{display:"flex",gap:9,alignItems:"flex-end",flexDirection:m.role==="user"?"row-reverse":"row",animation:"fadeUp 0.25s ease"}}>
-                {m.role==="assistant"&&<div style={{width:27,height:27,borderRadius:"50%",background:"linear-gradient(135deg,#0ea5e9,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico name="shld" size={12}/></div>}
-                <div style={{maxWidth:"78%",padding:"10px 14px",fontSize:13.5,lineHeight:1.65,borderRadius:m.role==="user"?"18px 4px 18px 18px":"4px 18px 18px 18px",background:m.role==="user"?"linear-gradient(135deg,#0ea5e9,#2563eb)":"#1c1c2a",color:"#f0f0f8",whiteSpace:"pre-wrap",fontFamily:"'DM Sans',sans-serif"}}>
+                {m.role==="assistant"&&<div style={{width:27,height:27,borderRadius:"50%",background:"linear-gradient(135deg,#38bdf8,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico name="shld" size={12}/></div>}
+                <div style={{maxWidth:"78%",padding:"10px 14px",fontSize:13.5,lineHeight:1.65,borderRadius:m.role==="user"?"18px 4px 18px 18px":"4px 18px 18px 18px",background:m.role==="user"?"linear-gradient(135deg,#38bdf8,#2563eb)":"#1c1c2a",color:"#f0f0f8",whiteSpace:"pre-wrap",fontFamily:"'Inter',sans-serif"}}>
                   {m.content}
                 </div>
               </div>
@@ -828,18 +839,18 @@ Rules:
 
             {/* confirmed */}
             {stage===STAGE.CONFIRMED&&booking&&(
-              <div style={{background:"linear-gradient(135deg,#001a2d,#002040)",border:"1px solid #0ea5e960",borderRadius:16,padding:15,margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+              <div style={{background:"linear-gradient(135deg,#001a2d,#002040)",border:"1px solid #38bdf860",borderRadius:16,padding:15,margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:11}}>
                   <div style={{width:24,height:24,borderRadius:"50%",background:"#22c55e",display:"flex",alignItems:"center",justifyContent:"center"}}><Ico name="ok" size={12}/></div>
-                  <span style={{color:"#22c55e",fontWeight:700,fontSize:14,fontFamily:"'DM Sans',sans-serif"}}>Booking Confirmed!</span>
+                  <span style={{color:"#22c55e",fontWeight:700,fontSize:14,fontFamily:"'Inter',sans-serif"}}>Booking Confirmed!</span>
                 </div>
                 {[["Service",booking.service],["When",`${booking.day} · ${booking.time}`],["Name",booking.info&&booking.info.legalName],["Phone",booking.info&&booking.info.phone],["Address",booking.info?`${booking.info.street}, ${booking.info.city} ${booking.info.zip}`:null]].map(([l,v])=>v&&(
-                  <div key={l} style={{display:"flex",gap:9,fontSize:12.5,fontFamily:"'DM Sans',sans-serif",marginBottom:5}}>
+                  <div key={l} style={{display:"flex",gap:9,fontSize:12.5,fontFamily:"'Inter',sans-serif",marginBottom:5}}>
                     <span style={{color:"#505080",minWidth:70,flexShrink:0}}>{l}</span>
                     <span style={{color:"#d0d0f8",fontWeight:500}}>{v}</span>
                   </div>
                 ))}
-                <div style={{marginTop:10,padding:"7px 10px",background:"#001040",borderRadius:8,fontSize:11,color:"#60a5fa",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
+                <div style={{marginTop:10,padding:"7px 10px",background:"#001040",borderRadius:8,fontSize:11,color:"#60a5fa",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
                   <Ico name="cal" size={11}/> Google Calendar updated · SMS sent
                 </div>
               </div>
@@ -860,9 +871,9 @@ Rules:
           {msgs.length<=2&&stage===XSTAGE.PROBLEM&&(
             <div style={{padding:"0 13px 8px",display:"flex",gap:6,flexWrap:"wrap",flexShrink:0}}>
               {settings.services.slice(0,4).map(sv=>(
-                <button key={sv} onClick={()=>send(`I need ${sv.toLowerCase()}`)} style={{padding:"5px 11px",borderRadius:18,border:"1px solid #252535",background:"transparent",color:"#8080a8",fontSize:11.5,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.2s"}}
+                <button key={sv} onClick={()=>send(`I need ${sv.toLowerCase()}`)} style={{padding:"5px 11px",borderRadius:18,border:"1px solid #2a2d4a",background:"transparent",color:"#8080a8",fontSize:11.5,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.2s"}}
                   onMouseEnter={e=>{e.currentTarget.style.borderColor=ac;e.currentTarget.style.color=ac;}}
-                  onMouseLeave={e=>{e.currentTarget.style.borderColor="#252535";e.currentTarget.style.color="#8080a8";}}>
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2d4a";e.currentTarget.style.color="#8080a8";}}>
                   I need {sv.toLowerCase()}
                 </button>
               ))}
@@ -872,9 +883,9 @@ Rules:
           {/* input bar - shown during AI conversation */}
           {(stage===XSTAGE.PROBLEM||stage===XSTAGE.URGENCY_CONFIRM)&&(
             <div style={{padding:"7px 13px 15px",flexShrink:0}}>
-              <div style={{display:"flex",gap:7,background:"#1a1a28",borderRadius:26,padding:"6px 6px 6px 15px",border:"1px solid #252535"}}>
-                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Describe your issue..." style={{flex:1,background:"none",border:"none",outline:"none",color:"#e0e0f8",fontSize:13.5,fontFamily:"'DM Sans',sans-serif"}}/>
-                <button onClick={()=>send()} disabled={loading||!input.trim()} style={{width:34,height:34,borderRadius:"50%",border:"none",cursor:"pointer",background:input.trim()?`linear-gradient(135deg,${ac},#2563eb)`:"#252535",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
+              <div style={{display:"flex",gap:7,background:"#1a1a28",borderRadius:26,padding:"6px 6px 6px 15px",border:"1px solid #2a2d4a"}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Describe your issue..." style={{flex:1,background:"none",border:"none",outline:"none",color:"#e0e0f8",fontSize:13.5,fontFamily:"'Inter',sans-serif"}}/>
+                <button onClick={()=>send()} disabled={loading||!input.trim()} style={{width:34,height:34,borderRadius:"50%",border:"none",cursor:"pointer",background:input.trim()?`linear-gradient(135deg,${ac},#2563eb)`:"#2a2d4a",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
                   <Ico name="send" size={14}/>
                 </button>
               </div>
@@ -910,21 +921,21 @@ Rules:
       useEffect(()=>{if(ref.current)ref.current.focus();},[]);
       const check=()=>{if(zip.length!==5)return;setSt("checking");setTimeout(()=>{const ok=zips.includes(zip);setSt(ok?"ok":"no");if(ok)setTimeout(()=>onResult(true,zip),700);},600);};
       return (
-        <div style={{background:"#13131e",border:"1px solid #252535",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
-          <div style={{padding:"11px 15px",borderBottom:"1px solid #252535",display:"flex",alignItems:"center",gap:7}}>
-            <span>📍</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>Service Area Check</span>
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",gap:7}}>
+            <span>📍</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Service Area Check</span>
           </div>
           <div style={{padding:14}}>
-            <p style={{fontSize:13,color:"#8080a8",marginBottom:11,lineHeight:1.6,fontFamily:"'DM Sans',sans-serif"}}>Enter your ZIP code to confirm we can reach you.</p>
+            <p style={{fontSize:13,color:"#8080a8",marginBottom:11,lineHeight:1.6,fontFamily:"'Inter',sans-serif"}}>Enter your ZIP code to confirm we can reach you.</p>
             <div style={{display:"flex",gap:8}}>
               <input ref={ref} value={zip} onChange={e=>{setZip(e.target.value.replace(/\D/g,"").slice(0,5));setSt(null);}} onKeyDown={e=>e.key==="Enter"&&zip.length===5&&check()} placeholder="e.g. 80203" maxLength={5}
-                style={{flex:1,padding:"9px 14px",background:"#1a1a2a",border:`1px solid ${st==="ok"?"#22c55e":st==="no"?"#ef4444":"#252540"}`,borderRadius:10,color:"#e0e0f8",fontSize:16,letterSpacing:"0.15em",outline:"none",fontFamily:"'DM Sans',sans-serif",textAlign:"center",transition:"border-color 0.2s"}}/>
-              <button onClick={check} disabled={zip.length!==5} style={{padding:"9px 16px",borderRadius:10,border:"none",cursor:zip.length===5?"pointer":"not-allowed",background:zip.length===5?"linear-gradient(135deg,#0ea5e9,#2563eb)":"#1a1a2a",color:"#fff",fontSize:13,fontWeight:700,opacity:zip.length===5?1:0.4,fontFamily:"'DM Sans',sans-serif"}}>
+                style={{flex:1,padding:"9px 14px",background:"#181b35",border:`1px solid ${st==="ok"?"#22c55e":st==="no"?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:16,letterSpacing:"0.15em",outline:"none",fontFamily:"'Inter',sans-serif",textAlign:"center",transition:"border-color 0.2s"}}/>
+              <button onClick={check} disabled={zip.length!==5} style={{padding:"9px 16px",borderRadius:10,border:"none",cursor:zip.length===5?"pointer":"not-allowed",background:zip.length===5?"linear-gradient(135deg,#38bdf8,#2563eb)":"#181b35",color:"#fff",fontSize:13,fontWeight:700,opacity:zip.length===5?1:0.4,fontFamily:"'Inter',sans-serif"}}>
                 {st==="checking"?"...":"Check"}
               </button>
             </div>
-            {st==="ok"&&<div style={{marginTop:9,padding:"9px 12px",background:"#001a0a",border:"1px solid #22c55e40",borderRadius:10,fontSize:12,color:"#22c55e",animation:"fadeUp 0.2s ease",fontFamily:"'DM Sans',sans-serif"}}>✅ ZIP {zip} is in our service area!</div>}
-            {st==="no"&&<div style={{marginTop:9,padding:"9px 12px",background:"#1c0000",border:"1px solid #ef444440",borderRadius:10,fontSize:12,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>❌ ZIP {zip} is outside our service area. Call us for referrals.</div>}
+            {st==="ok"&&<div style={{marginTop:9,padding:"9px 12px",background:"#001a0a",border:"1px solid #22c55e40",borderRadius:10,fontSize:12,color:"#22c55e",animation:"fadeUp 0.2s ease",fontFamily:"'Inter',sans-serif"}}>✅ ZIP {zip} is in our service area!</div>}
+            {st==="no"&&<div style={{marginTop:9,padding:"9px 12px",background:"#1c0000",border:"1px solid #ef444440",borderRadius:10,fontSize:12,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>❌ ZIP {zip} is outside our service area. Call us for referrals.</div>}
           </div>
         </div>
       );
@@ -944,26 +955,26 @@ Rules:
         if(Object.keys(e).length){setErr(e);return;}
         setSub(true);setTimeout(()=>onSubmit(f),400);
       };
-      const is=(k)=>({padding:"9px 11px",background:"#1a1a2a",border:`1px solid ${err[k]?"#ef4444":"#252540"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'DM Sans',sans-serif",width:"100%"});
-      const Lb=({c})=><label style={{fontSize:10,fontWeight:700,color:"#606080",letterSpacing:"0.06em",textTransform:"uppercase",display:"block",marginBottom:4,fontFamily:"'DM Sans',sans-serif"}}>{c}</label>;
+      const is=(k)=>({padding:"9px 11px",background:"#181b35",border:`1px solid ${err[k]?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"});
+      const Lb=({c})=><label style={{fontSize:10,fontWeight:700,color:"#757aa8",letterSpacing:"0.06em",textTransform:"uppercase",display:"block",marginBottom:4,fontFamily:"'Inter',sans-serif"}}>{c}</label>;
 
       return (
-        <div style={{background:"#13131e",border:"1px solid #252535",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
-          <div style={{padding:"11px 15px",borderBottom:"1px solid #252535",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-            <div style={{display:"flex",alignItems:"center",gap:7}}><span>👤</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>Your Information</span></div>
-            <span style={{fontSize:10,padding:"2px 8px",background:"#001428",color:"#60a5fa",borderRadius:10,border:"1px solid #60a5fa40",fontFamily:"'DM Sans',sans-serif"}}>🔒 Secure</span>
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{display:"flex",alignItems:"center",gap:7}}><span>👤</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Your Information</span></div>
+            <span style={{fontSize:10,padding:"2px 8px",background:"#001428",color:"#60a5fa",borderRadius:10,border:"1px solid #60a5fa40",fontFamily:"'Inter',sans-serif"}}>🔒 Secure</span>
           </div>
           <div style={{padding:14,display:"flex",flexDirection:"column",gap:9}}>
-            <div><Lb c="Legal Full Name"/><input value={f.legalName} onChange={e=>{set("legalName",e.target.value);setErr(v=>({...v,legalName:null}));}} placeholder="John Smith" style={is("legalName")}/>{err.legalName&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err.legalName}</span>}</div>
-            <div><Lb c="Phone Number"/><input value={f.phone} onChange={e=>{set("phone",formatPhone(e.target.value));setErr(v=>({...v,phone:null}));}} placeholder="+1 (720) 555-0100" type="tel" style={is("phone")}/>{err.phone&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err.phone}</span>}</div>
-            <div><Lb c="Street Address"/><input value={f.street} onChange={e=>{set("street",e.target.value);setErr(v=>({...v,street:null}));}} placeholder="123 Main St" style={is("street")}/>{err.street&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err.street}</span>}</div>
+            <div><Lb c="Legal Full Name"/><input value={f.legalName} onChange={e=>{set("legalName",e.target.value);setErr(v=>({...v,legalName:null}));}} placeholder="John Smith" style={is("legalName")}/>{err.legalName&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.legalName}</span>}</div>
+            <div><Lb c="Phone Number"/><input value={f.phone} onChange={e=>{set("phone",formatPhone(e.target.value));setErr(v=>({...v,phone:null}));}} placeholder="+1 (720) 555-0100" type="tel" style={is("phone")}/>{err.phone&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.phone}</span>}</div>
+            <div><Lb c="Street Address"/><input value={f.street} onChange={e=>{set("street",e.target.value);setErr(v=>({...v,street:null}));}} placeholder="123 Main St" style={is("street")}/>{err.street&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.street}</span>}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 46px 76px",gap:7}}>
               <div><Lb c="City"/><input value={f.city} onChange={e=>{set("city",e.target.value);setErr(v=>({...v,city:null}));}} placeholder="Denver" style={is("city")}/></div>
               <div><Lb c="State"/><input value={f.state} onChange={e=>set("state", formatState(e.target.value))} maxLength={2} placeholder="NY" style={is("state")}/></div>
               <div><Lb c="ZIP"/><input value={f.zip} onChange={e=>set("zip",e.target.value.replace(/\D/g,"").slice(0,5))} style={is("zip")}/></div>
             </div>
-            <div style={{padding:"8px 11px",background:"#0d0d18",borderRadius:9,border:"1px solid #1e1e30",fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>🔒 Only shared with the assigned technician.</div>
-            <button onClick={go} disabled={sub} style={{padding:12,borderRadius:12,border:"none",cursor:"pointer",background:sub?"#1a1a2a":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Syne',sans-serif",transition:"all 0.2s"}}>
+            <div style={{padding:"8px 11px",background:"#0b0d1e",borderRadius:9,border:"1px solid #262950",fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>🔒 Only shared with the assigned technician.</div>
+            <button onClick={go} disabled={sub} style={{padding:12,borderRadius:12,border:"none",cursor:"pointer",background:sub?"#181b35":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"all 0.2s"}}>
               {sub?"Saving...":"Continue to Scheduling →"}
             </button>
           </div>
@@ -976,27 +987,27 @@ Rules:
       const [day,setDay]=useState(days[0]);
       const ds=slots.filter(s=>s.day===day&&!s.booked);
       return (
-        <div style={{background:"#13131e",border:"1px solid #252535",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
-          <div style={{padding:"11px 15px",borderBottom:"1px solid #252535",display:"flex",alignItems:"center",gap:7}}>
-            <Ico name="cal" size={14}/><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>Available Times</span>
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",gap:7}}>
+            <Ico name="cal" size={14}/><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Available Times</span>
           </div>
           {urgency==="emergency"&&(
-            <div style={{padding:"9px 13px",borderBottom:"1px solid #252535"}}>
-              <button onClick={()=>onSelect({id:"emg",day:"Today",time:"ASAP",emergency:true})} style={{width:"100%",padding:"10px 14px",background:"#3d0000",border:"1px solid #ff4444",borderRadius:11,color:"#ff6666",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"'DM Sans',sans-serif"}}>
+            <div style={{padding:"9px 13px",borderBottom:"1px solid #2a2d4a"}}>
+              <button onClick={()=>onSelect({id:"emg",day:"Today",time:"ASAP",emergency:true})} style={{width:"100%",padding:"10px 14px",background:"#3d0000",border:"1px solid #ff4444",borderRadius:11,color:"#ff6666",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"'Inter',sans-serif"}}>
                 <span>🚨 Dispatch Emergency Tech Now</span><span style={{fontSize:11,opacity:0.8}}>30-60 min</span>
               </button>
             </div>
           )}
-          <div style={{display:"flex",borderBottom:"1px solid #252535",overflowX:"auto"}}>
-            {days.map(d=><button key={d} onClick={()=>setDay(d)} style={{padding:"8px 12px",border:"none",background:"transparent",cursor:"pointer",color:day===d?ac:"#606080",fontSize:11,fontWeight:600,borderBottom:day===d?`2px solid ${ac}`:"2px solid transparent",whiteSpace:"nowrap",fontFamily:"'DM Sans',sans-serif",transition:"color 0.2s"}}>{d}</button>)}
+          <div style={{display:"flex",borderBottom:"1px solid #2a2d4a",overflowX:"auto"}}>
+            {days.map(d=><button key={d} onClick={()=>setDay(d)} style={{padding:"8px 12px",border:"none",background:"transparent",cursor:"pointer",color:day===d?ac:"#757aa8",fontSize:11,fontWeight:600,borderBottom:day===d?`2px solid ${ac}`:"2px solid transparent",whiteSpace:"nowrap",fontFamily:"'Inter',sans-serif",transition:"color 0.2s"}}>{d}</button>)}
           </div>
           <div style={{padding:"11px 13px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
             {ds.length===0
-              ?<div style={{gridColumn:"span 2",textAlign:"center",color:"#505070",fontSize:13,padding:"14px 0",fontFamily:"'DM Sans',sans-serif"}}>No slots this day</div>
+              ?<div style={{gridColumn:"span 2",textAlign:"center",color:"#6b6f9a",fontSize:13,padding:"14px 0",fontFamily:"'Inter',sans-serif"}}>No slots this day</div>
               :ds.map(s=>(
-                <button key={s.id} onClick={()=>onSelect(s)} style={{padding:"9px 13px",background:"#1a1a2e",border:"1px solid #252540",borderRadius:9,color:"#d0d0f0",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"all 0.15s",fontFamily:"'DM Sans',sans-serif"}}
+                <button key={s.id} onClick={()=>onSelect(s)} style={{padding:"9px 13px",background:"#1a1a2e",border:"1px solid #2a2d52",borderRadius:9,color:"#d0d0f0",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"all 0.15s",fontFamily:"'Inter',sans-serif"}}
                   onMouseEnter={e=>{e.currentTarget.style.background=ac+"20";e.currentTarget.style.borderColor=ac;e.currentTarget.style.color=ac;}}
-                  onMouseLeave={e=>{e.currentTarget.style.background="#1a1a2e";e.currentTarget.style.borderColor="#252540";e.currentTarget.style.color="#d0d0f0";}}>
+                  onMouseLeave={e=>{e.currentTarget.style.background="#1a1a2e";e.currentTarget.style.borderColor="#2a2d52";e.currentTarget.style.color="#d0d0f0";}}>
                   <Ico name="clk" size={12}/>{s.time}
                 </button>
               ))
@@ -1010,7 +1021,7 @@ Rules:
     function Dash({bookings, settings, lang="en", onUpdateBooking}) {
       const t = T[lang]||T.en;
       const [filt,setFilt]=useState("all");
-      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#0ea5e9"}, ac=tmpl.color;
+      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#38bdf8"}, ac=tmpl.color;
       const ord={emergency:0,high:1,normal:2};
 
       const now = new Date();
@@ -1037,15 +1048,15 @@ Rules:
       days7.forEach(({key})=>{ countByDay[key]=(active.filter(b=>b.day===key).length); });
 
       return (
-        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f",overflowY:"auto"}}>
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818",overflowY:"auto"}}>
 
           {/* ── Header ── */}
-          <div style={{padding:"16px 18px 0",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0}}>
+          <div style={{padding:"16px 18px 0",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
             <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:13}}>
               <span style={{fontSize:20}}>{tmpl.emoji}</span>
               <div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
-                <div style={{fontSize:11,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
+                <div style={{fontSize:11,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
               </div>
             </div>
 
@@ -1056,9 +1067,9 @@ Rules:
                 [lang==="zh"?"紧急":"Emergency",active.filter(b=>b.urgency==="emergency").length,"#ff4444"],
                 [lang==="zh"?"今日":"Today",active.filter(b=>b.day==="Today").length,"#22c55e"],
               ].map(([l,v,c])=>(
-                <div key={l} style={{background:"#13131f",borderRadius:11,padding:"11px 13px",border:"1px solid #1e1e30"}}>
-                  <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Syne',sans-serif"}}>{v}</div>
-                  <div style={{fontSize:10,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{l}</div>
+                <div key={l} style={{background:"#111428",borderRadius:11,padding:"11px 13px",border:"1px solid #262950"}}>
+                  <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{v}</div>
+                  <div style={{fontSize:10,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{l}</div>
                 </div>
               ))}
             </div>
@@ -1066,7 +1077,7 @@ Rules:
             {/* ── Filter tabs ── */}
             <div style={{display:"flex"}}>
               {[["all",t.filterAll],["emergency",t.filterEmerg],["high",t.filterUrgent],["normal",t.filterStd]].map(([k,l])=>(
-                <button key={k} onClick={()=>setFilt(k)} style={{padding:"8px 10px",border:"none",background:"transparent",cursor:"pointer",color:filt===k?ac:"#505070",fontSize:10,fontWeight:600,borderBottom:filt===k?`2px solid ${ac}`:"2px solid transparent",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}>{l}</button>
+                <button key={k} onClick={()=>setFilt(k)} style={{padding:"8px 10px",border:"none",background:"transparent",cursor:"pointer",color:filt===k?ac:"#6b6f9a",fontSize:10,fontWeight:600,borderBottom:filt===k?`2px solid ${ac}`:"2px solid transparent",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{l}</button>
               ))}
             </div>
           </div>
@@ -1074,9 +1085,9 @@ Rules:
           <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
 
             {/* ── Today's date + urgency summary ── */}
-            <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
+            <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
               <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
                   📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
                 </div>
               </div>
@@ -1087,26 +1098,26 @@ Rules:
                   {label:"📅 Regular",  count:todayBookings.filter(b=>b.urgency==="normal").length,     col:"#60a5fa", bg:"#001a2d30"},
                 ].map(({label,count,col,bg})=>(
                   <div key={label} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:20,background:bg,border:`1px solid ${col}40`}}>
-                    <span style={{fontSize:11,color:col,fontWeight:700,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
-                    <span style={{fontSize:13,color:col,fontWeight:800,fontFamily:"'Syne',sans-serif"}}>{count}</span>
+                    <span style={{fontSize:11,color:col,fontWeight:700,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                    <span style={{fontSize:13,color:col,fontWeight:800,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{count}</span>
                   </div>
                 ))}
-                {todayBookings.length===0&&<span style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif"}}>No appointments today</span>}
+                {todayBookings.length===0&&<span style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>No appointments today</span>}
               </div>
             </div>
 
             {/* ── Weekly calendar ── */}
-            <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>7-Day Booking Calendar</div>
+            <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>7-Day Booking Calendar</div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5}}>
                 {days7.map(({key,label,date})=>{
                   const cnt = countByDay[key]||0;
                   const isToday = key==="Today";
                   return (
                     <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
-                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#404060",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#52558a",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
                       <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                        <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt}</span>
+                        <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt}</span>
                       </div>
                     </div>
                   );
@@ -1116,33 +1127,33 @@ Rules:
 
             {/* ── Booking list ── */}
             {shown.length===0
-              ?<div style={{textAlign:"center",padding:"36px 0",color:"#404060",fontFamily:"'DM Sans',sans-serif",fontSize:14}}><div style={{fontSize:30,marginBottom:8}}>📭</div>{t.noBookings}</div>
+              ?<div style={{textAlign:"center",padding:"36px 0",color:"#52558a",fontFamily:"'Inter',sans-serif",fontSize:14}}><div style={{fontSize:30,marginBottom:8}}>📭</div>{t.noBookings}</div>
               :shown.map((b,i)=>(
-                <div key={b.id||i} style={{background:"#13131f",border:"1px solid #1e1e30",borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${urgCol(b.urgency)}`,animation:"fadeUp 0.3s ease"}}>
+                <div key={b.id||i} style={{background:"#111428",border:"1px solid #262950",borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${urgCol(b.urgency)}`,animation:"fadeUp 0.3s ease"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
                     <div>
-                      <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Syne',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
-                      <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'DM Sans',sans-serif"}}>{b.service}</div>
+                      <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
+                      <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'Inter',sans-serif"}}>{b.service}</div>
                     </div>
                     <Badge level={b.urgency||"normal"} lang={lang}/>
                   </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#505070",fontFamily:"'DM Sans',sans-serif",marginBottom:9}}>
+                  <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
                     <span>🕐 {b.day} · {b.time}</span>
                     {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
                     {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
                   </div>
                   <div style={{display:"flex",gap:7,alignItems:"center"}}>
-                    <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
+                    <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
                       <Ico name="cal" size={11}/> {t.calUpdated}
                     </div>
                     <button onClick={()=>onUpdateBooking(b.id,"completed")}
-                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
                       onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
                       onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
                       ✓ Complete
                     </button>
                     <button onClick={()=>onUpdateBooking(b.id,"cancelled")}
-                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
                       onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
                       onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
                       ✕ Cancel
@@ -1170,7 +1181,7 @@ Rules:
     function LangToggle({lang, setLang, ac}) {
       return (
         <button onClick={()=>setLang(l=>l==="en"?"zh":"en")}
-          style={{padding:"4px 12px",borderRadius:14,border:`1.5px solid ${ac}60`,background:`${ac}15`,color:ac,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.05em",transition:"all 0.2s"}}>
+          style={{padding:"4px 12px",borderRadius:14,border:`1.5px solid ${ac}60`,background:`${ac}15`,color:ac,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em",transition:"all 0.2s"}}>
           {lang==="en"?"🇨🇳 中文":"🇺🇸 EN"}
         </button>
       );
@@ -1190,15 +1201,15 @@ Rules:
       };
 
       return (
-        <div style={{minHeight:"100dvh",background:"#06060f",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
+        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
           <div style={{width:"100%",maxWidth:420,animation:"fadeUp 0.4s ease"}}>
             <div style={{textAlign:"center",marginBottom:32}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:28,fontWeight:800,color:"#fff",marginBottom:10}}>
-                Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:28,fontWeight:800,color:"#fff",marginBottom:10}}>
+                Annie<span style={{color:"#38bdf8"}}> the Agent</span>
               </div>
-              <div style={{fontSize:14,color:"#505070",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
+              <div style={{fontSize:14,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",lineHeight:1.7}}>
                 Enter your Anthropic API key to run the demo.<br/>
-                <span style={{color:"#404060",fontSize:12}}>Your key stays in your browser only — never stored or uploaded.</span>
+                <span style={{color:"#52558a",fontSize:12}}>Your key stays in your browser only — never stored or uploaded.</span>
               </div>
             </div>
 
@@ -1209,18 +1220,18 @@ Rules:
                 onKeyDown={e=>e.key==="Enter"&&submit()}
                 placeholder="sk-ant-api03-..."
                 type="password"
-                style={{width:"calc(100% - 26px)",padding:"13px",background:"#0f0f1e",border:`1.5px solid ${err?"#ef4444":"#252540"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.05em"}}
+                style={{width:"calc(100% - 26px)",padding:"13px",background:"#0c0e24",border:`1.5px solid ${err?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em"}}
               />
-              {err && <div style={{marginTop:6,fontSize:12,color:"#ef4444",fontFamily:"'DM Sans',sans-serif"}}>{err}</div>}
+              {err && <div style={{marginTop:6,fontSize:12,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err}</div>}
             </div>
 
             <button onClick={submit} disabled={!val.trim()}
-              style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:val.trim()?"pointer":"not-allowed",background:val.trim()?"linear-gradient(135deg,#0ea5e9,#6366f1)":"#252535",color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:800,opacity:val.trim()?1:0.5,transition:"all 0.2s"}}>
+              style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:val.trim()?"pointer":"not-allowed",background:val.trim()?"linear-gradient(135deg,#38bdf8,#818cf8)":"#2a2d4a",color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,opacity:val.trim()?1:0.5,transition:"all 0.2s"}}>
               Enter Demo →
             </button>
 
-            <div style={{marginTop:20,padding:"12px 14px",background:"#0c0c18",borderRadius:10,border:"1px solid #1e1e30",fontSize:11,color:"#404060",fontFamily:"'DM Sans',sans-serif",lineHeight:1.7}}>
-              💡 Get your key at <span style={{color:"#0ea5e9"}}>console.anthropic.com</span> → API Keys.<br/>
+            <div style={{marginTop:20,padding:"12px 14px",background:"#0a0c20",borderRadius:10,border:"1px solid #262950",fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif",lineHeight:1.7}}>
+              💡 Get your key at <span style={{color:"#38bdf8"}}>console.anthropic.com</span> → API Keys.<br/>
               This demo uses Claude API — small cost per conversation (~$0.01).
             </div>
           </div>
@@ -1232,36 +1243,36 @@ Rules:
     function IntroScreen({onStart}) {
       const [hovered, setHovered] = useState(false);
       return (
-        <div style={{minHeight:"100dvh",background:"#06060f",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",position:"relative",overflow:"hidden"}}>
+        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",position:"relative",overflow:"hidden"}}>
           {/* glow */}
-          <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(14,165,233,0.1) 0%,transparent 70%)",top:"50%",left:"50%",transform:"translate(-50%,-55%)",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(56,189,248,0.1) 0%,transparent 70%)",top:"50%",left:"50%",transform:"translate(-50%,-55%)",pointerEvents:"none"}}/>
           
 
           <div style={{position:"relative",zIndex:1,textAlign:"center",maxWidth:640,animation:"fadeUp 0.6s ease both"}}>
             {/* badge */}
-            <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:20,border:"1px solid rgba(14,165,233,0.3)",background:"rgba(14,165,233,0.08)",fontSize:11,fontWeight:700,color:"#0ea5e9",letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:28}}>
-              <span style={{width:6,height:6,borderRadius:"50%",background:"#0ea5e9",animation:"pulse 2s infinite",display:"inline-block"}}/>
+            <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:20,border:"1px solid rgba(56,189,248,0.3)",background:"rgba(56,189,248,0.08)",fontSize:11,fontWeight:700,color:"#38bdf8",letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:28}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#38bdf8",animation:"pulse 2s infinite",display:"inline-block"}}/>
               Interactive Demo
             </div>
 
             {/* logo */}
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(48px,8vw,77px)",fontWeight:800,color:"#fff",letterSpacing:"-0.03em",marginBottom:16,lineHeight:1}}>
-              Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
+            <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"clamp(48px,8vw,77px)",fontWeight:800,color:"#fff",letterSpacing:"-0.03em",marginBottom:16,lineHeight:1}}>
+              Annie<span style={{color:"#38bdf8"}}> the Agent</span>
             </div>
 
-            <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:"clamp(22px,4vw,35px)",fontWeight:700,color:"#c0c0e0",lineHeight:1.3,marginBottom:18,letterSpacing:"-0.01em"}}>
+            <h1 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"clamp(22px,4vw,35px)",fontWeight:700,color:"#c0c0e0",lineHeight:1.3,marginBottom:18,letterSpacing:"-0.01em"}}>
               Your AI agent that books appointments,<br/>handles emergencies, and never sleeps.
             </h1>
 
-            <p style={{fontSize:15,color:"#505070",lineHeight:1.8,marginBottom:40,fontFamily:"'DM Sans',sans-serif",fontWeight:300}}>
+            <p style={{fontSize:15,color:"#6b6f9a",lineHeight:1.8,marginBottom:40,fontFamily:"'Inter',sans-serif",fontWeight:300}}>
               In this demo, you'll set up your business in 60 seconds,<br/>
               then watch your AI agent take a real booking from a customer.
             </p>
 
             {/* step pills */}
             <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginBottom:44}}>
-              {[["1","Set up your business","#0ea5e9"],["2","See your dashboard","#22c55e"],["3","Watch AI take a booking","#f97316"],["4","Booking appears live","#a855f7"]].map(([n,label,c])=>(
-                <div key={n} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,border:`1px solid ${c}30`,background:`${c}0e`,fontSize:12,color:c,fontFamily:"'DM Sans',sans-serif",fontWeight:600}}>
+              {[["1","Set up your business","#38bdf8"],["2","See your dashboard","#22c55e"],["3","Watch AI take a booking","#f97316"],["4","Booking appears live","#a855f7"]].map(([n,label,c])=>(
+                <div key={n} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,border:`1px solid ${c}30`,background:`${c}0e`,fontSize:12,color:c,fontFamily:"'Inter',sans-serif",fontWeight:600}}>
                   <span style={{width:18,height:18,borderRadius:"50%",background:c,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,flexShrink:0}}>{n}</span>
                   {label}
                 </div>
@@ -1271,17 +1282,17 @@ Rules:
             <button onClick={onStart}
               onMouseEnter={()=>setHovered(true)}
               onMouseLeave={()=>setHovered(false)}
-              style={{padding:"16px 44px",borderRadius:14,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#0ea5e9,#6366f1)",color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,letterSpacing:"0.01em",boxShadow:hovered?"0 0 60px rgba(14,165,233,0.5)":"0 0 30px rgba(14,165,233,0.25)",transform:hovered?"translateY(-2px)":"none",transition:"all 0.2s"}}>
+              style={{padding:"16px 44px",borderRadius:14,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#38bdf8,#818cf8)",color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,letterSpacing:"0.01em",boxShadow:hovered?"0 0 60px rgba(56,189,248,0.5)":"0 0 30px rgba(56,189,248,0.25)",transform:hovered?"translateY(-2px)":"none",transition:"all 0.2s"}}>
               Try It Now →
             </button>
-            <div style={{marginTop:16,fontSize:12,color:"#303050",fontFamily:"'DM Sans',sans-serif"}}>No sign-up needed · Takes about 2 minutes</div>
+            <div style={{marginTop:16,fontSize:12,color:"#303050",fontFamily:"'Inter',sans-serif"}}>No sign-up needed · Takes about 2 minutes</div>
           </div>
         </div>
       );
     }
 
     // Color palette for custom business types
-    const COLOR_PALETTE = ["#0ea5e9","#22c55e","#f97316","#a855f7","#ec4899","#f59e0b","#14b8a6","#ef4444"];
+    const COLOR_PALETTE = ["#38bdf8","#22c55e","#f97316","#a855f7","#ec4899","#f59e0b","#14b8a6","#ef4444"];
     const EMOJI_OPTIONS = ["🏢","💈","🌿","🐾","🍕","🔑","🚗","💄","🏋️","🎨","🧹","🪟","⚡","🌳","🧰","🏥","📦","🛁"];
 
     // Auto-format phone: type digits only → formats to +1 (000) 000-0000
@@ -1297,22 +1308,26 @@ Rules:
     const formatState = (raw) => raw.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,2);
 
     function SetupScreen({onLaunch}) {
+      const [step, setStep] = useState(0); // 0=bizType+info, 1=hours, 2=services, 3=area
       const [type, setType] = useState("plumber");
       const [name, setName] = useState(TEMPLATES["plumber"].name);
       const [phone, setPhone] = useState(TEMPLATES["plumber"].phone);
       const [city, setCity] = useState("Denver");
       const [state, setState] = useState("CO");
-      // Custom type state
       const [showCustom, setShowCustom] = useState(false);
       const [customLabel, setCustomLabel] = useState("");
       const [customEmoji, setCustomEmoji] = useState("🏢");
-      const [customColor, setCustomColor] = useState("#0ea5e9");
-      const [customTypes, setCustomTypes] = useState({}); // key→tmpl map
+      const [customColor, setCustomColor] = useState("#38bdf8");
+      const [customTypes, setCustomTypes] = useState({});
+      const [zipIn, setZipIn] = useState("");
+
+      // Build full settings object for hours/services/area steps
+      const [s, setS] = useState(null);
 
       const allTemplates = {...TEMPLATES, ...customTypes};
       const currentTmpl = allTemplates[type] || TEMPLATES["plumber"];
       const ac = currentTmpl.color;
-      const inp = {padding:"10px 13px",background:"#0f0f1e",border:"1px solid #252540",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'DM Sans',sans-serif",transition:"border-color 0.2s"};
+      const inp = {padding:"10px 13px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'Inter',sans-serif",transition:"border-color 0.2s"};
 
       const addCustomType = () => {
         if (!customLabel.trim()) return;
@@ -1330,165 +1345,275 @@ Rules:
         setCustomLabel(""); setShowCustom(false);
       };
 
-      const launch = () => {
+      const goToStep1 = () => {
         const isBuiltIn = !!TEMPLATES[type];
-        const s = isBuiltIn
-          ? defaultSettings(type)
-          : defaultSettings(type, currentTmpl);
-        s.businessName = name;
-        s.phone = phone;
-        s.city = city;
-        s.state = state;
+        const settings = isBuiltIn ? defaultSettings(type) : defaultSettings(type, currentTmpl);
+        settings.businessName = name;
+        settings.phone = phone;
+        settings.city = city;
+        settings.state = state;
         if (!isBuiltIn) {
-          s.customEmoji = currentTmpl.emoji;
-          s.customLabel = currentTmpl.label;
-          s.customColor = currentTmpl.color;
-          s.customGreeting = currentTmpl.greeting;
+          settings.customEmoji = currentTmpl.emoji;
+          settings.customLabel = currentTmpl.label;
+          settings.customColor = currentTmpl.color;
+          settings.customGreeting = currentTmpl.greeting;
         }
-        onLaunch(s);
+        setS(settings);
+        setStep(1);
       };
 
+      const launch = () => { onLaunch(s); };
+
+      const updH = (d,f,v) => setS(p=>({...p,hours:{...p.hours,[d]:{...p.hours[d],[f]:v}}}));
+      const addZip = () => { const z=zipIn.trim(); if(z.length===5&&/^\d+$/.test(z)&&!s.serviceZips.includes(z)){setS(p=>({...p,serviceZips:[...p.serviceZips,z]}));setZipIn("");} };
+      const delZip = (z) => setS(p=>({...p,serviceZips:p.serviceZips.filter(x=>x!==z)}));
+
+      const STEPS = ["Business Info","Hours","Services","Service Area"];
+      const STEP_ICONS = ["🏢","🕐","🔧","📍"];
+
+      // ── STEP INDICATOR ──
+      const StepBar = () => (
+        <div style={{display:"flex",alignItems:"center",gap:0,marginBottom:28,position:"relative"}}>
+          {STEPS.map((label,i)=>{
+            const done = i < step;
+            const active = i === step;
+            return (
+              <React.Fragment key={i}>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",flex:1,position:"relative",zIndex:1}}>
+                  <div style={{width:36,height:36,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,
+                    background:done?"#22c55e":active?ac:"#222645",
+                    border:`2px solid ${done?"#22c55e":active?ac:"#2a2d52"}`,
+                    transition:"all 0.3s",marginBottom:5,
+                    boxShadow:active?`0 0 20px ${ac}70`:"none"}}>
+                    {done ? "✓" : STEP_ICONS[i]}
+                  </div>
+                  <div style={{fontSize:9,fontWeight:700,color:active?ac:done?"#22c55e":"#52558a",fontFamily:"'Inter',sans-serif",textTransform:"uppercase",letterSpacing:"0.06em",textAlign:"center",whiteSpace:"nowrap"}}>{label}</div>
+                </div>
+                {i < STEPS.length-1 && (
+                  <div style={{flex:1,height:2,background:done?"#22c55e30":"#222645",marginTop:-18,zIndex:0,transition:"all 0.3s"}}/>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      );
+
       return (
-        <div style={{minHeight:"100dvh",background:"#06060f",display:"flex",alignItems:"center",justifyContent:"center",padding:"32px 20px",overflowY:"auto"}}>
+        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",alignItems:"center",justifyContent:"center",padding:"32px 20px",overflowY:"auto"}}>
           <div style={{width:"100%",maxWidth:500,animation:"fadeUp 0.5s ease both"}}>
-            <div style={{textAlign:"center",marginBottom:32}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>
-                Annie<span style={{color:"#0ea5e9"}}> the Agent</span>
+            {/* Header */}
+            <div style={{textAlign:"center",marginBottom:28}}>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>
+                Annie<span style={{color:"#38bdf8"}}> the Agent</span>
               </div>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:"#f0f0ff",marginBottom:8}}>Set up your AI agent</div>
-              <div style={{fontSize:14,color:"#505070",fontFamily:"'DM Sans',sans-serif"}}>Takes 60 seconds. You can change everything later.</div>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:24,fontWeight:800,color:"#f0f0ff",marginBottom:6}}>Set up your AI agent</div>
+              <div style={{fontSize:13,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>Takes 60 seconds. You can change everything later.</div>
             </div>
 
-            {/* business type grid */}
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:10,fontWeight:700,color:"#505070",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>What kind of business?</div>
-              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
-                {Object.entries(allTemplates).map(([key,tmplOpt])=>(
-                  <button key={key} onClick={()=>{setType(key);setName(tmplOpt.name||"");setPhone(tmplOpt.phone||"");}}
-                    style={{padding:"14px 8px",borderRadius:12,border:`2px solid ${type===key?tmplOpt.color:"#1e1e30"}`,background:type===key?`${tmplOpt.color}15`:"#0c0c18",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
-                    <span style={{fontSize:22}}>{tmplOpt.emoji}</span>
-                    <span style={{fontSize:11,fontWeight:700,color:type===key?tmplOpt.color:"#505070",fontFamily:"'DM Sans',sans-serif",textAlign:"center"}}>{tmplOpt.label}</span>
-                  </button>
-                ))}
-                {/* Add custom type button */}
-                <button onClick={()=>setShowCustom(s=>!s)}
-                  style={{padding:"14px 8px",borderRadius:12,border:`2px dashed ${showCustom?"#6366f1":"#252535"}`,background:showCustom?"#6366f115":"transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
-                  <span style={{fontSize:22}}>＋</span>
-                  <span style={{fontSize:11,fontWeight:700,color:showCustom?"#6366f1":"#404060",fontFamily:"'DM Sans',sans-serif"}}>Other</span>
+            <StepBar/>
+
+            {/* ── STEP 0: Business Type + Info ── */}
+            {step===0&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                {/* business type grid */}
+                <div style={{marginBottom:20}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>What kind of business?</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+                    {Object.entries(allTemplates).map(([key,tmplOpt])=>(
+                      <button key={key} onClick={()=>{setType(key);setName(tmplOpt.name||"");setPhone(tmplOpt.phone||"");}}
+                        style={{padding:"14px 8px",borderRadius:12,border:`2px solid ${type===key?tmplOpt.color:"#222645"}`,background:type===key?`${tmplOpt.color}15`:"#0a0c20",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                        <span style={{fontSize:22}}>{tmplOpt.emoji}</span>
+                        <span style={{fontSize:11,fontWeight:700,color:type===key?tmplOpt.color:"#6b6f9a",fontFamily:"'Inter',sans-serif",textAlign:"center"}}>{tmplOpt.label}</span>
+                      </button>
+                    ))}
+                    <button onClick={()=>setShowCustom(s=>!s)}
+                      style={{padding:"14px 8px",borderRadius:12,border:`2px dashed ${showCustom?"#818cf8":"#2a2d4a"}`,background:showCustom?"#818cf815":"transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                      <span style={{fontSize:22}}>＋</span>
+                      <span style={{fontSize:11,fontWeight:700,color:showCustom?"#818cf8":"#52558a",fontFamily:"'Inter',sans-serif"}}>Other</span>
+                    </button>
+                  </div>
+                  {showCustom && (
+                    <div style={{marginTop:10,padding:"14px",background:"#0a0c20",border:"1px solid #818cf830",borderRadius:12,animation:"fadeUp 0.3s ease"}}>
+                      <div style={{fontSize:10,fontWeight:700,color:"#818cf8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>Create your business type</div>
+                      <input value={customLabel} onChange={e=>setCustomLabel(e.target.value)} placeholder="e.g. Pet Grooming, Lawn Care..."
+                        onKeyDown={e=>e.key==="Enter"&&addCustomType()}
+                        style={{...inp,marginBottom:10,width:"calc(100% - 26px)"}}/>
+                      <div style={{marginBottom:10}}>
+                        <div style={{fontSize:10,color:"#52558a",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>Pick an emoji:</div>
+                        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                          {EMOJI_OPTIONS.map(e=>(
+                            <button key={e} onClick={()=>setCustomEmoji(e)}
+                              style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${customEmoji===e?"#818cf8":"#2a2d4a"}`,background:customEmoji===e?"#818cf820":"transparent",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:10,color:"#52558a",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>Pick a color:</div>
+                        <div style={{display:"flex",gap:8}}>
+                          {COLOR_PALETTE.map(c=>(
+                            <button key={c} onClick={()=>setCustomColor(c)}
+                              style={{width:24,height:24,borderRadius:"50%",background:c,border:`2.5px solid ${customColor===c?"#fff":"transparent"}`,cursor:"pointer",transition:"all 0.15s"}}/>
+                          ))}
+                        </div>
+                      </div>
+                      <button onClick={addCustomType} disabled={!customLabel.trim()}
+                        style={{width:"100%",padding:"9px",borderRadius:8,border:"none",cursor:customLabel.trim()?"pointer":"not-allowed",background:customLabel.trim()?"#818cf8":"#2a2d4a",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",opacity:customLabel.trim()?1:0.5}}>
+                        Add Business Type
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Business info fields */}
+                <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
+                  {[["Business Name",name,setName,"e.g. ProFix Plumbing","text"],["Phone Number",phone,setPhone,"+1 (555) 000-0000","tel"],["City",city,setCity,"Denver","text"],["State",state,setState,"CO","text"]].map(([label,val,setter,ph,tp])=>(
+                    <div key={label}>
+                      <div style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>{label}</div>
+                      <input value={val}
+                        onChange={e=>setter(tp==="tel" ? formatPhone(e.target.value) : label==="State" ? formatState(e.target.value) : e.target.value)}
+                        placeholder={ph} type={tp}
+                        maxLength={label==="State"?2:undefined}
+                        style={{...inp, width:"calc(100% - 26px)"}}
+                        onFocus={e=>e.target.style.borderColor=ac}
+                        onBlur={e=>e.target.style.borderColor="#2a2d52"}/>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Preview card */}
+                <div style={{padding:"13px 16px",background:"#0a0c20",borderRadius:12,border:`1px solid ${ac}30`,marginBottom:20,display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{width:42,height:42,borderRadius:11,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{currentTmpl.emoji}</div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{name||"Your Business"}</div>
+                    <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginTop:2}}>{phone||"—"} · {city}, {state}</div>
+                  </div>
+                  <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                    <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>AI Ready
+                  </div>
+                </div>
+
+                <button onClick={goToStep1} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,boxShadow:`0 0 24px ${ac}40`,transition:"all 0.2s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.opacity="0.88";e.currentTarget.style.transform="translateY(-1px)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="none";}}>
+                  Next: Set Your Hours →
                 </button>
               </div>
+            )}
 
-              {/* Custom type creator */}
-              {showCustom && (
-                <div style={{marginTop:10,padding:"14px",background:"#0c0c18",border:"1px solid #6366f130",borderRadius:12,animation:"fadeUp 0.3s ease"}}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#6366f1",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>Create your business type</div>
-                  <input value={customLabel} onChange={e=>setCustomLabel(e.target.value)} placeholder="e.g. Pet Grooming, Lawn Care, Beauty Salon..."
-                    onKeyDown={e=>e.key==="Enter"&&addCustomType()}
-                    style={{...inp,marginBottom:10,width:"calc(100% - 26px)"}}/>
-                  {/* emoji picker */}
-                  <div style={{marginBottom:10}}>
-                    <div style={{fontSize:10,color:"#404060",marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>Pick an emoji:</div>
-                    <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                      {EMOJI_OPTIONS.map(e=>(
-                        <button key={e} onClick={()=>setCustomEmoji(e)}
-                          style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${customEmoji===e?"#6366f1":"#252535"}`,background:customEmoji===e?"#6366f120":"transparent",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                          {e}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  {/* color picker */}
-                  <div style={{marginBottom:12}}>
-                    <div style={{fontSize:10,color:"#404060",marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>Pick a color:</div>
-                    <div style={{display:"flex",gap:8}}>
-                      {COLOR_PALETTE.map(c=>(
-                        <button key={c} onClick={()=>setCustomColor(c)}
-                          style={{width:24,height:24,borderRadius:"50%",background:c,border:`2.5px solid ${customColor===c?"#fff":"transparent"}`,cursor:"pointer",transition:"all 0.15s"}}/>
-                      ))}
-                    </div>
-                  </div>
-                  <button onClick={addCustomType} disabled={!customLabel.trim()}
-                    style={{width:"100%",padding:"9px",borderRadius:8,border:"none",cursor:customLabel.trim()?"pointer":"not-allowed",background:customLabel.trim()?"#6366f1":"#252535",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'DM Sans',sans-serif",opacity:customLabel.trim()?1:0.5}}>
-                    Add Business Type
+            {/* ── STEP 1: Hours ── */}
+            {step===1&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:14}}>🕐 When are you open?</div>
+                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:24}}>
+                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>{
+                    const h=s.hours[day];
+                    return (
+                      <div key={day} style={{background:"#0c0e24",borderRadius:11,border:`1px solid ${h.open?ac+"40":"#161930"}`,padding:"11px 13px",opacity:h.open?1:0.55,transition:"all 0.2s"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:10}}>
+                          <button onClick={()=>updH(day,"open",!h.open)} style={{width:34,height:19,borderRadius:10,border:"none",cursor:"pointer",background:h.open?ac:"#2a2d4a",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                            <span style={{position:"absolute",top:2,left:h.open?16:2,width:15,height:15,borderRadius:"50%",background:"#fff",transition:"left 0.2s",display:"block"}} />
+                          </button>
+                          <span style={{fontSize:12,fontWeight:700,color:h.open?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif",minWidth:28}}>{day}</span>
+                          {h.open?(
+                            <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
+                              <select value={h.start} onChange={e=>updH(day,"start",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                              <span style={{color:"#6b6f9a",fontSize:11}}>–</span>
+                              <select value={h.end} onChange={e=>updH(day,"end",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                            </div>
+                          ):<span style={{fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>Closed</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{display:"flex",gap:10}}>
+                  <button onClick={()=>setStep(0)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={()=>setStep(2)} style={{flex:2,padding:"13px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,boxShadow:`0 0 20px ${ac}30`}}>
+                    Next: Set Your Services →
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* fields */}
-            <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
-              {[["Business Name",name,setName,"e.g. ProFix Plumbing","text"],["Phone Number",phone,setPhone,"+1 (555) 000-0000","tel"],["City",city,setCity,"Denver","text"],["State",state,setState,"CO","text"]].map(([label,val,setter,ph,tp])=>(
-                <div key={label}>
-                  <div style={{fontSize:10,fontWeight:700,color:"#505070",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6,fontFamily:"'DM Sans',sans-serif"}}>{label}</div>
-                  <input value={val}
-                    onChange={e=>setter(tp==="tel" ? formatPhone(e.target.value) : label==="State" ? formatState(e.target.value) : e.target.value)}
-                    placeholder={ph} type={tp}
-                    maxLength={label==="State"?2:undefined}
-                    style={{...inp, width: label==="State" ? "calc(100% - 26px)" : "calc(100% - 26px)"}}
-                    onFocus={e=>e.target.style.borderColor=ac}
-                    onBlur={e=>e.target.style.borderColor="#252540"}/>
+            {/* ── STEP 2: Services ── */}
+            {step===2&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:14}}>🔧 What services do you offer?</div>
+                <SvcTab s={s} setS={setS} ac={ac} lang="en" t={{activeServices:"Active Services",priceRange:"Price Range",addService:"Add Service",addServicePlaceholder:"Service name",addServicePrice:"Price"}}/>
+                <div style={{display:"flex",gap:10,marginTop:20}}>
+                  <button onClick={()=>setStep(1)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={()=>setStep(3)} style={{flex:2,padding:"13px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,boxShadow:`0 0 20px ${ac}30`}}>
+                    Next: Set Your Service Area →
+                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* preview card */}
-            <div style={{padding:"13px 16px",background:"#0c0c18",borderRadius:12,border:`1px solid ${ac}30`,marginBottom:24,display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:42,height:42,borderRadius:11,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{currentTmpl.emoji}</div>
-              <div>
-                <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Syne',sans-serif"}}>{name||"Your Business"}</div>
-                <div style={{fontSize:11,color:"#606080",fontFamily:"'DM Sans',sans-serif",marginTop:2}}>{phone||"—"} · {city}, {state}</div>
               </div>
-              <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
-                <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>AI Ready
-              </div>
-            </div>
+            )}
 
-            <button onClick={launch} style={{width:"100%",padding:"15px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,letterSpacing:"0.01em",boxShadow:`0 0 30px ${ac}40`,transition:"all 0.2s"}}
-              onMouseEnter={e=>{e.currentTarget.style.opacity="0.88";e.currentTarget.style.transform="translateY(-1px)";}}
-              onMouseLeave={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="none";}}>
-              Launch My AI Agent →
-            </button>
+            {/* ── STEP 3: Service Area (ZIPs) ── */}
+            {step===3&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:6}}>📍 Which ZIP codes do you serve?</div>
+                <div style={{fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:16}}>Annie will only book customers within these ZIP codes.</div>
+                <AreaTab s={s} setS={setS} ac={ac} inp={inp} lang="en" t={{serviceArea:"Service Area",addZip:"Add ZIP",zipPlaceholder:"e.g. 80202"}} zipIn={zipIn} setZipIn={setZipIn} addZip={addZip} delZip={delZip}/>
+                <div style={{display:"flex",gap:10,marginTop:20}}>
+                  <button onClick={()=>setStep(2)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={launch} style={{flex:2,padding:"15px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,letterSpacing:"0.01em",boxShadow:`0 0 30px ${ac}40`,transition:"all 0.2s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.opacity="0.88";e.currentTarget.style.transform="translateY(-1px)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="none";}}>
+                    🚀 Launch My AI Agent →
+                  </button>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       );
     }
 
+
     // Dash with "Try Your AI" CTA button
     // ── BOOKING CARD (reusable) ──
     function BookingCard({b, ac, lang, onUpdateBooking, isNew=false, showRestore=false}) {
       return (
-        <div style={{background:isNew?"#0d1a0d":"#13131f",border:`1px solid ${isNew?"#22c55e60":"#1e1e30"}`,borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${b.urgency==="emergency"?"#ff4444":b.urgency==="high"?"#f97316":"#60a5fa"}`,animation:isNew?"newBooking 0.6s ease":"fadeUp 0.3s ease",position:"relative"}}>
-          {isNew&&<div style={{position:"absolute",top:8,right:10,fontSize:10,fontWeight:700,color:"#22c55e",fontFamily:"'DM Sans',sans-serif",background:"#22c55e18",padding:"2px 8px",borderRadius:10,border:"1px solid #22c55e40"}}>✨ New</div>}
+        <div style={{background:isNew?"#0d1a0d":"#111428",border:`1px solid ${isNew?"#22c55e80":"#252850"}`,borderRadius:13,padding:"13px 15px",borderLeft:`4px solid ${b.urgency==="emergency"?"#ff5555":b.urgency==="high"?"#fb923c":"#38bdf8"}`,animation:isNew?"newBooking 0.6s ease":"fadeUp 0.3s ease",position:"relative"}}>
+          {isNew&&<div style={{position:"absolute",top:8,right:10,fontSize:10,fontWeight:700,color:"#22c55e",fontFamily:"'Inter',sans-serif",background:"#22c55e18",padding:"2px 8px",borderRadius:10,border:"1px solid #22c55e40"}}>✨ New</div>}
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
             <div>
-              <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Syne',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
-              <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'DM Sans',sans-serif"}}>{b.service}</div>
+              <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
+              <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'Inter',sans-serif"}}>{b.service}</div>
             </div>
             <Badge level={b.urgency||"normal"} lang={lang}/>
           </div>
-          <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#505070",fontFamily:"'DM Sans',sans-serif",marginBottom:9}}>
+          <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
             <span>🕐 {b.day} · {b.time}</span>
             {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
             {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
           </div>
           <div style={{display:"flex",gap:7,alignItems:"center"}}>
-            <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'DM Sans',sans-serif"}}>
+            <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
               <Ico name="cal" size={11}/> Google Calendar updated ✓
             </div>
             {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"completed")}
-              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
               onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
               onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
               ✓ Complete
             </button>}
             {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"cancelled")}
-              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
               onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
               onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
               ✕ Cancel
             </button>}
             {showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"pending")}
-              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #a78bfa40",background:"#1a0030",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap"}}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #a78bfa40",background:"#1a0030",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
               onMouseEnter={e=>{e.currentTarget.style.background="#a78bfa";e.currentTarget.style.color="#000";}}
               onMouseLeave={e=>{e.currentTarget.style.background="#1a0030";e.currentTarget.style.color="#a78bfa";}}>
               ↩ Restore
@@ -1500,7 +1625,7 @@ Rules:
 
     function DashWithCTA({bookings, settings, lang, onTryChat, newBookingId, onUpdateBooking}) {
       const t = T[lang]||T.en;
-      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#0ea5e9"}, ac=tmpl.color;
+      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#38bdf8"}, ac=tmpl.color;
       const now = new Date();
       const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
       const days7 = Array.from({length:7},(_,i)=>{
@@ -1551,15 +1676,15 @@ Rules:
             <button onClick={()=>setTodayOpen(isOpen?null:urgency)}
               style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
               <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
-                <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{items.length}</span>
+                <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{items.length}</span>
               </div>
               <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
             </button>
             {isOpen&&(
               <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
                 {items.length===0
-                  ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>No appointments</div>
+                  ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>No appointments</div>
                   :items.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
                 }
               </div>
@@ -1569,13 +1694,13 @@ Rules:
       };
 
       return (
-        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#09090f",overflowY:"auto"}}>
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818",overflowY:"auto"}}>
           {/* ── Sticky header ── */}
-          <div style={{padding:"14px 18px 12px",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0,display:"flex",alignItems:"center",gap:9}}>
+          <div style={{padding:"14px 18px 12px",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0,display:"flex",alignItems:"center",gap:9}}>
             <span style={{fontSize:20}}>{tmpl.emoji}</span>
             <div style={{flex:1}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
-              <div style={{fontSize:11,color:"#505070",marginTop:2,fontFamily:"'DM Sans',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
+              <div style={{fontSize:11,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
             </div>
           </div>
 
@@ -1583,13 +1708,13 @@ Rules:
 
             {/* ── CTA (no bookings yet) ── */}
             {bookings.length===0&&(
-              <div style={{background:"linear-gradient(135deg,rgba(14,165,233,0.08),rgba(99,102,241,0.08))",border:`1px solid ${ac}40`,borderRadius:14,padding:"18px 16px",textAlign:"center",animation:"fadeUp 0.4s ease"}}>
+              <div style={{background:"linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08))",border:`1px solid ${ac}40`,borderRadius:14,padding:"18px 16px",textAlign:"center",animation:"fadeUp 0.4s ease"}}>
                 <div style={{fontSize:28,marginBottom:8}}>🤖</div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:15,fontWeight:800,color:"#e0e0ff",marginBottom:6}}>Your AI agent is live!</div>
-                <div style={{fontSize:13,color:"#606080",fontFamily:"'DM Sans',sans-serif",marginBottom:14,lineHeight:1.6}}>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,color:"#e0e0ff",marginBottom:6}}>Your AI agent is live!</div>
+                <div style={{fontSize:13,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginBottom:14,lineHeight:1.6}}>
                   See it in action — try booking an appointment as a customer would.
                 </div>
-                <button onClick={onTryChat} style={{padding:"11px 28px",borderRadius:10,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#6366f1)`,color:"#fff",fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:800,boxShadow:`0 0 20px ${ac}40`,transition:"all 0.2s"}}
+                <button onClick={onTryChat} style={{padding:"11px 28px",borderRadius:10,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#818cf8)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:13,fontWeight:800,boxShadow:`0 0 20px ${ac}40`,transition:"all 0.2s"}}
                   onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
                   onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
                   💬 Talk to your AI agent →
@@ -1599,12 +1724,12 @@ Rules:
 
             {/* ── TODAY section ── */}
             {bookings.length>0&&(
-              <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
-                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif",marginBottom:10}}>
+              <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:10}}>
                   📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
                 </div>
                 {todayBookings.length===0
-                  ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif"}}>No appointments today</div>
+                  ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>No appointments today</div>
                   :<div>
                     <TodayUrgencySection urgency="emergency" label="🚨 Emergency" col="#ff4444"/>
                     <TodayUrgencySection urgency="high"      label="⚡ Urgent"    col="#f97316"/>
@@ -1616,8 +1741,8 @@ Rules:
 
             {/* ── 7-DAY CALENDAR ── */}
             {bookings.length>0&&(
-              <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,padding:"12px 14px"}}>
-                <div style={{fontSize:10,fontWeight:700,color:"#404060",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'DM Sans',sans-serif"}}>7-Day Booking Calendar</div>
+              <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>7-Day Booking Calendar</div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5,marginBottom:calDay?12:0}}>
                   {days7.map(({key,label})=>{
                     const cnt=countByDay[key]||0, isToday=key==="Today", isSel=calDay===key;
@@ -1625,9 +1750,9 @@ Rules:
                       <div key={key} onClick={()=>setCalDay(isSel?null:key)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,cursor:"pointer",background:isSel?`${ac}30`:isToday?`${ac}15`:"transparent",border:isSel?`1px solid ${ac}`:isToday?`1px solid ${ac}40`:"1px solid transparent",transition:"all 0.15s"}}
                         onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background=`${ac}10`;}}
                         onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isToday?`${ac}15`:"transparent";}}>
-                        <div style={{fontSize:9,fontWeight:700,color:isSel||isToday?ac:"#505070",fontFamily:"'DM Sans',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                        <div style={{fontSize:9,fontWeight:700,color:isSel||isToday?ac:"#6b6f9a",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
                         <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?(isSel?ac:`${ac}80`):"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
-                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Syne',sans-serif"}}>{cnt||""}</span>
+                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt||""}</span>
                         </div>
                       </div>
                     );
@@ -1636,10 +1761,10 @@ Rules:
                 {calDay&&(()=>{
                   const dayBookings=[...active.filter(b=>b.day===calDay)].sort((a,b)=>timeToMin(a)-timeToMin(b));
                   return (
-                    <div style={{borderTop:"1px solid #1e1e30",paddingTop:10}}>
-                      <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'DM Sans',sans-serif"}}>{calDay}</div>
+                    <div style={{borderTop:"1px solid #222645",paddingTop:10}}>
+                      <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>{calDay}</div>
                       {dayBookings.length===0
-                        ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"8px 0"}}>No appointments</div>
+                        ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"8px 0"}}>No appointments</div>
                         :dayBookings.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking}/>)
                       }
                     </div>
@@ -1656,19 +1781,19 @@ Rules:
               const ArchiveSection = ({tab, label, col, items}) => {
                 const isTabOpen = archiveTab===tab;
                 return (
-                  <div style={{background:"#0f0f1e",border:`1px solid ${col}30`,borderRadius:12,overflow:"hidden"}}>
+                  <div style={{background:"#0c0e24",border:`1px solid ${col}30`,borderRadius:12,overflow:"hidden"}}>
                     <button onClick={()=>{setArchiveTab(isTabOpen?null:tab); setArchiveGroup(null);}}
                       style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
                       <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:13,fontWeight:700,color:col,fontFamily:"'Syne',sans-serif"}}>{label}</span>
-                        <span style={{fontSize:14,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 10px",borderRadius:12}}>{items.length}</span>
+                        <span style={{fontSize:13,fontWeight:700,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{label}</span>
+                        <span style={{fontSize:14,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 10px",borderRadius:12}}>{items.length}</span>
                       </div>
                       <span style={{fontSize:11,color:col,opacity:0.6}}>{isTabOpen?"▲":"▼"}</span>
                     </button>
                     {isTabOpen&&(
                       <div style={{borderTop:`1px solid ${col}20`,padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
                         {items.length===0
-                          ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                          ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
                           :[
                             {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
                             {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
@@ -1681,15 +1806,15 @@ Rules:
                                 <button onClick={()=>setArchiveGroup(isOpen?null:`${tab}-${key}`)}
                                   style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${gc}15`:"transparent",border:"none",cursor:"pointer"}}>
                                   <div style={{display:"flex",alignItems:"center",gap:8}}>
-                                    <span style={{fontSize:12,fontWeight:700,color:gc,fontFamily:"'DM Sans',sans-serif"}}>{gl}</span>
-                                    <span style={{fontSize:12,fontWeight:800,color:gc,background:`${gc}20`,padding:"1px 8px",borderRadius:10,fontFamily:"'Syne',sans-serif"}}>{grp.length}</span>
+                                    <span style={{fontSize:12,fontWeight:700,color:gc,fontFamily:"'Inter',sans-serif"}}>{gl}</span>
+                                    <span style={{fontSize:12,fontWeight:800,color:gc,background:`${gc}20`,padding:"1px 8px",borderRadius:10,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{grp.length}</span>
                                   </div>
                                   <span style={{fontSize:10,color:gc,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
                                 </button>
                                 {isOpen&&(
                                   <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${gc}08`}}>
                                     {grp.length===0
-                                      ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                                      ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
                                       :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} showRestore={true}/>)
                                     }
                                   </div>
@@ -1707,17 +1832,17 @@ Rules:
               return (
                 <>
                   {/* Pending */}
-                  <div style={{background:"#0f0f1e",border:"1px solid #1e1e30",borderRadius:12,overflow:"hidden"}}>
+                  <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,overflow:"hidden"}}>
                     <button onClick={()=>{setPendingOpen(o=>!o); setPendingGroup(null);}}
                       style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
                       <div style={{display:"flex",alignItems:"center",gap:10}}>
-                        <span style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Syne',sans-serif"}}>Pending</span>
-                        <span style={{fontSize:16,fontWeight:800,color:"#60a5fa",fontFamily:"'Syne',sans-serif",background:"#60a5fa20",padding:"1px 10px",borderRadius:12}}>{active.length}</span>
+                        <span style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Pending</span>
+                        <span style={{fontSize:16,fontWeight:800,color:"#60a5fa",fontFamily:"'Plus Jakarta Sans',sans-serif",background:"#60a5fa20",padding:"1px 10px",borderRadius:12}}>{active.length}</span>
                       </div>
-                      <span style={{fontSize:11,color:"#505070"}}>{pendingOpen?"▲":"▼"}</span>
+                      <span style={{fontSize:11,color:"#6b6f9a"}}>{pendingOpen?"▲":"▼"}</span>
                     </button>
                     {pendingOpen&&(
-                      <div style={{borderTop:"1px solid #1e1e30",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                      <div style={{borderTop:"1px solid #222645",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
                         {[
                           {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
                           {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
@@ -1730,15 +1855,15 @@ Rules:
                               <button onClick={()=>setPendingGroup(isOpen?null:key)}
                                 style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
                                 <div style={{display:"flex",alignItems:"center",gap:8}}>
-                                  <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'DM Sans',sans-serif"}}>{label}</span>
-                                  <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Syne',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{grp.length}</span>
+                                  <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                                  <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{grp.length}</span>
                                 </div>
                                 <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
                               </button>
                               {isOpen&&(
                                 <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
                                   {grp.length===0
-                                    ?<div style={{fontSize:12,color:"#404060",fontFamily:"'DM Sans',sans-serif",padding:"6px 2px"}}>None</div>
+                                    ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
                                     :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
                                   }
                                 </div>
@@ -1761,7 +1886,7 @@ Rules:
 
             {/* Book another */}
             {bookings.length>0&&(
-              <button onClick={onTryChat} style={{padding:"10px",borderRadius:10,border:`1px solid ${ac}30`,background:"transparent",cursor:"pointer",color:ac,fontFamily:"'DM Sans',sans-serif",fontSize:12,fontWeight:600,transition:"all 0.2s"}}
+              <button onClick={onTryChat} style={{padding:"10px",borderRadius:10,border:`1px solid ${ac}30`,background:"transparent",cursor:"pointer",color:ac,fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:600,transition:"all 0.2s"}}
                 onMouseEnter={e=>e.currentTarget.style.background=ac+"10"}
                 onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
                 + Book another appointment
@@ -1786,7 +1911,7 @@ Rules:
       const [newBookingId, setNewBookingId] = useState(null);
       const isDesktop = useIsDesktop();
       const t = T[lang]||T.en;
-      const ac = (TEMPLATES[settings.businessType]||{color:settings.customColor||'#0ea5e9'}).color;
+      const ac = (TEMPLATES[settings.businessType]||{color:settings.customColor||'#38bdf8'}).color;
 
       const handleLaunch = (s) => { setSettings(s); setScreen("main"); setShowChat(false); };
 
@@ -1820,17 +1945,17 @@ Rules:
             {/* top bar */}
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"7px 20px",flexShrink:0}}>
               <div style={{display:"flex",alignItems:"center",gap:14}}>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.01em"}}>Annie<span style={{color:ac}}> the Agent</span></div>
-                <div style={{width:1,height:16,background:"#1e1e30"}}/>
-                <button onClick={()=>setScreen("setup")} style={{fontSize:11,color:"#505070",fontFamily:"'DM Sans',sans-serif",background:"none",border:"none",cursor:"pointer",padding:0}}
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.01em"}}>Annie<span style={{color:ac}}> the Agent</span></div>
+                <div style={{width:1,height:16,background:"#222645"}}/>
+                <button onClick={()=>setScreen("setup")} style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",background:"none",border:"none",cursor:"pointer",padding:0}}
                   onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
-                  onMouseLeave={e=>e.currentTarget.style.color="#505070"}>
+                  onMouseLeave={e=>e.currentTarget.style.color="#6b6f9a"}>
                   ← Change business type
                 </button>
               </div>
               <div style={{display:"flex",alignItems:"center",gap:10}}>
                 <LangToggle lang={lang} setLang={setLang} ac={ac}/>
-                <button onClick={()=>setShowSettings(s=>!s)} style={{padding:"5px 14px",borderRadius:10,border:`1px solid ${showSettings?ac+"80":"#252535"}`,background:showSettings?`${ac}18`:"transparent",color:showSettings?ac:"#606080",cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                <button onClick={()=>setShowSettings(s=>!s)} style={{padding:"5px 14px",borderRadius:10,border:`1px solid ${showSettings?ac+"80":"#2a2d4a"}`,background:showSettings?`${ac}18`:"transparent",color:showSettings?ac:"#757aa8",cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:5,transition:"all 0.2s"}}>
                   <Ico name={showSettings?"grid":"cog"} size={13}/>
                   {showSettings ? t.backDash : t.openSettings}
                 </button>
@@ -1850,11 +1975,11 @@ Rules:
               {/* RIGHT: chat panel — slides in when active */}
               {showChat&&(
                 <div style={{width:"44%",display:"flex",flexDirection:"column",overflow:"hidden",animation:"slideIn 0.35s ease"}}>
-                  <div style={{padding:"10px 16px",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                    <span style={{fontSize:10,fontWeight:700,color:"#505070",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>💬 Customer View</span>
-                    <button onClick={()=>setShowChat(false)} style={{background:"none",border:"none",color:"#505070",cursor:"pointer",fontSize:11,fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:4}}
+                  <div style={{padding:"10px 16px",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <span style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>💬 Customer View</span>
+                    <button onClick={()=>setShowChat(false)} style={{background:"none",border:"none",color:"#6b6f9a",cursor:"pointer",fontSize:11,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4}}
                       onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
-                      onMouseLeave={e=>e.currentTarget.style.color="#505070"}>
+                      onMouseLeave={e=>e.currentTarget.style.color="#6b6f9a"}>
                       ← Back to dashboard
                     </button>
                   </div>
@@ -1873,19 +1998,19 @@ Rules:
       return (
         <div style={{maxWidth:430,margin:"0 auto",height:"100dvh",display:"flex",flexDirection:"column"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"9px 14px",flexShrink:0}}>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:"#fff"}}>Annie<span style={{color:ac}}> the Agent</span></div>
+            <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:16,fontWeight:800,color:"#fff"}}>Annie<span style={{color:ac}}> the Agent</span></div>
             <div style={{display:"flex",gap:8,alignItems:"center"}}>
               <LangToggle lang={lang} setLang={setLang} ac={ac}/>
-              <button onClick={()=>setScreen("setup")} style={{fontSize:10,color:"#505070",fontFamily:"'DM Sans',sans-serif",background:"none",border:"1px solid #252535",borderRadius:8,cursor:"pointer",padding:"4px 8px"}}>← Setup</button>
+              <button onClick={()=>setScreen("setup")} style={{fontSize:10,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",background:"none",border:"1px solid #2a2d4a",borderRadius:8,cursor:"pointer",padding:"4px 8px"}}>← Setup</button>
             </div>
           </div>
           {/* nav tabs */}
-          <div style={{display:"flex",background:"#0d0d18",borderBottom:"1px solid #1e1e30",flexShrink:0}}>
+          <div style={{display:"flex",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
             {[{k:"dashboard",l:t.navDashboard,i:"grid"},{k:"settings",l:t.navSettings,i:"cog"}].map(tab=>{
               const active=mobileView===tab.k;
               return (
                 <button key={tab.k} onClick={()=>{setShowChat(false);setShowSettings(tab.k==="settings");}}
-                  style={{flex:1,padding:"10px 4px",border:"none",background:"transparent",cursor:"pointer",color:active?ac:"#505070",fontSize:10,fontWeight:600,borderBottom:active?`2px solid ${ac}`:"2px solid transparent",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"'DM Sans',sans-serif",letterSpacing:"0.05em",textTransform:"uppercase",transition:"color 0.2s"}}>
+                  style={{flex:1,padding:"10px 4px",border:"none",background:"transparent",cursor:"pointer",color:active?ac:"#6b6f9a",fontSize:10,fontWeight:600,borderBottom:active?`2px solid ${ac}`:"2px solid transparent",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em",textTransform:"uppercase",transition:"color 0.2s"}}>
                   <Ico name={tab.i} size={15}/>{tab.l}
                   {tab.k==="dashboard"&&bookings.length>0&&!showChat&&<span style={{position:"absolute",marginTop:-8,marginLeft:16,width:14,height:14,background:ac,borderRadius:"50%",fontSize:8,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700}}>{bookings.length}</span>}
                 </button>

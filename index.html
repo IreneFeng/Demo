@@ -5,25 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Annie the Agent — AI Booking for Home Service Businesses</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg: #06060f;
-      --bg2: #0c0c1a;
-      --bg3: #0f0f1e;
-      --border: #1a1a2e;
-      --accent: #0ea5e9;
-      --accent2: #6366f1;
+      --bg: #05071a;
+      --bg2: #080a1f;
+      --bg3: #0c0e24;
+      --border: #1e2240;
+      --accent: #38bdf8;
+      --accent2: #818cf8;
       --green: #22c55e;
       --red: #ff4444;
       --orange: #f97316;
-      --text: #e8e8f8;
-      --muted: #505070;
-      --muted2: #2a2a40;
+      --text: #f0f2ff;
+      --muted: #7c82b0;
+      --muted2: #232645;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
     /* Noise overlay */
     body::before {
@@ -37,16 +37,16 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 18px 48px;
-      background: rgba(6,6,15,0.85); backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(5,7,26,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(56,189,248,0.12);
     }
-    .nav-logo { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
+    .nav-logo { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #fff; text-decoration: none; }
     .nav-logo span { color: var(--accent); }
     .nav-links { display: flex; gap: 32px; list-style: none; }
-    .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--text); }
-    .nav-cta { padding: 9px 20px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; font-family: 'Syne', sans-serif; transition: all 0.2s; box-shadow: 0 0 20px rgba(14,165,233,0.3); }
-    .nav-cta:hover { background: #0284c7; box-shadow: 0 0 30px rgba(14,165,233,0.5); }
+    .nav-links a { color: #8890b8; text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; letter-spacing: -0.01em; }
+    .nav-links a:hover { color: #f0f2ff; }
+    .nav-cta { padding: 9px 20px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s; box-shadow: 0 0 20px rgba(56,189,248,0.38); }
+    .nav-cta:hover { background: #0284c7; box-shadow: 0 0 30px rgba(56,189,248,0.55); }
 
     /* ── SECTIONS ── */
     section { position: relative; z-index: 1; }
@@ -55,19 +55,20 @@
     .hero {
       min-height: 100vh; display: flex; align-items: center;
       padding: 120px 48px 80px;
-      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(14,165,233,0.07) 0%, transparent 70%),
-                  radial-gradient(ellipse 60% 50% at 20% 80%, rgba(99,102,241,0.06) 0%, transparent 70%);
+      background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(56,189,248,0.16) 0%, transparent 65%),
+                  radial-gradient(ellipse 60% 50% at 20% 80%, rgba(129,140,248,0.13) 0%, transparent 65%),
+                  radial-gradient(ellipse 40% 40% at 80% 80%, rgba(56,189,248,0.06) 0%, transparent 60%);
     }
     .hero-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; width: 100%; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.3); border-radius: 20px; font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 24px; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.38); border-radius: 20px; font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 24px; }
     .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-    h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; color: #fff; margin-bottom: 20px; }
+    h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(36px, 4vw, 56px); font-weight: 800; line-height: 1.1; color: #fff; margin-bottom: 20px; }
     h1 .accent { color: var(--accent); }
-    .hero-sub { font-size: 18px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; max-width: 480px; }
+    .hero-sub { font-size: 18px; color: #9096c8; line-height: 1.75; margin-bottom: 36px; max-width: 480px; font-weight: 400; letter-spacing: -0.01em; }
     .hero-btns { display: flex; gap: 14px; align-items: center; margin-bottom: 28px; flex-wrap: wrap; }
-    .btn-primary { padding: 14px 28px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; font-family: 'Syne', sans-serif; box-shadow: 0 0 30px rgba(14,165,233,0.35); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(14,165,233,0.5); }
+    .btn-primary { padding: 14px 28px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; font-family: 'Plus Jakarta Sans', sans-serif; box-shadow: 0 0 30px rgba(56,189,248,0.42); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(56,189,248,0.55); }
     .btn-ghost { padding: 14px 28px; border: 1px solid var(--border); color: var(--muted); border-radius: 10px; font-size: 15px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
     .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
     .hero-trust { font-size: 12px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
@@ -78,68 +79,70 @@
     .avatar-glow {
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
       width: 320px; height: 420px; border-radius: 50%;
-      background: radial-gradient(ellipse, rgba(14,165,233,0.18) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(56,189,248,0.25) 0%, transparent 70%);
       filter: blur(20px);
     }
-    .avatar-img { position: relative; z-index: 2; width: 340px; max-width: 100%; filter: drop-shadow(0 20px 60px rgba(14,165,233,0.2)); margin-top: -20px; }
+    .avatar-img { position: relative; z-index: 2; width: 340px; max-width: 100%; filter: drop-shadow(0 20px 60px rgba(56,189,248,0.28)); margin-top: -20px; }
     .chat-bubble {
       position: relative; z-index: 3;
-      background: rgba(15,15,30,0.95); border: 1px solid rgba(14,165,233,0.4);
+      background: rgba(15,15,30,0.95); border: 1px solid rgba(56,189,248,0.48);
       border-radius: 16px; padding: 12px 16px; backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(14,165,233,0.1);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 20px rgba(56,189,248,0.15);
       animation: float 4s ease-in-out infinite;
       max-width: 260px; width: 100%;
       align-self: flex-start; margin-left: 20px;
     }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-    .chat-bubble-name { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; font-family: 'Syne', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+    .chat-bubble-name { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; font-family: 'Plus Jakarta Sans', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
     .chat-bubble-text { font-size: 13px; color: var(--text); line-height: 1.5; }
     .chat-bubble-stat { margin-top: 8px; display: flex; gap: 8px; }
-    .stat-chip { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif; }
+    .stat-chip { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; }
 
     /* ── TRUST BAR ── */
     .trust-bar { padding: 18px 48px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--bg2); }
-    .trust-bar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--muted); flex-wrap: wrap; justify-content: center; }
+    .trust-bar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #8890b8; flex-wrap: wrap; justify-content: center; font-weight: 500; }
     .trust-bar strong { color: var(--muted); font-weight: 600; margin-right: 4px; }
     .trust-sep { color: var(--muted2); }
 
     /* ── PROBLEM/SOLUTION ── */
     .problem-solution { padding: 100px 48px; }
     .ps-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-    .ps-col { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 36px; }
-    .ps-col.good { border-color: rgba(14,165,233,0.3); background: linear-gradient(135deg, rgba(14,165,233,0.05), rgba(99,102,241,0.05)); }
-    .ps-header { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 24px; }
-    .ps-col.bad .ps-header { color: var(--muted); }
-    .ps-col.good .ps-header { color: var(--accent); }
-    .ps-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; font-size: 14px; line-height: 1.6; color: var(--muted); }
-    .ps-col.good .ps-item { color: var(--text); }
-    .ps-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
-    .ps-col.bad .ps-icon { background: rgba(255,68,68,0.15); }
-    .ps-col.good .ps-icon { background: rgba(34,197,94,0.15); }
+    .ps-col { border-radius: 20px; padding: 36px; }
+    .ps-col.bad { background: #0a0c20; border: 1px solid #1a1d38; }
+    .ps-col.good { background: linear-gradient(135deg, rgba(56,189,248,0.09), rgba(129,140,248,0.09)); border: 1px solid rgba(56,189,248,0.42); box-shadow: 0 0 80px rgba(56,189,248,0.1), inset 0 1px 0 rgba(56,189,248,0.2); }
+    .ps-header { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; margin-bottom: 24px; }
+    .ps-col.bad .ps-header { color: #6b6f9a; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+    .ps-col.good .ps-header { color: var(--accent); font-size: 22px; letter-spacing: -0.02em; text-shadow: 0 0 30px rgba(56,189,248,0.45); }
+    .ps-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; line-height: 1.65; }
+    .ps-col.bad .ps-item { font-size: 14px; color: #55597a; font-weight: 400; text-decoration: line-through; text-decoration-color: #ff444460; text-decoration-thickness: 1.5px; }
+    .ps-col.good .ps-item { font-size: 15px; color: #ccd2f0; font-weight: 500; }
+    .ps-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; font-weight: 700; }
+    .ps-col.bad .ps-icon { background: rgba(255,68,68,0.1); color: #ff4444; opacity: 0.5; }
+    .ps-col.good .ps-icon { background: rgba(34,197,94,0.18); color: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,0.2); }
 
     /* ── HOW IT WORKS ── */
     .how { padding: 100px 48px; background: var(--bg2); }
     .how-inner { max-width: 1200px; margin: 0 auto; }
-    .section-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
-    .section-title { font-family: 'Syne', sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 800; color: #fff; margin-bottom: 16px; }
-    .section-sub { font-size: 16px; color: var(--muted); max-width: 560px; line-height: 1.7; margin-bottom: 60px; }
+    .section-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 12px; text-shadow: 0 0 20px rgba(56,189,248,0.5); }
+    .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(28px, 3vw, 40px); font-weight: 800; color: #fff; margin-bottom: 16px; }
+    .section-sub { font-size: 16px; color: #9096c0; max-width: 560px; line-height: 1.7; margin-bottom: 60px; font-weight: 400; }
     .steps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; position: relative; }
     .steps::before { content: ''; position: absolute; top: 32px; left: calc(16.66% + 24px); right: calc(16.66% + 24px); height: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2)); opacity: 0.3; }
     .step { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 28px; position: relative; transition: border-color 0.2s; }
-    .step:hover { border-color: rgba(14,165,233,0.4); }
-    .step-num { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 20px; }
-    .step h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; }
-    .step p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+    .step:hover { border-color: rgba(56,189,248,0.48); }
+    .step-num { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 20px; }
+    .step h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .step p { font-size: 14px; color: #8890b8; line-height: 1.7; font-weight: 400; }
 
     /* ── FEATURES ── */
     .features { padding: 100px 48px; }
     .features-inner { max-width: 1200px; margin: 0 auto; }
     .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
     .feature-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: all 0.2s; }
-    .feature-card:hover { border-color: rgba(14,165,233,0.3); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+    .feature-card:hover { border-color: rgba(56,189,248,0.38); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
     .feature-icon { font-size: 28px; margin-bottom: 14px; }
-    .feature-card h3 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-    .feature-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .feature-card h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .feature-card p { font-size: 13px; color: #8890b8; line-height: 1.7; font-weight: 400; }
 
     /* ── PRICING ── */
     .pricing { padding: 100px 48px; background: var(--bg2); }
@@ -147,26 +150,26 @@
     .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 60px; }
     .price-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 36px; position: relative; transition: all 0.2s; }
     .price-card:hover { transform: translateY(-4px); }
-    .price-card.featured { border-color: rgba(14,165,233,0.5); background: linear-gradient(135deg, rgba(14,165,233,0.08), rgba(99,102,241,0.08)); box-shadow: 0 0 60px rgba(14,165,233,0.12); }
-    .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 10px; font-family: 'Syne', sans-serif; white-space: nowrap; }
+    .price-card.featured { border-color: rgba(56,189,248,0.55); background: linear-gradient(135deg, rgba(56,189,248,0.13), rgba(129,140,248,0.13)); box-shadow: 0 0 60px rgba(56,189,248,0.18); }
+    .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 14px; border-radius: 10px; font-family: 'Plus Jakarta Sans', sans-serif; white-space: nowrap; }
     .price-tier { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
-    .price-amount { font-family: 'Syne', sans-serif; font-size: 44px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px; }
+    .price-amount { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 44px; font-weight: 800; color: #fff; line-height: 1; margin-bottom: 4px; }
     .price-amount span { font-size: 18px; color: var(--muted); font-weight: 400; }
-    .price-desc { font-size: 13px; color: var(--muted); margin-bottom: 28px; margin-top: 6px; }
+    .price-desc { font-size: 13px; color: #8890b8; margin-bottom: 28px; margin-top: 6px; font-weight: 400; }
     .price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-    .price-features li { font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .price-features li { font-size: 13.5px; color: #c8cef0; display: flex; align-items: center; gap: 8px; font-weight: 500; }
     .price-features li::before { content: '✓'; color: var(--green); font-weight: 700; font-size: 12px; }
-    .btn-price { display: block; width: 100%; padding: 13px; border-radius: 10px; text-align: center; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
+    .btn-price { display: block; width: 100%; padding: 13px; border-radius: 10px; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.2s; }
     .btn-price-outline { border: 1px solid var(--border); color: var(--muted); }
     .btn-price-outline:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-price-filled { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 24px rgba(14,165,233,0.3); }
-    .btn-price-filled:hover { box-shadow: 0 0 36px rgba(14,165,233,0.5); transform: translateY(-1px); }
+    .btn-price-filled { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 0 24px rgba(56,189,248,0.38); }
+    .btn-price-filled:hover { box-shadow: 0 0 36px rgba(56,189,248,0.55); transform: translateY(-1px); }
     .pricing-note { text-align: center; margin-top: 28px; font-size: 13px; color: var(--muted); }
 
     /* ── FINAL CTA ── */
     .final-cta {
       padding: 120px 48px;
-      background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(14,165,233,0.1) 0%, rgba(99,102,241,0.07) 50%, transparent 100%);
+      background: radial-gradient(ellipse 80% 80% at 50% 50%, rgba(56,189,248,0.15) 0%, rgba(129,140,248,0.11) 50%, transparent 100%);
       text-align: center; position: relative; overflow: hidden;
     }
     .final-cta::before {
@@ -175,14 +178,14 @@
       pointer-events: none;
     }
     .final-cta-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
-    .final-cta h2 { font-family: 'Syne', sans-serif; font-size: clamp(32px, 4vw, 52px); font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.1; }
-    .final-cta p { font-size: 17px; color: var(--muted); margin-bottom: 40px; line-height: 1.7; }
+    .final-cta h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(32px, 4vw, 52px); font-weight: 800; color: #fff; margin-bottom: 16px; line-height: 1.1; }
+    .final-cta p { font-size: 17px; color: #9096c0; margin-bottom: 40px; line-height: 1.7; font-weight: 400; }
     .final-cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
     /* ── FOOTER ── */
     footer { padding: 40px 48px; border-top: 1px solid var(--border); background: var(--bg); }
     .footer-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-    .footer-logo { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; color: #fff; }
+    .footer-logo { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #fff; }
     .footer-logo span { color: var(--accent); }
     .footer-links { display: flex; gap: 24px; }
     .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
@@ -240,7 +243,7 @@
         <span>No credit card</span>
         <span>Any home service business</span>
       </div>
-      <div style="margin-top:16px;padding:12px 16px;background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.25);border-radius:10px;font-size:13px;color:#a0c4d8;line-height:1.6;">
+      <div style="margin-top:16px;padding:12px 16px;background:rgba(56,189,248,0.13);border:1px solid rgba(14,165,233,0.25);border-radius:10px;font-size:13px;color:#a0c4d8;line-height:1.6;">
         🔑 To try the live demo, contact the developer for a free test API key: <span style="color:var(--accent);font-weight:600;letter-spacing:0.02em;">dkellykennedy&#64;gmail&#46;com</span></div>
     </div>
     <div class="hero-visual fade-up" style="transition-delay:0.15s">
@@ -272,53 +275,82 @@
 
 <!-- PROBLEM / SOLUTION -->
 <section class="problem-solution" id="features">
+  <div style="max-width:1200px;margin:0 auto 36px;text-align:center;padding:0 48px;">
+    <div class="section-label fade-up">Why Annie?</div>
+    <div class="section-title fade-up" style="margin-bottom:8px;">Stop losing jobs to missed calls.</div>
+    <div style="font-size:16px;color:#9096c0;font-family:'Inter',sans-serif;font-weight:400;" class="fade-up">Every unanswered call is a job going to your competitor. Annie makes sure that never happens.</div>
+  </div>
   <div class="ps-inner">
     <div class="ps-col bad fade-up">
-      <div class="ps-header">😮‍💨 Without Annie</div>
+      <div class="ps-header">😮‍💨 Without Annie <span style="font-size:10px;font-weight:600;color:#ff444470;background:rgba(255,68,68,0.1);padding:2px 8px;border-radius:6px;letter-spacing:0.05em;vertical-align:middle;">OLD WAY</span></div>
+
       <div class="ps-item">
         <div class="ps-icon">✕</div>
-        <span>You miss calls while on a job site — customers move on</span>
+        <span>Miss a call on the job site
+          <span style="display:block;font-size:11px;font-weight:700;color:#ff444480;margin-top:3px;text-decoration:none;">→ 85% never call back. That's ~$1,200 gone.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✕</div>
-        <span>Customers text at midnight expecting an instant answer</span>
+        <span>No answer after hours or on weekends
+          <span style="display:block;font-size:11px;font-weight:700;color:#ff444480;margin-top:3px;text-decoration:none;">→ 62% of missed callers go straight to a competitor.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✕</div>
-        <span>Scheduling back-and-forth eats hours of your week</span>
+        <span>Voicemail as a backup plan
+          <span style="display:block;font-size:11px;font-weight:700;color:#ff444480;margin-top:3px;text-decoration:none;">→ 80% hang up without leaving a message.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✕</div>
-        <span>Emergency jobs get buried in a full voicemail box</span>
+        <span>Scheduling back-and-forth by phone &amp; text
+          <span style="display:block;font-size:11px;font-weight:700;color:#ff444480;margin-top:3px;text-decoration:none;">→ Avg. 5+ hours/week lost to manual booking.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✕</div>
-        <span>Out-of-area customers waste your time before you realize</span>
+        <span>All of the above, year after year
+          <span style="display:block;font-size:11px;font-weight:700;color:#ff444480;margin-top:3px;text-decoration:none;">→ Avg. small business loses $126,000/yr to missed calls.</span>
+        </span>
       </div>
     </div>
+
     <div class="ps-col good fade-up" style="transition-delay:0.1s">
-      <div class="ps-header">✨ With Annie</div>
+      <div class="ps-header">✨ With Annie <span style="font-size:10px;font-weight:700;color:#22c55e;background:rgba(34,197,94,0.12);padding:2px 8px;border-radius:6px;letter-spacing:0.05em;vertical-align:middle;">NOW</span></div>
+
       <div class="ps-item">
         <div class="ps-icon">✓</div>
-        <span>Annie responds instantly, 24/7 — even when you can't pick up</span>
+        <span>Annie responds instantly, 24/7
+          <span style="display:block;font-size:11px;font-weight:700;color:#22c55e;margin-top:3px;">→ Every customer gets an answer in seconds.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✓</div>
-        <span>Customers chat naturally and get booked in minutes</span>
+        <span>Always on — nights, weekends, holidays
+          <span style="display:block;font-size:11px;font-weight:700;color:#22c55e;margin-top:3px;">→ Capture the 15–20% of bookings that happen after hours.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✓</div>
-        <span>Annie asks the right questions and fills your calendar automatically</span>
+        <span>No voicemail, no drop-offs
+          <span style="display:block;font-size:11px;font-weight:700;color:#22c55e;margin-top:3px;">→ Annie chats naturally until the job is booked.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✓</div>
-        <span>Emergency requests are flagged, prioritized, and shown instantly</span>
+        <span>Fully automated scheduling
+          <span style="display:block;font-size:11px;font-weight:700;color:#22c55e;margin-top:3px;">→ Zero back-and-forth. Booking confirmed in minutes.</span>
+        </span>
       </div>
       <div class="ps-item">
         <div class="ps-icon">✓</div>
-        <span>ZIP code enforcement means only customers you can serve get booked</span>
+        <span>ROI from day one
+          <span style="display:block;font-size:11px;font-weight:700;color:#22c55e;margin-top:3px;">→ One saved job pays for Annie for months.</span>
+        </span>
       </div>
     </div>
+  </div>
   </div>
 </section>
 
@@ -407,7 +439,7 @@
         <div class="price-tier">Starter</div>
         <div class="price-amount">$99<span>/mo</span></div>
         <div class="price-desc">Everything you need to start winning jobs</div>
-        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);font-size:11px;font-weight:700;color:#22c55e;margin-bottom:16px;font-family:'Syne',sans-serif;">✦ Available Now</div>
+        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);font-size:11px;font-weight:700;color:#22c55e;margin-bottom:16px;font-family:'Plus Jakarta Sans', sans-serif;">✦ Available Now</div>
         <ul class="price-features">
           <li>1 business</li>
           <li>Up to 150 bookings/month</li>
@@ -427,7 +459,7 @@
         <div class="price-tier">Pro</div>
         <div class="price-amount">$199<span>/mo</span></div>
         <div class="price-desc">AI on the phone, in the calendar, everywhere</div>
-        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(14,165,233,0.12);border:1px solid rgba(14,165,233,0.3);font-size:11px;font-weight:700;color:var(--accent);margin-bottom:16px;font-family:'Syne',sans-serif;">⚡ Phase 2 — Coming Soon</div>
+        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(56,189,248,0.18);border:1px solid rgba(56,189,248,0.38);font-size:11px;font-weight:700;color:var(--accent);margin-bottom:16px;font-family:'Plus Jakarta Sans', sans-serif;">⚡ Phase 2 — Coming Soon</div>
         <ul class="price-features">
           <li>Everything in Starter</li>
           <li>Unlimited bookings</li>
@@ -437,7 +469,7 @@
           <li style="color:var(--accent);font-weight:600;">☎️ Dedicated business phone number</li>
           <li>+ $1 per booking after 300</li>
         </ul>
-        <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Join Waitlist',2000);" class="btn-price btn-price-filled" style="cursor:pointer;font-family:'Syne',sans-serif;">Join Waitlist</button>
+        <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Join Waitlist',2000);" class="btn-price btn-price-filled" style="cursor:pointer;font-family:'Plus Jakarta Sans', sans-serif;">Join Waitlist</button>
       </div>
 
       <!-- BUSINESS -->
@@ -445,7 +477,7 @@
         <div class="price-tier">Business</div>
         <div class="price-amount">$399<span>/mo</span></div>
         <div class="price-desc">Your whole team, fully automated</div>
-        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:16px;font-family:'Syne',sans-serif;">🚀 Phase 3 — Coming Soon</div>
+        <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:rgba(129,140,248,0.17);border:1px solid rgba(99,102,241,0.3);font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:16px;font-family:'Plus Jakarta Sans', sans-serif;">🚀 Phase 3 — Coming Soon</div>
         <ul class="price-features">
           <li>Everything in Pro</li>
           <li style="color:#a78bfa;font-weight:600;">👷 Up to 10 contractors</li>
@@ -456,7 +488,7 @@
           <li>Dedicated onboarding call</li>
           <li>+ $0.75 per booking after 500</li>
         </ul>
-        <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Contact Us',2000);" class="btn-price btn-price-outline" style="cursor:pointer;font-family:'Syne',sans-serif;">Contact Us</button>
+        <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Contact Us',2000);" class="btn-price btn-price-outline" style="cursor:pointer;font-family:'Plus Jakarta Sans', sans-serif;">Contact Us</button>
       </div>
 
     </div>
@@ -471,7 +503,7 @@
     <p>Annie is live and ready to demo right now. See exactly how it works for your business — no setup required.</p>
     <div class="final-cta-btns">
       <a href="demo.html" class="btn-primary" style="font-size:16px;padding:16px 36px;">Launch Annie Demo →</a>
-      <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Contact Us',2000);" class="btn-ghost" style="font-size:16px;padding:16px 36px;cursor:pointer;font-family:'Syne',sans-serif;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;transition:all 0.2s;">Contact Us</button>
+      <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com');this.textContent='Email copied! ✓';setTimeout(()=>this.textContent='Contact Us',2000);" class="btn-ghost" style="font-size:16px;padding:16px 36px;cursor:pointer;font-family:'Plus Jakarta Sans', sans-serif;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;transition:all 0.2s;">Contact Us</button>
     </div>
   </div>
 </section>
