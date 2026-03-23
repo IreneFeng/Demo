@@ -1031,7 +1031,8 @@ Rules:
         const d=new Date(now); d.setDate(now.getDate()+i);
         return {
           key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
-          label: i===0?"Today":i===1?"Tmrw":`${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          label: `${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          sub: i===0?"Today":i===1?"Tmrw":null,
           date: d,
         };
       });
@@ -1114,11 +1115,12 @@ Rules:
                   const cnt = countByDay[key]||0;
                   const isToday = key==="Today";
                   return (
-                    <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
-                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#52558a",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                    <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
+                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#8890b8",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
                       <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
                         <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt}</span>
                       </div>
+                      {sub&&<div style={{fontSize:8,fontWeight:700,color:isToday?ac:"#f97316",fontFamily:"'Inter',sans-serif",letterSpacing:"0.04em"}}>{sub}</div>}
                     </div>
                   );
                 })}
@@ -1138,7 +1140,17 @@ Rules:
                     <Badge level={b.urgency||"normal"} lang={lang}/>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
-                    <span>🕐 {b.day} · {b.time}</span>
+                    <span>🕐 {(()=>{
+                      const now=new Date();
+                      const tom=new Date(now); tom.setDate(now.getDate()+1);
+                      const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                      const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                      if(b.day==="Today") return `Today, ${months[now.getMonth()]} ${now.getDate()}`;
+                      if(b.day==="Tomorrow") return `${days[tom.getDay()]}, ${months[tom.getMonth()]} ${tom.getDate()}`;
+                      return b.day;
+                    })()} · {b.time}</span>
+                    {b.day==="Tomorrow"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#f97316",background:"rgba(249,115,22,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>⏰ Tomorrow</span>}
+                    {b.day==="Today"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>📅 Today</span>}
                     {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
                     {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
                   </div>
@@ -1544,7 +1556,17 @@ Rules:
             <Badge level={b.urgency||"normal"} lang={lang}/>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
-            <span>🕐 {b.day} · {b.time}</span>
+            <span>🕐 {(()=>{
+              const now=new Date();
+              const tom=new Date(now); tom.setDate(now.getDate()+1);
+              const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+              const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+              if(b.day==="Today") return `Today, ${months[now.getMonth()]} ${now.getDate()}`;
+              if(b.day==="Tomorrow") return `${days[tom.getDay()]}, ${months[tom.getMonth()]} ${tom.getDate()}`;
+              return b.day;
+            })()} · {b.time}</span>
+            {b.day==="Tomorrow"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#f97316",background:"rgba(249,115,22,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>⏰ Tomorrow</span>}
+            {b.day==="Today"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>📅 Today</span>}
             {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
             {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
           </div>
@@ -1584,7 +1606,8 @@ Rules:
         const d=new Date(now); d.setDate(now.getDate()+i);
         return {
           key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
-          label: i===0?"Today":i===1?"Tmrw":`${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          label: `${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          sub: i===0?"Today":i===1?"Tmrw":null,
         };
       });
       const active = bookings.filter(b=>b.status!=="completed"&&b.status!=="cancelled");
@@ -1696,16 +1719,17 @@ Rules:
               <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
                 <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>7-Day Booking Calendar</div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5,marginBottom:calDay?12:0}}>
-                  {days7.map(({key,label})=>{
+                  {days7.map(({key,label,sub})=>{
                     const cnt=countByDay[key]||0, isToday=key==="Today", isSel=calDay===key;
                     return (
-                      <div key={key} onClick={()=>setCalDay(isSel?null:key)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"8px 4px",borderRadius:10,cursor:"pointer",background:isSel?`${ac}30`:isToday?`${ac}15`:"transparent",border:isSel?`1px solid ${ac}`:isToday?`1px solid ${ac}40`:"1px solid transparent",transition:"all 0.15s"}}
+                      <div key={key} onClick={()=>setCalDay(isSel?null:key)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",borderRadius:10,cursor:"pointer",background:isSel?`${ac}30`:isToday?`${ac}15`:"transparent",border:isSel?`1px solid ${ac}`:isToday?`1px solid ${ac}40`:"1px solid transparent",transition:"all 0.15s"}}
                         onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background=`${ac}10`;}}
                         onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isToday?`${ac}15`:"transparent";}}>
                         <div style={{fontSize:9,fontWeight:700,color:isSel||isToday?ac:"#6b6f9a",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
                         <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?(isSel?ac:`${ac}80`):"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
                           <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt||""}</span>
                         </div>
+                        {sub&&<div style={{fontSize:8,fontWeight:700,color:isToday?ac:"#f97316",fontFamily:"'Inter',sans-serif",letterSpacing:"0.04em"}}>{sub}</div>}
                       </div>
                     );
                   })}
