@@ -33,8 +33,8 @@
   <script type="text/babel">
     const { useState, useRef, useEffect } = React;
 
-    // API key stored in module scope — set via KeyEntry screen
-    let ANTHROPIC_API_KEY = "";
+    // API calls go through Cloudflare Worker proxy — no key needed in browser
+    const WORKER_URL = "https://annie-proxy.irene901230.workers.dev"; // e.g. https://annie-proxy.yourname.workers.dev
 
     const URGENCY = { EMERGENCY: "emergency", HIGH: "high", NORMAL: "normal" };
     const STAGE = { PROBLEM: "problem", ZIP_CHECK: "zip_check", INFO_FORM: "info_form", SLOTS: "slots", CONFIRMED: "confirmed" };
@@ -1191,54 +1191,6 @@ Rules:
     // screen: "intro" | "setup" | "dashboard" | "chat"
 
     // ── API KEY ENTRY SCREEN ──
-    function KeyEntry({onKey}) {
-      const [val, setVal] = useState("");
-      const [err, setErr] = useState("");
-      const submit = () => {
-        const k = val.trim();
-        if (!k.startsWith("sk-ant-")) { setErr("Key should start with sk-ant-..."); return; }
-        onKey(k);
-      };
-
-      return (
-        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",alignItems:"center",justifyContent:"center",padding:"24px"}}>
-          <div style={{width:"100%",maxWidth:420,animation:"fadeUp 0.4s ease"}}>
-            <div style={{textAlign:"center",marginBottom:32}}>
-              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:28,fontWeight:800,color:"#fff",marginBottom:10}}>
-                Annie<span style={{color:"#38bdf8"}}> the Agent</span>
-              </div>
-              <div style={{fontSize:14,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",lineHeight:1.7}}>
-                Enter your Anthropic API key to run the demo.<br/>
-                <span style={{color:"#52558a",fontSize:12}}>Your key stays in your browser only — never stored or uploaded.</span>
-              </div>
-            </div>
-
-            <div style={{marginBottom:12}}>
-              <input
-                value={val}
-                onChange={e=>{setVal(e.target.value);setErr("");}}
-                onKeyDown={e=>e.key==="Enter"&&submit()}
-                placeholder="sk-ant-api03-..."
-                type="password"
-                style={{width:"calc(100% - 26px)",padding:"13px",background:"#0c0e24",border:`1.5px solid ${err?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em"}}
-              />
-              {err && <div style={{marginTop:6,fontSize:12,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err}</div>}
-            </div>
-
-            <button onClick={submit} disabled={!val.trim()}
-              style={{width:"100%",padding:"13px",borderRadius:10,border:"none",cursor:val.trim()?"pointer":"not-allowed",background:val.trim()?"linear-gradient(135deg,#38bdf8,#818cf8)":"#2a2d4a",color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,opacity:val.trim()?1:0.5,transition:"all 0.2s"}}>
-              Enter Demo →
-            </button>
-
-            <div style={{marginTop:20,padding:"12px 14px",background:"#0a0c20",borderRadius:10,border:"1px solid #262950",fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif",lineHeight:1.7}}>
-              💡 Get your key at <span style={{color:"#38bdf8"}}>console.anthropic.com</span> → API Keys.<br/>
-              This demo uses Claude API — small cost per conversation (~$0.01).
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     // ── INTRO SCREEN ──
     function IntroScreen({onStart}) {
       const [hovered, setHovered] = useState(false);
@@ -1901,7 +1853,7 @@ Rules:
     function App() {
       // Demo flow: "intro" → "setup" → "main"
       const [screen, setScreen] = useState("intro");
-      const [apiReady, setApiReady] = useState(false);
+
       const [settings, setSettings] = useState(defaultSettings("plumber"));
       const [bookings, setBookings] = useState([]);
       const [chatKey, setChatKey] = useState(0);
@@ -1934,7 +1886,7 @@ Rules:
       const handleTryChat = () => { setChatKey(k=>k+1); setShowChat(true); };
 
       // Show key entry if not set
-      if (!apiReady) return <KeyEntry onKey={k=>{ANTHROPIC_API_KEY=k; setApiReady(true);}} />;
+
       if (screen==="intro") return <IntroScreen onStart={()=>setScreen("setup")}/>;
       if (screen==="setup") return <SetupScreen onLaunch={handleLaunch}/>;
 
