@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Agent Hub — annietheagent.ai</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:    #0E0D0A;
+  --ink2:   #4A4840;
+  --ink3:   #9B9890;
+  --ink4:   #C8C5BD;
+  --bg:     #F2F0EA;
+  --bg2:    #ECEAE3;
+  --white:  #FAFAF7;
+  --brd:    #E0DDD5;
+  --annie:  #1A1A2E;
+  --annie2: #38BDF8;
+  --amelia: #2952CC;
+  --amelia2:#EDF1FB;
+  --soon:   #6B6560;
+  --f-serif: 'Instrument Serif', Georgia, serif;
+  --f-body:  'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--f-body);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── GRAIN TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  height: 60px;
+  background: rgba(242,240,234,0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--brd);
+}
+.nav-brand {
+  font-family: var(--f-serif);
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -.3px;
+}
+.nav-brand em {
+  font-style: italic;
+  color: var(--ink3);
+  font-size: 15px;
+  margin-left: 6px;
+}
+.nav-badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative; z-index: 1;
+  padding: 100px 48px 72px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 28px;
+}
+.hero-label::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink4);
+}
+h1 {
+  font-family: var(--f-serif);
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: -.02em;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+h1 em {
+  font-style: italic;
+  color: var(--ink3);
+}
+.hero-sub {
+  font-size: 16px;
+  color: var(--ink2);
+  line-height: 1.7;
+  max-width: 480px;
+  font-weight: 300;
+}
+
+/* ── DIVIDER ── */
+.divider {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 48px;
+  height: 1px;
+  background: var(--brd);
+}
+
+/* ── AGENT GRID ── */
+.agents {
+  position: relative; z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 64px 48px 100px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── CARD BASE ── */
+.card {
+  border-radius: 16px;
+  padding: 36px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  transition: transform .25s ease, box-shadow .25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { transform: translateY(-4px); }
+
+/* ── ANNIE CARD ── */
+.card-annie {
+  background: var(--annie);
+  box-shadow: 0 2px 0 rgba(0,0,0,.12), 0 8px 32px rgba(26,26,46,.18);
+  color: #fff;
+}
+.card-annie:hover {
+  box-shadow: 0 2px 0 rgba(0,0,0,.16), 0 20px 48px rgba(26,26,46,.28);
+}
+.card-annie::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,189,248,.22) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── AMELIA CARD ── */
+.card-amelia {
+  background: var(--white);
+  border: 1px solid var(--brd);
+  box-shadow: 0 2px 0 rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+  color: var(--ink);
+}
+.card-amelia:hover {
+  box-shadow: 0 2px 0 rgba(0,0,0,.06), 0 20px 48px rgba(0,0,0,.10);
+}
+
+/* ── COMING SOON CARD ── */
+.card-soon {
+  background: var(--bg2);
+  border: 1.5px dashed var(--brd);
+  color: var(--ink3);
+  cursor: default;
+}
+.card-soon:hover { transform: none; }
+
+/* ── CARD ELEMENTS ── */
+.card-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 24px;
+  flex-shrink: 0;
+}
+.card-annie .card-icon { background: rgba(56,189,248,.15); }
+.card-amelia .card-icon { background: var(--amelia2); }
+.card-soon .card-icon { background: var(--brd); opacity: .6; }
+
+.card-status {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.card-annie .card-status { color: var(--annie2); }
+.card-amelia .card-status { color: var(--amelia); }
+.card-soon .card-status { color: var(--ink4); }
+
+.card-name {
+  font-family: var(--f-serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -.02em;
+  margin-bottom: 8px;
+  line-height: 1.1;
+}
+.card-annie .card-name { color: #fff; }
+.card-amelia .card-name { color: var(--ink); }
+
+.card-tagline {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.55;
+  margin-bottom: 28px;
+  flex: 1;
+}
+.card-annie .card-tagline { color: rgba(255,255,255,.55); }
+.card-amelia .card-tagline { color: var(--ink3); }
+.card-soon .card-tagline { color: var(--ink4); }
+
+.card-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all .18s ease;
+  letter-spacing: -.01em;
+}
+.card-btn svg {
+  width: 14px; height: 14px;
+  opacity: .6;
+  transition: transform .18s ease, opacity .18s ease;
+}
+.card-btn:hover svg { transform: translateX(3px); opacity: 1; }
+
+/* Annie buttons */
+.card-annie .btn-primary {
+  background: var(--annie2);
+  color: #0a0a1a;
+}
+.card-annie .btn-primary:hover { background: #60cef9; }
+.card-annie .btn-secondary {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.card-annie .btn-secondary:hover {
+  background: rgba(255,255,255,.13);
+  color: #fff;
+}
+
+/* Amelia buttons */
+.card-amelia .btn-primary {
+  background: var(--amelia);
+  color: #fff;
+}
+.card-amelia .btn-primary:hover { background: #1e3fa8; }
+.card-amelia .btn-secondary {
+  background: var(--amelia2);
+  color: var(--amelia);
+  border: 1px solid var(--blue-m, #C8D4F5);
+}
+.card-amelia .btn-secondary:hover { background: #dce6fb; }
+
+/* Soon pill */
+.soon-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 9px;
+  background: var(--brd);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink4);
+  align-self: flex-start;
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--brd);
+  padding: 28px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.footer-brand {
+  font-family: var(--f-serif);
+  font-size: 14px;
+  color: var(--ink3);
+  text-decoration: none;
+}
+.footer-note {
+  font-size: 12px;
+  color: var(--ink4);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero { animation: fadeUp .6s ease both; }
+.card { animation: fadeUp .6s ease both; }
+.card-annie  { animation-delay: .15s; }
+.card-amelia { animation-delay: .25s; }
+.card-soon   { animation-delay: .35s; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 780px) {
+  nav { padding: 0 24px; }
+  .hero { padding: 64px 24px 48px; }
+  .divider { padding: 0 24px; }
+  .agents { grid-template-columns: 1fr; padding: 40px 24px 72px; gap: 16px; }
+  footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/hub.html">annietheagent.ai <em>agents</em></a>
+  <span class="nav-badge">AI Agent Studio</span>
+</nav>
+
+<section class="hero">
+  <div class="hero-label">What we build</div>
+  <h1>AI agents that <em>work</em><br>while you don't.</h1>
+  <p class="hero-sub">A growing suite of purpose-built AI agents — each one designed to handle a specific job, end to end, without you lifting a finger.</p>
+</section>
+
+<div class="divider"></div>
+
+<section class="agents">
+
+  <!-- ANNIE -->
+  <div class="card card-annie">
+    <div class="card-icon">📅</div>
+    <div class="card-status">● Live</div>
+    <div class="card-name">Annie</div>
+    <p class="card-tagline">AI booking agent for home service businesses. Answers every customer, detects emergencies, and schedules automatically — 24/7.</p>
+    <div class="card-links">
+      <a class="card-btn btn-primary" href="/demo.html">
+        Try Demo
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="card-btn btn-secondary" href="/index.html">
+        Learn More
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- AMELIA -->
+  <div class="card card-amelia">
+    <div class="card-icon">✦</div>
+    <div class="card-status">● Live</div>
+    <div class="card-name">Amelia</div>
+    <p class="card-tagline">AI copilot for executive assistants. Manages email, meetings, tasks, and daily briefs — so you can focus on what only you can do.</p>
+    <div class="card-links">
+      <a class="card-btn btn-primary" href="/amelia/">
+        Try Demo
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="card-btn btn-secondary" href="/amelia/">
+        Learn More
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- COMING SOON -->
+  <div class="card card-soon">
+    <div class="card-icon">◌</div>
+    <div class="card-status">In Development</div>
+    <div class="card-name" style="color:var(--ink4);">Next Agent</div>
+    <p class="card-tagline">Something new is being built. Each agent in this suite handles one job — and handles it completely.</p>
+    <div class="card-links">
+      <div class="soon-pill">◌ &nbsp;Coming Soon</div>
+    </div>
+  </div>
+
+</section>
+
+<footer>
+  <a class="footer-brand" href="/hub.html">annietheagent.ai</a>
+  <span class="footer-note">Questions? <a href="mailto:dkellykennedy@gmail.com" style="color:var(--ink3);text-decoration:none;">dkellykennedy@gmail.com</a></span>
+</footer>
+
+</body>
+</html>
