@@ -430,7 +430,7 @@
         }
       };
 
-      // Radius-based ZIP fetch — geocode address then find all ZIPs within N miles
+      // Radius-based ZIP fetch — geocode then find nearby cities via Photon, fetch their ZIPs
       const fetchByRadius = async () => {
         const city = s.city?.trim();
         const state = s.state?.trim();
@@ -438,101 +438,126 @@
         if (!city || !state || isNaN(miles) || miles<=0) { setRadiusStatus("error"); return; }
         setRadiusStatus("loading");
         try {
-          // Step 1: geocode the business address to get lat/lng
-          const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(city+", "+state+", US")}&limit=1&layer=city&countrycode=us`);
-          if (!geoRes.ok) throw new Error();
-          const geoData = await geoRes.json();
-          if (!geoData.features?.length) throw new Error();
-          const [lng, lat] = geoData.features[0].geometry.coordinates;
-
-          // Step 2: convert miles to degrees (approx: 1 degree lat ≈ 69 miles)
-          const degLat = miles / 69;
-          const degLng = miles / (69 * Math.cos(lat * Math.PI / 180));
-
-          // Step 3: use GeoNames nearby postal codes API (free, no key needed for basic)
-          // Alternative: use zipcodestack or use bounding box approach with zippopotam
-          // We'll use the free api.zippopotam.us bounding box workaround:
-          // Fetch surrounding cities and collect their ZIPs
-          const bbox = {
-            minLat: lat - degLat, maxLat: lat + degLat,
-            minLng: lng - degLng, maxLng: lng + degLng,
-          };
-
-          // Use GeoNames free API for nearby postal codes
-          const nearbyRes = await fetch(
-            `http://api.geonames.org/findNearbyPostalCodesJSON?lat=${lat}&lng=${lng}&radius=${miles}&maxRows=200&country=US&username=demo`
+          // Step 1: geocode business city to lat/lng using Nominatim
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city+", "+state+", US")}&format=json&limit=1&addressdetails=1`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
           );
-          if (!nearbyRes.ok) throw new Error();
-          const nearbyData = await nearbyRes.json();
+          if (!geoRes.ok) throw new Error("geocode failed");
+          const geoData = await geoRes.json();
+          if (!geoData?.length) throw new Error("city not found");
+          const lat = parseFloat(geoData[0].lat);
+          const lng = parseFloat(geoData[0].lon);
 
-          if (nearbyData.postalCodes?.length) {
-            const newZips = [...new Set(nearbyData.postalCodes.map(p => p.postalCode))];
-            setS(p => ({...p, serviceZips: [...new Set([...p.serviceZips, ...newZips])]}));
-            setRadiusCount(newZips.length);
-            setRadiusStatus("done");
-            setTimeout(() => setRadiusStatus(null), 3000);
-          } else {
-            throw new Error("no results");
+          // Step 2: convert miles to degrees for bounding box
+          const dLat = miles / 69.0;
+          const dLng = miles / (69.0 * Math.cos(lat * Math.PI / 180));
+          const minLat = lat - dLat, maxLat = lat + dLat;
+          const minLng = lng - dLng, maxLng = lng + dLng;
+
+          // Step 3: search cities within bounding box using Nominatim viewbox
+          const nearRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=city&format=json&limit=50&countrycodes=us&addressdetails=1&viewbox=${minLng.toFixed(4)},${maxLat.toFixed(4)},${maxLng.toFixed(4)},${minLat.toFixed(4)}&bounded=1`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
+          );
+          if (!nearRes.ok) throw new Error("nearby search failed");
+          const nearData = await nearRes.json();
+
+          // Step 4: collect unique city+state combos
+          const US_STATES2 = {
+            "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA",
+            "Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA",
+            "Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA",
+            "Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD",
+            "Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS",
+            "Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH",
+            "New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC",
+            "North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA",
+            "Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN",
+            "Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA",
+            "West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"
+          };
+          const cities = [];
+          const seen = new Set();
+          cities.push({city, state: US_STATES2[state]||state});
+          seen.add(city.toLowerCase());
+
+          for (const item of (Array.isArray(nearData)?nearData:[])) {
+            const addr = item.address||{};
+            const fc = addr.city||addr.town||addr.village||addr.municipality;
+            const fs = US_STATES2[addr.state]||addr.state;
+            if (!fc||!fs) continue;
+            const key = fc.toLowerCase();
+            if (!seen.has(key)) { seen.add(key); cities.push({city:fc, state:fs}); }
           }
+
+          // Step 5: for each city, fetch ZIPs from zippopotam
+          const allZips = new Set(s.serviceZips);
+          let addedCount = 0;
+          const fetchPromises = cities.slice(0,30).map(async ({city:c, state:st}) => {
+            try {
+              const zr = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(st)}/${encodeURIComponent(c)}`);
+              if (!zr.ok) return;
+              const zd = await zr.json();
+              (zd.places||[]).forEach(p => {
+                const zip = p["post code"];
+                if (!allZips.has(zip)) { allZips.add(zip); addedCount++; }
+              });
+            } catch {}
+          });
+          await Promise.all(fetchPromises);
+
+          if (allZips.size === s.serviceZips.length && addedCount === 0) throw new Error("no new zips");
+          setS(p => ({...p, serviceZips: [...allZips]}));
+          setRadiusCount(addedCount);
+          setRadiusStatus("done");
+          setTimeout(() => setRadiusStatus(null), 4000);
         } catch(e) {
-          // Fallback: use photon + zippopotam for surrounding cities
-          try {
-            const miles2 = parseFloat(radiusMiles);
-            const geoRes2 = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent((s.city||"")+" "+(s.state||"")+" US")}&limit=1&countrycode=us`);
-            const geoData2 = await geoRes2.json();
-            const [lng2, lat2] = geoData2.features[0].geometry.coordinates;
-            // Get nearby places within bounding box
-            const nearRes = await fetch(`https://photon.komoot.io/api/?lat=${lat2}&lon=${lng2}&q=&limit=20&layer=city&countrycode=us&bbox=${lng2-miles2/50},${lat2-miles2/69},${lng2+miles2/50},${lat2+miles2/69}`);
-            const nearData = await nearRes.json();
-            const cities = nearData.features?.map(f=>({city:f.properties.name, state:f.properties.stateCode||f.properties.state})).filter(c=>c.city&&c.state)||[];
-            const allZips = new Set(s.serviceZips);
-            let added = 0;
-            for (const c of cities.slice(0,8)) {
-              try {
-                const zr = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(c.state)}/${encodeURIComponent(c.city)}`);
-                if (zr.ok) {
-                  const zd = await zr.json();
-                  zd.places?.forEach(p => allZips.add(p["post code"]));
-                  added += zd.places?.length||0;
-                }
-              } catch{}
-            }
-            setS(p => ({...p, serviceZips: [...allZips]}));
-            setRadiusCount(added);
-            setRadiusStatus("done");
-            setTimeout(() => setRadiusStatus(null), 3000);
-          } catch {
-            setRadiusStatus("error");
-            setTimeout(() => setRadiusStatus(null), 3000);
-          }
+          setRadiusStatus("error");
+          setTimeout(() => setRadiusStatus(null), 3000);
         }
       };
 
-      // City search — debounced, searches zippopotam.us by partial city name
+      // City search using Nominatim (OpenStreetMap) - free, no key needed
       const searchCity = async (val) => {
         setCitySearch(val);
         setCityResults([]);
-        if (val.trim().length < 2) return;
+        if (val.trim().length < 2) { setCityStatus(null); return; }
         setCityStatus("loading");
         try {
-          // Search across common states using GeoNames-style lookup via zippopotam
-          // We'll search the city name across US by fetching from a public city search API
-          const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(val.trim())}`);
-          // zippopotam doesn't support city-only search, use alternative approach:
-          // fetch from photon geocoder which is free and supports city search
-          const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val.trim())}&limit=8&layer=city&countrycode=us`);
-          if (!geoRes.ok) throw new Error();
-          const geoData = await geoRes.json();
-          const results = geoData.features
-            .filter(f => f.properties.country === "United States")
-            .map(f => ({
-              city: f.properties.name,
-              state: f.properties.state,
-              stateCode: f.properties.stateCode || f.properties.state,
-              label: `${f.properties.name}, ${f.properties.stateCode || f.properties.state}`
-            }))
-            .filter((v,i,a) => a.findIndex(x=>x.label===v.label)===i) // dedupe
-            .slice(0,6);
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val.trim())}&countrycodes=us&limit=10&format=json&addressdetails=1&featuretype=city`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
+          );
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const US_STATES = {
+            "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA",
+            "Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA",
+            "Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA",
+            "Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD",
+            "Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS",
+            "Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH",
+            "New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC",
+            "North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA",
+            "Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN",
+            "Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA",
+            "West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY","District of Columbia":"DC"
+          };
+          const seen = new Set();
+          const results = [];
+          for (const item of data) {
+            const addr = item.address || {};
+            const cityName = addr.city || addr.town || addr.village || addr.municipality || addr.county;
+            const stateName = addr.state;
+            if (!cityName || !stateName) continue;
+            const stateCode = US_STATES[stateName] || stateName;
+            const label = `${cityName}, ${stateCode}`;
+            if (seen.has(label)) continue;
+            seen.add(label);
+            results.push({ city: cityName, state: stateName, stateCode, label });
+            if (results.length >= 6) break;
+          }
           setCityResults(results);
           setCityStatus(null);
         } catch(e) {
