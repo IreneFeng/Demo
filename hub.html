@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Agent Hub — annietheagent.ai</title>
+<title>Annie the Agent — Any Agent. Always Ahead.</title>
 <link rel="icon" type="image/png" href="/assets/favi.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>
@@ -64,12 +64,14 @@ nav {
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .nav-brand em {
   font-style: italic;
   color: var(--ink3);
   font-size: 15px;
-  margin-left: 6px;
 }
 .nav-badge {
   font-size: 11px;
@@ -82,9 +84,13 @@ nav {
 /* ── HERO ── */
 .hero {
   position: relative; z-index: 1;
-  padding: 100px 48px 72px;
+  padding: 80px 48px 72px;
   max-width: 960px;
   margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .hero-label {
   display: inline-flex;
@@ -95,7 +101,7 @@ nav {
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--ink3);
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 .hero-label::before {
   content: '';
@@ -104,15 +110,28 @@ nav {
   height: 1px;
   background: var(--ink4);
 }
+.hero-label::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink4);
+}
+.hero-logo {
+  width: 280px;
+  height: auto;
+  margin-bottom: 40px;
+  display: block;
+}
 h1 {
   font-family: var(--f-serif);
-  font-size: clamp(42px, 6vw, 76px);
+  font-size: clamp(36px, 5vw, 60px);
   font-weight: 400;
-  line-height: 1.05;
+  line-height: 1.08;
   color: var(--ink);
   letter-spacing: -.02em;
-  margin-bottom: 24px;
-  max-width: 700px;
+  margin-bottom: 20px;
+  max-width: 640px;
 }
 h1 em {
   font-style: italic;
@@ -122,7 +141,7 @@ h1 em {
   font-size: 16px;
   color: var(--ink2);
   line-height: 1.7;
-  max-width: 480px;
+  max-width: 460px;
   font-weight: 300;
 }
 
@@ -352,6 +371,7 @@ footer {
   .divider { padding: 0 24px; }
   .agents { grid-template-columns: 1fr; padding: 40px 24px 72px; gap: 16px; }
   footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  .hero-logo { width: 200px; }
 }
 </style>
 </head>
@@ -359,14 +379,16 @@ footer {
 
 <nav>
   <a class="nav-brand" href="/hub.html">
-    <img src="/assets/logo.png" alt="Annie the Agent" style="height:32px;width:auto;display:block;"/>
+    <img src="/assets/logo.png" alt="" style="height:36px;width:auto;display:block;border-radius:8px;"/>
+    <span>Annie <em>the Agent</em></span>
   </a>
-  <span class="nav-badge">AI Agent Studio</span>
+  <span class="nav-badge">Any Agent. Always Ahead.</span>
 </nav>
 
 <section class="hero">
-  <div class="hero-label">What we build</div>
-  <h1>AI agents that <em>work</em><br>while you don't.</h1>
+  <div class="hero-label">Our Agents</div>
+  <img class="hero-logo" src="/assets/logo_no_bg.png" alt="Annie the Agent"/>
+  <h1>Any agent.<br><em>Always ahead.</em></h1>
   <p class="hero-sub">A growing suite of purpose-built AI agents — each one designed to handle a specific job, end to end, without you lifting a finger.</p>
 </section>
 
@@ -424,7 +446,5 @@ footer {
 </section>
 
 <footer>
-  <a class="footer-brand" href="/hub.html">
-    <img src="/assets/logo.png" alt="Annie the Agent" style="height:22px;width:auto;opacity:.6;display:block;"/>
-  </a>
+  <a class="footer-brand" href="/hub.html">Annie the Agent</a>
   <span class="footer-note">Questions? <a href="/cdn-cgi/l/email-protection#721619171e1e0b19171c1c17160b32151f131b1e5c111d1f" style="color:var(--ink3);text-decoration:none;"><span class="__c
