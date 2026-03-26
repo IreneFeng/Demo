@@ -1426,6 +1426,18 @@ Rules:
       const [hovered, setHovered] = useState(false);
       return (
         <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",position:"relative",overflow:"hidden"}}>
+          {/* top nav bar */}
+          <div style={{position:"absolute",top:0,left:0,right:0,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 24px",zIndex:10}}>
+            <div style={{display:"flex",flexDirection:"column",gap:1}}>
+              <div style={{fontSize:9,color:"#52558a",fontFamily:"'Inter',sans-serif",letterSpacing:"0.1em",textTransform:"uppercase",lineHeight:1}}>Annie the Agent</div>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:16,fontWeight:800,color:"#38bdf8",lineHeight:1}}>Annie</div>
+            </div>
+            <a href="/annie/index.html" style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:20,border:"1px solid #222645",background:"rgba(255,255,255,0.03)",color:"#8890b8",fontSize:12,fontWeight:600,fontFamily:"'Inter',sans-serif",textDecoration:"none",transition:"all 0.2s"}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor="#38bdf8";e.currentTarget.style.color="#38bdf8";}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor="#222645";e.currentTarget.style.color="#8890b8";}}>
+              ← About Annie
+            </a>
+          </div>
           {/* glow */}
           <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(56,189,248,0.1) 0%,transparent 70%)",top:"50%",left:"50%",transform:"translate(-50%,-55%)",pointerEvents:"none"}}/>
           
@@ -1448,7 +1460,7 @@ Rules:
 
             <p style={{fontSize:15,color:"#6b6f9a",lineHeight:1.8,marginBottom:40,fontFamily:"'Inter',sans-serif",fontWeight:300}}>
               In this demo, you'll set up your business in 60 seconds,<br/>
-              then watch your AI agent take a real booking from a customer.
+              then watch <span style={{color:"#38bdf8"}}>Annie</span> take a real booking from a customer.
             </p>
 
             {/* step pills */}
@@ -1585,7 +1597,7 @@ Rules:
           <div style={{width:"100%",maxWidth:500,animation:"fadeUp 0.5s ease both"}}>
             {/* Header */}
             <div style={{textAlign:"center",marginBottom:28}}>
-              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:22,fontWeight:800,color:"#38bdf8",marginBottom:8}}>
                 Annie
               </div>
               <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:24,fontWeight:800,color:"#f0f0ff",marginBottom:6}}>Set up <span style={{color:"#38bdf8"}}>Annie</span></div>
@@ -1903,7 +1915,7 @@ Rules:
             {bookings.length===0&&(
               <div style={{background:"linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08))",border:`1px solid ${ac}40`,borderRadius:14,padding:"18px 16px",textAlign:"center",animation:"fadeUp 0.4s ease"}}>
                 <div style={{fontSize:28,marginBottom:8}}>🤖</div>
-                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,color:"#e0e0ff",marginBottom:6}}>Annie is live!</div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,color:"#e0e0ff",marginBottom:6}}><span style={{color:'#38bdf8'}}>Annie</span> is live!</div>
                 <div style={{fontSize:13,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginBottom:14,lineHeight:1.6}}>
                   See it in action — try booking an appointment as a customer would.
                 </div>
@@ -2148,6 +2160,12 @@ Rules:
                   onMouseEnter={e=>e.currentTarget.style.color="#8890b8"}
                   onMouseLeave={e=>e.currentTarget.style.color="#52558a"}>
                   ← All Agents
+                </a>
+                <div style={{width:1,height:14,background:"#1a1d38"}}/>
+                <a href="/annie/index.html" style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",textDecoration:"none",transition:"color 0.2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
+                  onMouseLeave={e=>e.currentTarget.style.color="#6b6f9a"}>
+                  ← About Annie
                 </a>
                 <div style={{width:1,height:14,background:"#1a1d38"}}/>
                 <button onClick={()=>setScreen("setup")} style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",background:"none",border:"none",cursor:"pointer",padding:0}}
