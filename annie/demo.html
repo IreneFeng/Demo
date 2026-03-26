@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Booking Agent Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #080810; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: #2a2d4a; border-radius: 2px; }
+    select { appearance: none; -webkit-appearance: none; }
+    @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-5px)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes newBooking { 0%{transform:scale(1.02);box-shadow:0 0 0 3px #22c55e40} 100%{transform:scale(1);box-shadow:none} }
+  </style>
+</head>
+<body>
+  <div id="root"><div id="loading" style="color:#6b6f9a;padding:40px;font-family:monospace;background:#05071a;min-height:100vh;display:flex;align-items:center;justify-content:center;font-size:14px;">Loading Annie the Agent...</div></div>
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      document.getElementById("root").innerHTML = '<div style="color:#ff4444;padding:40px;font-family:monospace;background:#0a0010;min-height:100vh;white-space:pre-wrap;"><h2 style=\"margin-bottom:16px\">Error on line ' + line + ':</h2>' + msg + '\n\n' + (err && err.stack || '') + '</div>';
+    };
+  </script>
+  <script type="text/babel">
+    const { useState, useRef, useEffect } = React;
+
+    // API calls go through Cloudflare Worker proxy — no key needed in browser
+    const WORKER_URL = "https://annie-proxy.irene901230.workers.dev"; // e.g. https://annie-proxy.yourname.workers.dev
+
+    const URGENCY = { EMERGENCY: "emergency", HIGH: "high", NORMAL: "normal" };
+    const STAGE = { PROBLEM: "problem", ZIP_CHECK: "zip_check", INFO_FORM: "info_form", SLOTS: "slots", CONFIRMED: "confirmed" };
+
+    const TEMPLATES = {
+      plumber: {
+        emoji: "🔧", label: "Plumber", color: "#38bdf8",
+        name: "ProFix Plumbing", phone: "+1 (555) 847-2291",
+        services: ["Emergency Leak Repair","Drain Cleaning","Pipe Installation","Water Heater","Sewer Line","Faucet & Fixture"],
+        prices: {"Emergency Leak Repair":"$150-$400","Drain Cleaning":"$80-$200","Pipe Installation":"$200-$800","Water Heater":"$300-$1,200","Sewer Line":"$500-$2,000","Faucet & Fixture":"$75-$200"},
+        emergencyWords: ["leak","flood","burst","sewage","no water","pipe broke"],
+        greeting: "I handle plumbing emergencies 24/7.",
+      },
+      hvac: {
+        emoji: "❄️", label: "HVAC", color: "#22c55e",
+        name: "CoolAir HVAC", phone: "+1 (555) 923-4411",
+        services: ["AC Repair","Furnace Repair","AC Installation","Furnace Installation","Duct Cleaning","Tune-Up & Maintenance"],
+        prices: {"AC Repair":"$100-$600","Furnace Repair":"$100-$500","AC Installation":"$3,000-$7,000","Furnace Installation":"$2,500-$6,000","Duct Cleaning":"$300-$700","Tune-Up & Maintenance":"$80-$150"},
+        emergencyWords: ["no heat","no ac","no cooling","freezing","furnace out","ac out"],
+        greeting: "I help with heating and cooling emergencies too.",
+      },
+      remodel: {
+        emoji: "🏠", label: "Remodeling", color: "#f97316",
+        name: "BuildRight Remodeling", phone: "+1 (555) 761-8800",
+        services: ["Kitchen Remodel","Bathroom Remodel","Basement Finishing","Flooring","Painting","Deck & Patio"],
+        prices: {"Kitchen Remodel":"$15,000-$60,000","Bathroom Remodel":"$8,000-$25,000","Basement Finishing":"$20,000-$50,000","Flooring":"$3,000-$12,000","Painting":"$1,500-$6,000","Deck & Patio":"$5,000-$20,000"},
+        emergencyWords: [],
+        greeting: "I can schedule a free in-home consultation.",
+      },
+    };
+
+    const DENVER_ZIPS = ["80201","80202","80203","80204","80205","80206","80207","80208","80209","80210","80211","80212","80214","80215","80216","80218","80219","80220","80221","80222","80223","80224","80226","80227","80228","80229","80230","80231","80232","80233","80234","80235","80236","80237","80238","80239","80241","80246","80247","80249","80260","80290","80293","80294","80295","80299","80110","80111","80112","80120","80121","80122","80123","80124","80125","80126","80127","80128","80129","80130","80401","80403","80465","80002","80003","80004","80005","80007","80010","80011","80012","80013","80014","80015","80016","80017","80018","80019","80021","80022","80023","80024","80025","80026","80027"];
+
+    const HOURS_LIST = [{label:"12:00 AM",h:0},{label:"1:00 AM",h:1},{label:"2:00 AM",h:2},{label:"3:00 AM",h:3},{label:"4:00 AM",h:4},{label:"5:00 AM",h:5},{label:"6:00 AM",h:6},{label:"7:00 AM",h:7},{label:"8:00 AM",h:8},{label:"9:00 AM",h:9},{label:"10:00 AM",h:10},{label:"11:00 AM",h:11},{label:"12:00 PM",h:12},{label:"1:00 PM",h:13},{label:"2:00 PM",h:14},{label:"3:00 PM",h:15},{label:"4:00 PM",h:16},{label:"5:00 PM",h:17},{label:"6:00 PM",h:18},{label:"7:00 PM",h:19},{label:"8:00 PM",h:20},{label:"9:00 PM",h:21},{label:"10:00 PM",h:22},{label:"11:00 PM",h:23}];
+
+    // ── TRANSLATIONS ──
+    const T = {
+      en: {
+        dashTitle:"Dashboard", aiLive:"AI live", zips:"ZIPs", services:"services",
+        bookings:"Bookings", emergency:"Emergency", today:"Today",
+        filterAll:"All", filterEmerg:"🚨 Emergency", filterUrgent:"⚡ Urgent", filterStd:"Standard",
+        noBookings:"No bookings yet — AI is listening",
+        calUpdated:"Google Calendar updated ✓",
+        settingsTitle:"Business Settings", settingsSubtitle:"Changes apply instantly to Customer View",
+        save:"Save", saved:"Saved! ✓",
+        tabBiz:"🏢 Business", tabHrs:"🕐 Hours", tabSvc:"🔧 Services", tabArea:"📍 Area",
+        bizName:"Business Name", phone:"Phone", city:"City", state:"State",
+        customerSees:"Customer sees:",
+        operatingHours:"Operating Hours", closed:"Closed",
+        activeServices:"Active Services", servicesActive:"services active", of:"of",
+        serviceZips:"Service ZIP Codes", zipsDesc:"covered. Customers outside are redirected automatically.",
+        addZip:"Add ZIP...", denverCore:"Denver Core", southSuburbs:"South Suburbs", clearAll:"Clear All",
+        customerView:"💬 Customer View", dashboardView:"📊 Dashboard", settingsView:"⚙️ Settings",
+        switchDemo:"Switch Demo:", backDash:"← Dashboard", openSettings:"⚙️ Settings",
+        emergBadge:"🚨 EMERGENCY", urgentBadge:"⚡ URGENT", stdBadge:"📅 STANDARD",
+        navCustomer:"Customer", navDashboard:"Dashboard", navSettings:"Settings",
+      },
+      zh: {
+        dashTitle:"预约看板", aiLive:"AI在线", zips:"邮编", services:"服务",
+        bookings:"总预约", emergency:"紧急", today:"今日",
+        filterAll:"全部", filterEmerg:"🚨 紧急", filterUrgent:"⚡ 加急", filterStd:"普通",
+        noBookings:"暂无预约 — AI正在监听中",
+        calUpdated:"Google日历已更新 ✓",
+        settingsTitle:"商家设置", settingsSubtitle:"修改后立即同步到客户界面",
+        save:"保存", saved:"已保存 ✓",
+        tabBiz:"🏢 基本信息", tabHrs:"🕐 营业时间", tabSvc:"🔧 服务项目", tabArea:"📍 服务范围",
+        bizName:"商家名称", phone:"电话号码", city:"城市", state:"州",
+        customerSees:"客户看到的:",
+        operatingHours:"营业时间", closed:"休息",
+        activeServices:"服务项目", servicesActive:"个服务已开启", of:"/",
+        serviceZips:"服务邮编范围", zipsDesc:"个邮编已覆盖。范围外客户会被自动提示。",
+        addZip:"添加邮编...", denverCore:"丹佛核心区", southSuburbs:"南部郊区", clearAll:"清空全部",
+        customerView:"💬 客户界面", dashboardView:"📊 预约看板", settingsView:"⚙️ 商家设置",
+        switchDemo:"切换演示:", backDash:"← 返回看板", openSettings:"⚙️ 设置",
+        emergBadge:"🚨 紧急", urgentBadge:"⚡ 加急", stdBadge:"📅 普通",
+        navCustomer:"客户", navDashboard:"看板", navSettings:"设置",
+      },
+    };
+
+    const defaultSettings = (type, customTemplate) => {
+      const tmpl = customTemplate || TEMPLATES[type];
+      return ({
+      businessType: type,
+      businessName: tmpl.name,
+      phone: tmpl.phone || "",
+      city: "Denver", state: "CO",
+      serviceZips: [...DENVER_ZIPS],
+    serviceDuration: 60,
+      services: [...(tmpl.services||[])],
+      customPrices: {...(tmpl.prices||{})},
+      customEmoji: tmpl.emoji,
+      customLabel: tmpl.label,
+      customColor: tmpl.color,
+      hours: {
+        Mon:{open:true,start:"08:00",end:"17:00"}, Tue:{open:true,start:"08:00",end:"17:00"},
+        Wed:{open:true,start:"08:00",end:"17:00"}, Thu:{open:true,start:"08:00",end:"17:00"},
+        Fri:{open:true,start:"08:00",end:"17:00"}, Sat:{open:true,start:"09:00",end:"14:00"},
+        Sun:{open:false,start:"09:00",end:"13:00"},
+      },
+    });};
+
+    function makeSlots(settings, bookedSlotIds=[]) {
+      const slots = [], now = new Date();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const durMin = settings.serviceDuration || 60; // minutes
+      const stepMin = durMin; // slot interval = duration
+      for (let d = 0; d < 7; d++) {
+        const day = new Date(now); day.setDate(now.getDate() + d);
+        const dk = dayNames[day.getDay()], dh = settings.hours[dk];
+        if (!dh || !dh.open) continue;
+        const sh = parseInt(dh.start) * 60; // minutes from midnight
+        const eh = parseInt(dh.end) * 60;
+        const dl = d===0?"Today":d===1?"Tomorrow":`${dk} ${months[day.getMonth()]} ${day.getDate()}`;
+        for (let m = sh; m + stepMin <= eh; m += stepMin) {
+          const hh = Math.floor(m/60), mm = m%60;
+          if (d===0 && hh <= now.getHours()) continue;
+          const label = hh===0?"12:"+String(mm).padStart(2,"0")+" AM"
+            :hh<12?`${hh}:${String(mm).padStart(2,"0")} AM`
+            :hh===12?`12:${String(mm).padStart(2,"0")} PM`
+            :`${hh-12}:${String(mm).padStart(2,"0")} PM`;
+          const id = `s-${d}-${hh}-${mm}`;
+          slots.push({id, day:dl, time:label, booked: bookedSlotIds.includes(id)});
+        }
+      }
+      return slots;
+    }
+
+    async function askAI(messages, system) {
+      const r = await fetch(WORKER_URL, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({model:"claude-sonnet-4-20250514", max_tokens:600, system, messages}),
+      });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error.message);
+      return d.content?.map(c=>c.text||"").join("") || "";
+    }
+
+    function Ico({name, size=18}) {
+      const p = {
+        send:<><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>,
+        cal:<><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+        ok:<polyline points="20 6 9 17 4 12"/>,
+        clk:<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+        grid:<><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>,
+        cog:<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+        chat:<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>,
+        shld:<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
+        x:<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+        plus:<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+      };
+      return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{p[name]}</svg>;
+    }
+
+    function Badge({level, lang="en"}) {
+      const t = T[lang]||T.en;
+      const c = {
+        emergency:{t:t.emergBadge,bg:"#3d0000",col:"#ff4444",br:"#ff444466"},
+        high:{t:t.urgentBadge,bg:"#2d1a00",col:"#f97316",br:"#f9731666"},
+        normal:{t:t.stdBadge,bg:"#001a2d",col:"#60a5fa",br:"#60a5fa66"}
+      };
+      const x = c[level]||c.normal;
+      return <span style={{padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:700,letterSpacing:"0.06em",background:x.bg,color:x.col,border:`1px solid ${x.br}`}}>{x.t}</span>;
+    }
+
+    // ── PRICE RANGE HELPERS ──
+    // Parses "$100-$500" → {min:"100", max:"500"}
+    const parsePriceRange = (str) => {
+      if (!str) return {min:"", max:""};
+      const m = str.match(/\$?([\d,]+)\s*[-–]\s*\$?([\d,]+)/);
+      if (m) return {min:m[1].replace(/,/g,""), max:m[2].replace(/,/g,"")};
+      const single = str.match(/\$?([\d,]+)/);
+      if (single) return {min:single[1].replace(/,/g,""), max:""};
+      return {min:"", max:""};
+    };
+    const buildPriceRange = (min, max) => {
+      const a = min.replace(/\D/g,""), b = max.replace(/\D/g,"");
+      if (!a && !b) return "";
+      if (a && !b) return `$${a}`;
+      return `$${a}-$${b}`;
+    };
+    const fmtDigits = (v) => v.replace(/\D/g,"").slice(0,7);
+
+    // Price range editor for existing services
+    function PriceRange({svc, price, ac, lang, onChange}) {
+      const {min:initMin, max:initMax} = parsePriceRange(price);
+      const [mn, setMn] = useState(initMin);
+      const [mx, setMx] = useState(initMax);
+      const update = (newMn, newMx) => {
+        setMn(newMn); setMx(newMx);
+        onChange(buildPriceRange(newMn, newMx));
+      };
+      const inpStyle = {padding:"5px 9px",background:"#0b0d1e",border:`1px solid ${ac}40`,borderRadius:8,color:ac,fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"};
+      return (
+        <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
+          <span style={{fontSize:10,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"价格:":"Price:"}</span>
+          <div style={{display:"flex",alignItems:"center",gap:4,flex:1}}>
+            <span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>$</span>
+            <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder="min" style={inpStyle}/>
+            <span style={{fontSize:11,color:"#6b6f9a"}}>—</span>
+            <span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>$</span>
+            <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder="max" style={inpStyle}/>
+          </div>
+          {mn&&<span style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap",flexShrink:0}}>{buildPriceRange(mn,mx)}</span>}
+        </div>
+      );
+    }
+
+    // Price range editor for new service form (controlled)
+    function NewPriceRange({value, onChange, ac, lang}) {
+      const {min:initMin, max:initMax} = parsePriceRange(value);
+      const [mn, setMn] = useState(initMin);
+      const [mx, setMx] = useState(initMax);
+      useEffect(()=>{
+        if(!value){setMn("");setMx("");}
+      },[value]);
+      const update = (newMn, newMx) => {
+        setMn(newMn); setMx(newMx);
+        onChange(buildPriceRange(newMn, newMx));
+      };
+      const inpStyle = {padding:"7px 9px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"};
+      return (
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{lang==="zh"?"报价:":"Price:"}</span>
+          <span style={{fontSize:12,color:"#757aa8"}}>$</span>
+          <input value={mn} onChange={e=>update(fmtDigits(e.target.value),mx)} placeholder={lang==="zh"?"最低":"min"} style={inpStyle}/>
+          <span style={{fontSize:11,color:"#6b6f9a"}}>—</span>
+          <span style={{fontSize:12,color:"#757aa8"}}>$</span>
+          <input value={mx} onChange={e=>update(mn,fmtDigits(e.target.value))} placeholder={lang==="zh"?"最高":"max"} style={inpStyle}/>
+          {mn&&<span style={{fontSize:11,color:"#757aa8",whiteSpace:"nowrap",flexShrink:0,fontFamily:"'Inter',sans-serif"}}>{buildPriceRange(mn,mx)}</span>}
+        </div>
+      );
+    }
+
+    // ── SERVICE TAB ──
+    function SvcTab({s, setS, ac, lang, t}) {
+      const [newSvcName, setNewSvcName] = useState("");
+      const [newSvcPrice, setNewSvcPrice] = useState("");
+      const inp = {padding:"7px 10px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:8,color:"#e0e0f8",fontSize:12,outline:"none",fontFamily:"'Inter',sans-serif"};
+
+      // All services = preset services from template + any custom-added ones
+      // We track "allServices" as s.customServices (user-added) merged with template defaults
+      const allSvcs = s.services; // services is now the master list
+
+      const toggleSvc = (svc) => {
+        // For built-in services: toggle active state via a separate activeServices list
+        setS(p => {
+          const active = p.activeSvcList || [...p.services];
+          const next = active.includes(svc) ? active.filter(x=>x!==svc) : [...active, svc];
+          return {...p, activeSvcList: next};
+        });
+      };
+
+      const isActive = (svc) => {
+        if (!s.activeSvcList) return true; // default all on
+        return s.activeSvcList.includes(svc);
+      };
+
+      const addSvc = () => {
+        const name = newSvcName.trim();
+        if (!name) return;
+        setS(p => ({
+          ...p,
+          services: [...p.services, name],
+          activeSvcList: [...(p.activeSvcList || p.services), name],
+          customPrices: {...p.customPrices, [name]: newSvcPrice.trim()},
+        }));
+        setNewSvcName(""); setNewSvcPrice("");
+      };
+
+      const deleteSvc = (svc) => {
+        setS(p => ({
+          ...p,
+          services: p.services.filter(x=>x!==svc),
+          activeSvcList: (p.activeSvcList||p.services).filter(x=>x!==svc),
+          customPrices: Object.fromEntries(Object.entries(p.customPrices||{}).filter(([k])=>k!==svc)),
+        }));
+      };
+
+      const activeCount = allSvcs.filter(sv => isActive(sv)).length;
+
+      const DURATIONS = [
+        {label:"15 min", val:15},{label:"30 min", val:30},{label:"45 min", val:45},
+        {label:"1 hr",   val:60},{label:"1.5 hr", val:90},{label:"2 hr",  val:120},
+        {label:"3 hr",   val:180},{label:"4 hr",  val:240},
+      ];
+      const curDur = s.serviceDuration || 60;
+
+      return (
+        <div>
+          {/* Duration picker */}
+          <div style={{marginBottom:16,padding:"12px 14px",background:"#0c0e24",border:`1px solid ${ac}30`,borderRadius:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              ⏱ {lang==="zh"?"每次服务时长":"Service Duration"}
+            </div>
+            <div style={{fontSize:11,color:"#757aa8",marginBottom:10,fontFamily:"'Inter',sans-serif",lineHeight:1.5}}>
+              {lang==="zh"?"客户预约时间槽按此间隔排列":"Appointment slots will be spaced by this interval"}
+            </div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {DURATIONS.map(({label,val})=>(
+                <button key={val} onClick={()=>setS(p=>({...p,serviceDuration:val}))}
+                  style={{padding:"6px 12px",borderRadius:20,border:`1.5px solid ${val===curDur?ac:"#2a2d4a"}`,background:val===curDur?ac+"20":"transparent",color:val===curDur?ac:"#757aa8",fontSize:11.5,fontWeight:600,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s"}}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Inter',sans-serif"}}>{t.activeServices}</div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {allSvcs.map(svc=>{
+              const on = isActive(svc);
+              const price = s.customPrices?.[svc] || "";
+              return (
+                <div key={svc} style={{background:on?"#111428":"#0b0d1e",border:`1.5px solid ${on?ac+"60":"#1a1a28"}`,borderRadius:12,padding:"11px 13px",transition:"all 0.2s"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:on?8:0}}>
+                    <div style={{display:"flex",alignItems:"center",gap:9,flex:1,cursor:"pointer"}} onClick={()=>toggleSvc(svc)}>
+                      <div style={{width:20,height:20,borderRadius:"50%",border:`2px solid ${on?ac:"#2a2d4a"}`,background:on?ac:"transparent",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",flexShrink:0,transition:"all 0.2s"}}>
+                        {on&&<Ico name="ok" size={11}/>}
+                      </div>
+                      <div style={{fontSize:13,fontWeight:600,color:on?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif"}}>{svc}</div>
+                    </div>
+                    <button onClick={()=>deleteSvc(svc)} style={{background:"none",border:"none",color:"#303050",cursor:"pointer",padding:4,display:"flex",borderRadius:6,transition:"color 0.2s"}}
+                      onMouseEnter={e=>e.currentTarget.style.color="#ff4444"}
+                      onMouseLeave={e=>e.currentTarget.style.color="#303050"}>
+                      <Ico name="x" size={13}/>
+                    </button>
+                  </div>
+                  {on && (
+                    <PriceRange svc={svc} price={price} ac={ac} lang={lang}
+                      onChange={val=>setS(p=>({...p,customPrices:{...p.customPrices,[svc]:val}}))}/>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Add new service */}
+          <div style={{marginTop:14,padding:"13px",background:"#0a0c20",border:`1px solid ${ac}25`,borderRadius:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
+              + {lang==="zh"?"添加新服务":"Add new service"}
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:8}}>
+              <input value={newSvcName} onChange={e=>setNewSvcName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addSvc()}
+                placeholder={lang==="zh"?"服务名称":"Service name"}
+                style={inp}/>
+              <NewPriceRange value={newSvcPrice} onChange={setNewSvcPrice} ac={ac} lang={lang}/>
+            </div>
+            <button onClick={addSvc} disabled={!newSvcName.trim()}
+              style={{width:"100%",padding:"8px",borderRadius:8,border:"none",cursor:newSvcName.trim()?"pointer":"not-allowed",background:newSvcName.trim()?ac:"#2a2d4a",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",opacity:newSvcName.trim()?1:0.4,transition:"all 0.2s"}}>
+              {lang==="zh"?"添加服务":"Add Service"}
+            </button>
+          </div>
+
+          <div style={{marginTop:10,padding:"9px 12px",background:"#111428",borderRadius:10,border:"1px solid #262950",fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>
+            {activeCount} {t.of} {allSvcs.length} {t.servicesActive}
+          </div>
+        </div>
+      );
+    }
+
+    // ── AREA TAB ──
+    function AreaTab({s, setS, ac, inp, lang, t, zipIn, setZipIn, addZip, delZip}) {
+      const [autoStatus, setAutoStatus] = useState(null);
+      const [autoCount, setAutoCount] = useState(0);
+      const [citySearch, setCitySearch] = useState("");
+      const [cityResults, setCityResults] = useState([]);
+      const [cityStatus, setCityStatus] = useState(null);
+      const [cityCount, setCityCount] = useState(0);
+      const [radiusMiles, setRadiusMiles] = useState("10");
+      const [radiusStatus, setRadiusStatus] = useState(null);
+      const [radiusCount, setRadiusCount] = useState(0);
+
+      // Fetch ZIPs from business address — REPLACE existing ZIPs
+      const autoGenZips = async () => {
+        const city = s.city?.trim();
+        const state = s.state?.trim();
+        if (!city || !state) { setAutoStatus("error"); return; }
+        setAutoStatus("loading");
+        try {
+          const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(state)}/${encodeURIComponent(city)}`);
+          if (!res.ok) throw new Error("not found");
+          const data = await res.json();
+          const newZips = data.places.map(p => p["post code"]);
+          setS(p => ({...p, serviceZips: newZips})); // REPLACE, not merge
+          setAutoCount(newZips.length);
+          setAutoStatus("done");
+          setTimeout(() => setAutoStatus(null), 3000);
+        } catch(e) {
+          setAutoStatus("error");
+          setTimeout(() => setAutoStatus(null), 3000);
+        }
+      };
+
+      // Radius-based ZIP fetch — geocode then find nearby cities via Photon, fetch their ZIPs
+      const fetchByRadius = async () => {
+        const city = s.city?.trim();
+        const state = s.state?.trim();
+        const miles = parseFloat(radiusMiles);
+        if (!city || !state || isNaN(miles) || miles<=0) { setRadiusStatus("error"); return; }
+        setRadiusStatus("loading");
+        try {
+          // Step 1: geocode business city to lat/lng using Nominatim
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city+", "+state+", US")}&format=json&limit=1&addressdetails=1`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
+          );
+          if (!geoRes.ok) throw new Error("geocode failed");
+          const geoData = await geoRes.json();
+          if (!geoData?.length) throw new Error("city not found");
+          const lat = parseFloat(geoData[0].lat);
+          const lng = parseFloat(geoData[0].lon);
+
+          // Step 2: convert miles to degrees for bounding box
+          const dLat = miles / 69.0;
+          const dLng = miles / (69.0 * Math.cos(lat * Math.PI / 180));
+          const minLat = lat - dLat, maxLat = lat + dLat;
+          const minLng = lng - dLng, maxLng = lng + dLng;
+
+          // Step 3: search cities within bounding box using Nominatim viewbox
+          const nearRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=city&format=json&limit=50&countrycodes=us&addressdetails=1&viewbox=${minLng.toFixed(4)},${maxLat.toFixed(4)},${maxLng.toFixed(4)},${minLat.toFixed(4)}&bounded=1`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
+          );
+          if (!nearRes.ok) throw new Error("nearby search failed");
+          const nearData = await nearRes.json();
+
+          // Step 4: collect unique city+state combos
+          const US_STATES2 = {
+            "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA",
+            "Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA",
+            "Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA",
+            "Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD",
+            "Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS",
+            "Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH",
+            "New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC",
+            "North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA",
+            "Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN",
+            "Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA",
+            "West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"
+          };
+          const cities = [];
+          const seen = new Set();
+          cities.push({city, state: US_STATES2[state]||state});
+          seen.add(city.toLowerCase());
+
+          for (const item of (Array.isArray(nearData)?nearData:[])) {
+            const addr = item.address||{};
+            const fc = addr.city||addr.town||addr.village||addr.municipality;
+            const fs = US_STATES2[addr.state]||addr.state;
+            if (!fc||!fs) continue;
+            const key = fc.toLowerCase();
+            if (!seen.has(key)) { seen.add(key); cities.push({city:fc, state:fs}); }
+          }
+
+          // Step 5: for each city, fetch ZIPs from zippopotam
+          const allZips = new Set(s.serviceZips);
+          let addedCount = 0;
+          const fetchPromises = cities.slice(0,30).map(async ({city:c, state:st}) => {
+            try {
+              const zr = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(st)}/${encodeURIComponent(c)}`);
+              if (!zr.ok) return;
+              const zd = await zr.json();
+              (zd.places||[]).forEach(p => {
+                const zip = p["post code"];
+                if (!allZips.has(zip)) { allZips.add(zip); addedCount++; }
+              });
+            } catch {}
+          });
+          await Promise.all(fetchPromises);
+
+          if (allZips.size === s.serviceZips.length && addedCount === 0) throw new Error("no new zips");
+          setS(p => ({...p, serviceZips: [...allZips]}));
+          setRadiusCount(addedCount);
+          setRadiusStatus("done");
+          setTimeout(() => setRadiusStatus(null), 4000);
+        } catch(e) {
+          setRadiusStatus("error");
+          setTimeout(() => setRadiusStatus(null), 3000);
+        }
+      };
+
+      // City search using Nominatim (OpenStreetMap) - free, no key needed
+      const searchCity = async (val) => {
+        setCitySearch(val);
+        setCityResults([]);
+        if (val.trim().length < 2) { setCityStatus(null); return; }
+        setCityStatus("loading");
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val.trim())}&countrycodes=us&limit=10&format=json&addressdetails=1&featuretype=city`,
+            { headers: { "Accept-Language": "en-US", "User-Agent": "AnnieTheAgent/1.0" } }
+          );
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const US_STATES = {
+            "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA",
+            "Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA",
+            "Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA",
+            "Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD",
+            "Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS",
+            "Missouri":"MO","Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH",
+            "New Jersey":"NJ","New Mexico":"NM","New York":"NY","North Carolina":"NC",
+            "North Dakota":"ND","Ohio":"OH","Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA",
+            "Rhode Island":"RI","South Carolina":"SC","South Dakota":"SD","Tennessee":"TN",
+            "Texas":"TX","Utah":"UT","Vermont":"VT","Virginia":"VA","Washington":"WA",
+            "West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY","District of Columbia":"DC"
+          };
+          const seen = new Set();
+          const results = [];
+          for (const item of data) {
+            const addr = item.address || {};
+            const cityName = addr.city || addr.town || addr.village || addr.municipality || addr.county;
+            const stateName = addr.state;
+            if (!cityName || !stateName) continue;
+            const stateCode = US_STATES[stateName] || stateName;
+            const label = `${cityName}, ${stateCode}`;
+            if (seen.has(label)) continue;
+            seen.add(label);
+            results.push({ city: cityName, state: stateName, stateCode, label });
+            if (results.length >= 6) break;
+          }
+          setCityResults(results);
+          setCityStatus(null);
+        } catch(e) {
+          setCityStatus(null);
+          setCityResults([]);
+        }
+      };
+
+      // Add ZIPs for a selected city
+      const addCityZips = async (city, stateCode) => {
+        setCityStatus("loading");
+        setCityResults([]);
+        setCitySearch("");
+        try {
+          const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(stateCode)}/${encodeURIComponent(city)}`);
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const newZips = data.places.map(p => p["post code"]);
+          setS(p => ({...p, serviceZips: [...new Set([...p.serviceZips, ...newZips])]}));
+          setCityCount(newZips.length);
+          setCityStatus("done");
+          setTimeout(() => setCityStatus(null), 3000);
+        } catch(e) {
+          setCityStatus("error");
+          setTimeout(() => setCityStatus(null), 3000);
+        }
+      };
+
+      const clearAll = () => setS(p => ({...p, serviceZips: []}));
+
+      return (
+        <div>
+          <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>{t.serviceZips}</div>
+          <p style={{fontSize:12,color:"#757aa8",marginBottom:12,fontFamily:"'Inter',sans-serif",lineHeight:1.6}}>
+            <strong style={{color:"#d0d0f0"}}>{s.serviceZips.length} ZIPs</strong> {lang==="zh"?"个邮编已覆盖":"covered"}. {lang==="zh"?"范围外客户会被自动提示。":"Customers outside are redirected automatically."}
+          </p>
+
+          {/* Auto-generate from business address */}
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:`1px solid ${ac}30`,borderRadius:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:ac,marginBottom:4,fontFamily:"'Inter',sans-serif"}}>
+              📍 {lang==="zh"?"根据商家地址自动生成邮编":"Auto-generate from business address"}
+            </div>
+            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              {`${s.city||"—"}, ${s.state||"—"}`} · <span style={{color:"#ff444490",fontSize:10}}>{lang==="zh"?"⚠️ 会替换现有邮编":"⚠️ Replaces existing ZIPs"}</span>
+            </div>
+            <button onClick={autoGenZips} disabled={autoStatus==="loading"} style={{width:"100%",padding:"8px",borderRadius:9,border:`1px solid ${ac}50`,background:`${ac}15`,color:autoStatus==="loading"?"#757aa8":ac,cursor:autoStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {autoStatus==="loading"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {lang==="zh"?"查询中...":"Searching..."}</>
+               :autoStatus==="done"?`✅ ${autoCount} ZIPs loaded`
+               :autoStatus==="error"?`❌ Not found`
+               :`🔍 ${lang==="zh"?"自动获取周边邮编":"Fetch ZIPs for my area"}`}
+            </button>
+          </div>
+
+          {/* Radius-based fetch */}
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:"1px solid #262950",borderRadius:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8890b8",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              📡 {lang==="zh"?"按服务半径添加邮编":"Add ZIPs by service radius"}
+            </div>
+            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
+              {lang==="zh"?"从商家地址向外扩展，自动添加范围内所有邮编":"Auto-adds all ZIPs within your chosen radius from your business address"}
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+              <input
+                value={radiusMiles}
+                onChange={e=>setRadiusMiles(e.target.value.replace(/[^\d.]/g,""))}
+                placeholder="10"
+                style={{...inp,width:70,textAlign:"center",padding:"8px 10px"}}
+              />
+              <span style={{fontSize:13,color:"#8890b8",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>miles from {s.city||"your address"}</span>
+            </div>
+            <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+              {["5","10","15","25","50"].map(m=>(
+                <button key={m} onClick={()=>setRadiusMiles(m)}
+                  style={{padding:"4px 12px",borderRadius:14,border:`1.5px solid ${radiusMiles===m?ac:"#262950"}`,background:radiusMiles===m?`${ac}18`:"transparent",color:radiusMiles===m?ac:"#6b6f9a",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s"}}>
+                  {m} mi
+                </button>
+              ))}
+            </div>
+            <button onClick={fetchByRadius} disabled={radiusStatus==="loading"} style={{width:"100%",padding:"8px",borderRadius:9,border:"1px solid #262950",background:"#111428",color:radiusStatus==="loading"?"#757aa8":"#8890b8",cursor:radiusStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {radiusStatus==="loading"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Searching...</>
+               :radiusStatus==="done"?`✅ Added ${radiusCount} ZIPs within ${radiusMiles} miles`
+               :radiusStatus==="error"?`❌ Could not fetch — try a different radius`
+               :`📡 Fetch ZIPs within ${radiusMiles} miles`}
+            </button>
+          </div>
+
+          {/* City search */}
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:"1px solid #262950",borderRadius:12,position:"relative"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8890b8",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              🏙️ {lang==="zh"?"按城市添加邮编":"Add ZIPs by city"}
+            </div>
+            <input
+              value={citySearch}
+              onChange={e=>searchCity(e.target.value)}
+              placeholder={lang==="zh"?"输入城市名，如 Harrison...":"Search city, e.g. Harrison..."}
+              style={{...inp,marginBottom:cityResults.length>0?6:0}}
+            />
+            {cityStatus==="loading"&&<div style={{fontSize:11,color:"#6b6f9a",marginTop:4,fontFamily:"'Inter',sans-serif"}}>⟳ Searching...</div>}
+            {cityStatus==="done"&&<div style={{fontSize:11,color:"#22c55e",marginTop:4,fontFamily:"'Inter',sans-serif"}}>✅ Added {cityCount} ZIPs</div>}
+            {cityStatus==="error"&&<div style={{fontSize:11,color:"#ff4444",marginTop:4,fontFamily:"'Inter',sans-serif"}}>❌ City not found</div>}
+            {cityResults.length>0&&(
+              <div style={{background:"#080a1f",border:"1px solid #262950",borderRadius:10,overflow:"hidden",marginTop:4}}>
+                {cityResults.map((r,i)=>(
+                  <button key={i} onClick={()=>addCityZips(r.city, r.stateCode)}
+                    style={{width:"100%",padding:"9px 12px",background:"transparent",border:"none",borderBottom:i<cityResults.length-1?"1px solid #1a1d38":"none",color:"#ccd2f0",fontSize:13,fontFamily:"'Inter',sans-serif",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"background 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="#0c0e24"}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <span>{r.label}</span>
+                    <span style={{fontSize:11,color:ac}}>+ Add ZIPs</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Manual ZIP input */}
+          <div style={{display:"flex",gap:8,marginBottom:10}}>
+            <input value={zipIn} onChange={e=>setZipIn(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>e.key==="Enter"&&addZip()} placeholder={t.addZip} maxLength={5} style={{...inp,flex:1}} />
+            <button onClick={addZip} disabled={zipIn.length!==5} style={{padding:"9px 14px",borderRadius:10,border:"none",cursor:zipIn.length===5?"pointer":"not-allowed",background:zipIn.length===5?ac:"#2a2d4a",color:"#fff",opacity:zipIn.length===5?1:0.4}}>
+              <Ico name="plus" size={15}/>
+            </button>
+          </div>
+
+          {/* Clear all */}
+          <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
+            <button onClick={clearAll} style={{padding:"4px 11px",borderRadius:14,border:"1px solid #3d0000",background:"transparent",color:"#ff4444",fontSize:11,cursor:"pointer",fontFamily:"'Inter',sans-serif"}}>{t.clearAll}</button>
+          </div>
+
+          {/* ZIP list */}
+          <div style={{maxHeight:220,overflowY:"auto",display:"flex",flexWrap:"wrap",gap:6}}>
+            {s.serviceZips.sort().map(z=>(
+              <div key={z} style={{display:"flex",alignItems:"center",gap:4,padding:"3px 9px",background:"#111428",border:"1px solid #2a2d4a",borderRadius:20,fontSize:12,color:"#d0d0f0",fontFamily:"'Inter',sans-serif"}}>
+                {z}<button onClick={()=>delZip(z)} style={{background:"none",border:"none",color:"#6b6f9a",cursor:"pointer",display:"flex",padding:0}}><Ico name="x" size={10}/></button>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ── SETTINGS ──
+    function Settings({settings, onSave, lang="en"}) {
+      const t = T[lang]||T.en;
+      const [s, setS] = useState({...settings, serviceZips:[...settings.serviceZips], services:[...settings.services], customPrices:{...(settings.customPrices||(TEMPLATES[settings.businessType]||{prices:{}}).prices)}});
+      const [tab, setTab] = useState("biz");
+      const [saved, setSaved] = useState(false);
+      const [zipIn, setZipIn] = useState("");
+      const tmpl = TEMPLATES[s.businessType] || {emoji:s.customEmoji||"🏢",label:s.customLabel||s.businessType,color:s.customColor||"#38bdf8",services:[],prices:{}};
+      const ac = tmpl.color;
+      const upd = (k,v) => setS(p=>({...p,[k]:v}));
+      const updH = (d,f,v) => setS(p=>({...p,hours:{...p.hours,[d]:{...p.hours[d],[f]:v}}}));
+      const save = () => { onSave(s); setSaved(true); setTimeout(()=>setSaved(false),2000); };
+      const addZip = () => { const z=zipIn.trim(); if(z.length===5&&/^\d+$/.test(z)&&!s.serviceZips.includes(z)){setS(p=>({...p,serviceZips:[...p.serviceZips,z]}));setZipIn("");} };
+      const delZip = (z) => setS(p=>({...p,serviceZips:p.serviceZips.filter(x=>x!==z)}));
+      const togSvc = (v) => setS(p=>({...p,services:p.services.includes(v)?p.services.filter(x=>x!==v):[...p.services,v]}));
+      const inp = {padding:"9px 12px",background:"#181b35",border:"1px solid #2a2d52",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'Inter',sans-serif"};
+      const tabs = [["biz",t.tabBiz],["hrs",t.tabHrs],["svc",t.tabSvc],["area",t.tabArea]];
+
+      return (
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818"}}>
+          <div style={{padding:"16px 18px 0",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+              <div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{t.settingsTitle}</div>
+                <div style={{fontSize:11,color:"#6b6f9a",marginTop:3,fontFamily:"'Inter',sans-serif"}}>{t.settingsSubtitle}</div>
+              </div>
+              <button onClick={save} style={{padding:"8px 16px",borderRadius:10,border:"none",cursor:"pointer",background:saved?"#22c55e":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.3s"}}>
+                {saved?t.saved:t.save}
+              </button>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14,padding:"10px 12px",background:"#0a0c20",borderRadius:10,border:`1px solid ${ac}30`}}>
+              <div style={{fontSize:20}}>{tmpl.emoji}</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{s.businessName||tmpl.label}</div>
+                <div style={{fontSize:11,color:ac,fontFamily:"'Inter',sans-serif"}}>{tmpl.label}</div>
+              </div>
+              <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",display:"flex",alignItems:"center",gap:4,fontFamily:"'Inter',sans-serif"}}>
+                <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>AI Live
+              </div>
+            </div>
+            <div style={{display:"flex",gap:6,padding:"0 2px 14px"}}>
+              {tabs.map(([k,l])=>{
+                const active = tab===k;
+                return (
+                  <button key={k} onClick={()=>setTab(k)}
+                    style={{flex:1,padding:"8px 4px",borderRadius:10,border:`1.5px solid ${active?ac:"#222645"}`,background:active?`${ac}18`:"#0a0c20",cursor:"pointer",
+                      color:active?ac:"#6b6f9a",fontSize:10.5,fontWeight:700,
+                      fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap",
+                      transition:"all 0.18s",textAlign:"center",
+                      boxShadow:active?`0 0 16px ${ac}40`:"none",
+                      transform:active?"translateY(-1px)":"none"}}>
+                    {l}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{flex:1,overflowY:"auto",padding:18}}>
+            {tab==="biz" && (
+              <div style={{display:"flex",flexDirection:"column",gap:13}}>
+                {[[t.bizName,"businessName",tmpl.name],[t.phone,"phone","+1 (555) 000-0000"],[t.city,"city","Denver"],[t.state,"state","CO"]].map(([label,key,ph])=>(
+                  <div key={key}>
+                    <label style={{fontSize:10,fontWeight:700,color:"#757aa8",letterSpacing:"0.07em",textTransform:"uppercase",display:"block",marginBottom:5,fontFamily:"'Inter',sans-serif"}}>{label}</label>
+                    <input value={s[key]}
+                      onChange={e=>upd(key, key==="phone" ? formatPhone(e.target.value) : key==="state" ? formatState(e.target.value) : e.target.value)}
+                      placeholder={ph} style={{...inp, width: key==="state" ? 60 : undefined}}
+                      maxLength={key==="state"?2:undefined}
+                      type={key==="phone"?"tel":"text"}/>
+                  </div>
+                ))}
+                <div style={{padding:13,background:"#111428",borderRadius:12,border:"1px solid #262950"}}>
+                  <div style={{fontSize:11,color:"#6b6f9a",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>Customer sees:</div>
+                  <div style={{display:"flex",alignItems:"center",gap:10}}>
+                    <div style={{width:38,height:38,borderRadius:10,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{tmpl.emoji}</div>
+                    <div>
+                      <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{s.businessName}</div>
+                      <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif"}}>{s.phone} · {s.city}, {s.state}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {tab==="hrs" && (
+              <div>
+                <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:12,fontFamily:"'Inter',sans-serif"}}>Operating Hours</div>
+                <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>{
+                    const h=s.hours[day];
+                    return (
+                      <div key={day} style={{background:"#111428",borderRadius:11,border:`1px solid ${h.open?"#2a2d4a":"#161930"}`,padding:"11px 13px",opacity:h.open?1:0.5}}>
+                        <div style={{display:"flex",alignItems:"center",gap:10}}>
+                          <button onClick={()=>updH(day,"open",!h.open)} style={{width:34,height:19,borderRadius:10,border:"none",cursor:"pointer",background:h.open?ac:"#2a2d4a",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                            <span style={{position:"absolute",top:2,left:h.open?16:2,width:15,height:15,borderRadius:"50%",background:"#fff",transition:"left 0.2s",display:"block"}} />
+                          </button>
+                          <span style={{fontSize:12,fontWeight:700,color:h.open?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif",minWidth:28}}>{day}</span>
+                          {h.open?(
+                            <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
+                              <select value={h.start} onChange={e=>updH(day,"start",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                              <span style={{color:"#6b6f9a",fontSize:11}}>-</span>
+                              <select value={h.end} onChange={e=>updH(day,"end",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                            </div>
+                          ):<span style={{fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>Closed</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {tab==="svc" && (
+              <SvcTab s={s} setS={setS} ac={ac} lang={lang} t={t}/>
+            )}
+            {tab==="area" && (
+              <AreaTab s={s} setS={setS} ac={ac} inp={inp} lang={lang} t={t} zipIn={zipIn} setZipIn={setZipIn} addZip={addZip} delZip={delZip}/>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── URGENCY SELECTOR ──
+    function UrgencySelector({ac, onSelect}) {
+      const opts = [
+        {key:"emergency", emoji:"🚨", label:"Emergency", sub:"Needs attention right now", bg:"#3d0000", border:"#ff4444", col:"#ff4444"},
+        {key:"high",      emoji:"⚡", label:"Urgent",    sub:"Within today if possible",  bg:"#2d1a00", border:"#f97316", col:"#f97316"},
+        {key:"normal",    emoji:"📅", label:"Regular",   sub:"Schedule at your convenience",bg:"#001a2d",border:"#60a5fa", col:"#60a5fa"},
+      ];
+      return (
+        <div style={{padding:"6px 4px",animation:"fadeUp 0.3s ease"}}>
+          <div style={{fontSize:13,color:"#a0a0c0",fontFamily:"'Inter',sans-serif",marginBottom:12,lineHeight:1.5}}>
+            Before we start — how urgent is your situation?
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {opts.map(o=>(
+              <button key={o.key} onClick={()=>onSelect(o.key)}
+                style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:13,border:`1.5px solid ${o.border}40`,background:o.bg+"80",cursor:"pointer",textAlign:"left",transition:"all 0.15s",width:"100%"}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor=o.border;e.currentTarget.style.background=o.bg;}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor=o.border+"40";e.currentTarget.style.background=o.bg+"80";}}>
+                <span style={{fontSize:22,flexShrink:0}}>{o.emoji}</span>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:o.col,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{o.label}</div>
+                  <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginTop:2}}>{o.sub}</div>
+                </div>
+                <div style={{marginLeft:"auto",color:o.border+"80",fontSize:16}}>›</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ── URGENCY CONFIRM CARD ──
+    function UrgencyConfirm({detectedUrgency, ac, onConfirm}) {
+      const opts = [
+        {key:"emergency", emoji:"🚨", label:"Yes, it's an emergency", col:"#ff4444", bg:"#3d0000", border:"#ff444460"},
+        {key:"high",      emoji:"⚡", label:"Urgent but not emergency", col:"#f97316", bg:"#2d1a00", border:"#f9731660"},
+        {key:"normal",    emoji:"📅", label:"No, it can wait",          col:"#60a5fa", bg:"#001a2d", border:"#60a5fa60"},
+      ];
+      const detected = opts.find(o=>o.key===detectedUrgency)||opts[0];
+      return (
+        <div style={{background:"#111428",border:`1.5px solid ${detected.border}`,borderRadius:14,padding:"13px 14px",animation:"fadeUp 0.3s ease"}}>
+          <div style={{fontSize:12,color:"#808098",fontFamily:"'Inter',sans-serif",marginBottom:10}}>
+            Based on what you described — does this match?
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:7}}>
+            {opts.map(o=>(
+              <button key={o.key} onClick={()=>onConfirm(o.key)}
+                style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:10,border:`1px solid ${o.border}`,background:o.key===detectedUrgency?o.bg:"transparent",cursor:"pointer",transition:"all 0.15s",width:"100%"}}
+                onMouseEnter={e=>{e.currentTarget.style.background=o.bg;}}
+                onMouseLeave={e=>{e.currentTarget.style.background=o.key===detectedUrgency?o.bg:"transparent";}}>
+                <span style={{fontSize:16}}>{o.emoji}</span>
+                <span style={{fontSize:12.5,fontWeight:600,color:o.col,fontFamily:"'Inter',sans-serif"}}>{o.label}</span>
+                {o.key===detectedUrgency&&<span style={{marginLeft:"auto",fontSize:10,color:o.col,fontFamily:"'Inter',sans-serif"}}>AI detected</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ── CHAT ──
+    // Stage extension: add URGENCY_SELECT before PROBLEM, URGENCY_CONFIRM after PROBLEM
+    const XSTAGE = {...STAGE, URGENCY_SELECT:"urgency_select", URGENCY_CONFIRM:"urgency_confirm"};
+
+    function Chat({settings, bookedSlotIds=[], onBooked}) {
+      // Support both built-in and custom business types
+      const tmpl = TEMPLATES[settings.businessType] || {
+        emoji: settings.customEmoji || "🏢",
+        label: settings.customLabel || settings.businessType,
+        color: settings.customColor || "#38bdf8",
+        emergencyWords: settings.customEmergencyWords || [],
+        greeting: settings.customGreeting || "How can I help you today?",
+      };
+      const slots = makeSlots(settings, bookedSlotIds);
+      const ac = tmpl.color;
+      const [stage, setStage] = useState(XSTAGE.URGENCY_SELECT);
+      const [msgs, setMsgs] = useState([]);
+      const [input, setInput] = useState("");
+      const [loading, setLoading] = useState(false);
+      const [urgency, setUrgency] = useState(null);
+      const [detectedUrgency, setDetectedUrgency] = useState(null);
+      const [service, setService] = useState("");
+      const [zip, setZip] = useState(null);
+      const [info, setInfo] = useState(null);
+      const [booking, setBooking] = useState(null);
+      const bot = useRef(null);
+      useEffect(()=>{ if(bot.current) bot.current.scrollIntoView({behavior:"smooth"}); },[msgs,stage]);
+
+      const handleUrgencySelect = (level) => {
+        setUrgency(level);
+        const greetMap = {
+          emergency: `🚨 Hi, this is Annie — your AI booking agent for ${settings.businessName}. I see you've marked this as an emergency. I'll make sure we get to you fast.
+
+${tmpl.greeting} What's happening right now?`,
+          high: `⚡ Hi, this is Annie — your AI booking agent for ${settings.businessName}. I see this is urgent. We'll do our best to get someone out today.
+
+${tmpl.greeting} What's going on?`,
+          normal: `👋 Hi, this is Annie — your AI booking agent for ${settings.businessName}.
+
+${tmpl.greeting} What can I help you with today?`,
+        };
+        setMsgs([{role:"assistant", content: greetMap[level]}]);
+        setStage(XSTAGE.PROBLEM);
+      };
+
+      const handleUrgencyConfirm = (confirmedLevel) => {
+        setUrgency(confirmedLevel);
+        setMsgs(p=>[...p, {role:"assistant", content:`Got it — marked as ${confirmedLevel==="emergency"?"🚨 Emergency":confirmedLevel==="high"?"⚡ Urgent":"📅 Regular"}. What's your ZIP code so I can confirm we cover your area?`}]);
+        setStage(STAGE.ZIP_CHECK);
+      };
+
+      const activeSvcs = (settings.activeSvcList || settings.services).filter(sv => settings.services.includes(sv));
+      const svcWithPrices = activeSvcs.map(sv => {
+        const price = settings.customPrices?.[sv];
+        return price ? `${sv} (${price})` : sv;
+      }).join(", ");
+      const emergWords = tmpl.emergencyWords && tmpl.emergencyWords.length ? tmpl.emergencyWords.join(", ") : "urgent, emergency, asap, broken, no heat, no water, flooding, leak";
+
+      const sys = `You are Annie, an AI booking agent for ${settings.businessName}, a ${tmpl.label} business in ${settings.city}, ${settings.state}. Always refer to yourself as Annie.
+
+ACTIVE SERVICES (with price ranges): ${svcWithPrices || "General services"}
+
+STEP 1 — CHECK IF IN SCOPE:
+First, determine if the customer's request matches any of the active services above.
+- If OUT OF SCOPE: Politely say you don't offer that service, list what you DO offer, and ask if any of those would help. Do NOT tag URGENCY or SERVICE. Do NOT say ASK_ZIP_CONFIRM.
+- If IN SCOPE: continue to Step 2.
+
+STEP 2 — URGENCY:
+Assess urgency based on the problem described.
+Emergency keywords (if any): ${emergWords}
+Tag exactly one: URGENCY:EMERGENCY / URGENCY:HIGH / URGENCY:NORMAL
+
+STEP 3 — TAG SERVICE:
+Tag the best matching service: SERVICE:[exact service name from list]
+
+STEP 4 — END:
+After understanding the issue, end your message with ASK_ZIP_CONFIRM to trigger the next step.
+
+Rules:
+- Keep replies short (2-3 sentences max) and warm
+- Never make up services not on the list
+- If unsure which service, ask one clarifying question`;
+
+      const send = async (text) => {
+        const t = text||input.trim();
+        if (!t||loading||(stage!==XSTAGE.PROBLEM&&stage!==XSTAGE.URGENCY_CONFIRM)) return;
+        setInput("");
+        const nm = [...msgs,{role:"user",content:t}];
+        setMsgs(nm);
+        setLoading(true);
+        try {
+          const r = await askAI(nm.map(m=>({role:m.role,content:m.content})), sys);
+          let c = r;
+          // Parse detected urgency from AI (may differ from user selection)
+          let det = urgency;
+          if(r.includes("URGENCY:EMERGENCY")){det="emergency";c=c.replace(/URGENCY:EMERGENCY/g,"");}
+          else if(r.includes("URGENCY:HIGH")){det="high";c=c.replace(/URGENCY:HIGH/g,"");}
+          else if(r.includes("URGENCY:NORMAL")){det="normal";c=c.replace(/URGENCY:NORMAL/g,"");}
+          const sv=r.match(/SERVICE:([^\n|]+)/);
+          if(sv){setService(sv[1].trim());c=c.replace(/SERVICE:[^\n|]+/g,"");}
+          // Trigger urgency confirmation card
+          if(r.includes("ASK_ZIP_CONFIRM")){
+            c=c.replace(/ASK_ZIP_CONFIRM/g,"").trim();
+            setDetectedUrgency(det);
+            if(c) setMsgs(p=>[...p,{role:"assistant",content:c}]);
+            setStage(XSTAGE.URGENCY_CONFIRM);
+          } else if(r.includes("ASK_ZIP")){
+            c=c.replace(/ASK_ZIP/g,"").trim();
+            setMsgs(p=>[...p,{role:"assistant",content:c}]);
+            setStage(STAGE.ZIP_CHECK);
+          } else {
+            setMsgs(p=>[...p,{role:"assistant",content:c.trim()}]);
+          }
+        } catch(e){setMsgs(p=>[...p,{role:"assistant",content:`Error: ${e.message||e}. Please call ${settings.phone}.`}]);}
+        setLoading(false);
+      };
+
+      const steps=["Urgency","Issue","Area","Details","Schedule","Done"];
+      const si={[XSTAGE.URGENCY_SELECT]:0,[XSTAGE.URGENCY_CONFIRM]:1,[XSTAGE.PROBLEM]:1,[STAGE.ZIP_CHECK]:2,[STAGE.INFO_FORM]:3,[STAGE.SLOTS]:4,[STAGE.CONFIRMED]:5};
+      const cur=si[stage]||0;
+
+      return (
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#0c0c16"}}>
+          {/* header */}
+          <div style={{padding:"11px 16px 0",background:"#10101c",borderBottom:"1px solid #222645",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:11}}>
+              <div style={{display:"flex",alignItems:"center",gap:9}}>
+                <div style={{width:35,height:35,borderRadius:10,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17}}>{tmpl.emoji}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{settings.businessName}</div>
+                  <div style={{fontSize:10,color:"#22c55e",display:"flex",alignItems:"center",gap:4}}>
+                    <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block"}}/>AI Online 24/7
+                  </div>
+                </div>
+              </div>
+              {urgency&&<Badge level={urgency}/>}
+            </div>
+            {/* progress */}
+            <div style={{display:"flex",alignItems:"center",marginBottom:11}}>
+              {steps.map((s,i)=>(
+                <div key={s} style={{display:"flex",alignItems:"center",flex:i<steps.length-1?1:0}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+                    <div style={{width:19,height:19,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:i<cur?"#22c55e":i===cur?ac:"#181b35",border:`2px solid ${i<cur?"#22c55e":i===cur?ac:"#2a2d52"}`,fontSize:8,fontWeight:700,color:i<=cur?"#fff":"#52558a",transition:"all 0.3s"}}>
+                      {i<cur?"✓":i+1}
+                    </div>
+                    <span style={{fontSize:8,color:i===cur?ac:i<cur?"#22c55e":"#353550",fontFamily:"'Inter',sans-serif",fontWeight:600,whiteSpace:"nowrap"}}>{s}</span>
+                  </div>
+                  {i<steps.length-1&&<div style={{flex:1,height:1.5,background:i<cur?"#22c55e40":"#181b35",margin:"0 3px",marginBottom:11,transition:"background 0.3s"}}/>}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* messages */}
+          <div style={{flex:1,overflowY:"auto",padding:"14px 13px",display:"flex",flexDirection:"column",gap:11}}>
+            {msgs.map((m,i)=>(
+              <div key={i} style={{display:"flex",gap:9,alignItems:"flex-end",flexDirection:m.role==="user"?"row-reverse":"row",animation:"fadeUp 0.25s ease"}}>
+                {m.role==="assistant"&&<div style={{width:27,height:27,borderRadius:"50%",background:"linear-gradient(135deg,#38bdf8,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><Ico name="shld" size={12}/></div>}
+                <div style={{maxWidth:"78%",padding:"10px 14px",fontSize:13.5,lineHeight:1.65,borderRadius:m.role==="user"?"18px 4px 18px 18px":"4px 18px 18px 18px",background:m.role==="user"?"linear-gradient(135deg,#38bdf8,#2563eb)":"#1c1c2a",color:"#f0f0f8",whiteSpace:"pre-wrap",fontFamily:"'Inter',sans-serif"}}>
+                  {m.content}
+                </div>
+              </div>
+            ))}
+
+            {/* urgency selector — shown before any messages */}
+            {stage===XSTAGE.URGENCY_SELECT&&<UrgencySelector ac={ac} onSelect={handleUrgencySelect}/>}
+
+            {/* urgency confirm card — shown after AI detects urgency */}
+            {stage===XSTAGE.URGENCY_CONFIRM&&<UrgencyConfirm detectedUrgency={detectedUrgency||urgency} ac={ac} onConfirm={handleUrgencyConfirm}/>}
+
+
+
+            {/* confirmed */}
+            {stage===STAGE.CONFIRMED&&booking&&(
+              <div style={{background:"linear-gradient(135deg,#001a2d,#002040)",border:"1px solid #38bdf860",borderRadius:16,padding:15,margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:11}}>
+                  <div style={{width:24,height:24,borderRadius:"50%",background:"#22c55e",display:"flex",alignItems:"center",justifyContent:"center"}}><Ico name="ok" size={12}/></div>
+                  <span style={{color:"#22c55e",fontWeight:700,fontSize:14,fontFamily:"'Inter',sans-serif"}}>Booking Confirmed!</span>
+                </div>
+                {[["Service",booking.service],["When",`${booking.day} · ${booking.time}`],["Name",booking.info&&booking.info.legalName],["Phone",booking.info&&booking.info.phone],["Address",booking.info?`${booking.info.street}, ${booking.info.city} ${booking.info.zip}`:null]].map(([l,v])=>v&&(
+                  <div key={l} style={{display:"flex",gap:9,fontSize:12.5,fontFamily:"'Inter',sans-serif",marginBottom:5}}>
+                    <span style={{color:"#505080",minWidth:70,flexShrink:0}}>{l}</span>
+                    <span style={{color:"#d0d0f8",fontWeight:500}}>{v}</span>
+                  </div>
+                ))}
+                <div style={{marginTop:10,padding:"7px 10px",background:"#001040",borderRadius:8,fontSize:11,color:"#60a5fa",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
+                  <Ico name="cal" size={11}/> Google Calendar updated · SMS sent
+                </div>
+              </div>
+            )}
+
+            {loading&&(
+              <div style={{display:"flex",gap:9,alignItems:"center"}}>
+                <div style={{width:27,height:27,borderRadius:"50%",background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center"}}><Ico name="shld" size={12}/></div>
+                <div style={{padding:"10px 14px",background:"#1c1c2a",borderRadius:"4px 18px 18px 18px",display:"flex",gap:5}}>
+                  {[0,1,2].map(d=><span key={d} style={{width:6,height:6,borderRadius:"50%",background:ac,display:"inline-block",animation:`bounce 1.2s ${d*0.2}s infinite`}}/>)}
+                </div>
+              </div>
+            )}
+            <div ref={bot}/>
+          </div>
+
+          {/* quick replies */}
+          {msgs.length<=2&&stage===XSTAGE.PROBLEM&&(
+            <div style={{padding:"0 13px 8px",display:"flex",gap:6,flexWrap:"wrap",flexShrink:0}}>
+              {settings.services.slice(0,4).map(sv=>(
+                <button key={sv} onClick={()=>send(`I need ${sv.toLowerCase()}`)} style={{padding:"5px 11px",borderRadius:18,border:"1px solid #2a2d4a",background:"transparent",color:"#8080a8",fontSize:11.5,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.2s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=ac;e.currentTarget.style.color=ac;}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor="#2a2d4a";e.currentTarget.style.color="#8080a8";}}>
+                  I need {sv.toLowerCase()}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* input bar - shown during AI conversation */}
+          {(stage===XSTAGE.PROBLEM||stage===XSTAGE.URGENCY_CONFIRM)&&(
+            <div style={{padding:"7px 13px 15px",flexShrink:0}}>
+              <div style={{display:"flex",gap:7,background:"#1a1a28",borderRadius:26,padding:"6px 6px 6px 15px",border:"1px solid #2a2d4a"}}>
+                <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Describe your issue..." style={{flex:1,background:"none",border:"none",outline:"none",color:"#e0e0f8",fontSize:13.5,fontFamily:"'Inter',sans-serif"}}/>
+                <button onClick={()=>send()} disabled={loading||!input.trim()} style={{width:34,height:34,borderRadius:"50%",border:"none",cursor:"pointer",background:input.trim()?`linear-gradient(135deg,${ac},#2563eb)`:"#2a2d4a",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.2s"}}>
+                  <Ico name="send" size={14}/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* zip check - fixed at bottom */}
+          {stage===STAGE.ZIP_CHECK&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0}}>
+              <ZipCard zips={settings.serviceZips} ac={ac} onResult={(ok,z)=>{setZip(z);if(ok){setMsgs(p=>[...p,{role:"assistant",content:`Great — ZIP ${z} is covered! I just need a few details to book your appointment.`}]);setStage(STAGE.INFO_FORM);}}}/>
+            </div>
+          )}
+
+          {/* info form - fixed at bottom */}
+          {stage===STAGE.INFO_FORM&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0,overflowY:"auto",maxHeight:"60%"}}>
+              <InfoForm zip={zip} ac={ac} bizState={settings.state} onSubmit={d=>{setInfo(d);setMsgs(p=>[...p,{role:"assistant",content:`Got it, ${d.legalName.split(" ")[0]}! Here are our open slots. ${urgency==="emergency"?"Emergency dispatch available right now.":"Pick whatever works."}`}]);setStage(STAGE.SLOTS);}}/>
+            </div>
+          )}
+
+          {/* slot picker - fixed at bottom */}
+          {stage===STAGE.SLOTS&&!booking&&(
+            <div style={{padding:"8px 13px 15px",flexShrink:0}}>
+              <SlotPick slots={slots} urgency={urgency} ac={ac} onSelect={slot=>{const b={service:service||settings.services[0],day:slot.day,time:slot.emergency?"ASAP (30-60 min)":slot.time,urgency,info,at:new Date().toISOString(),slotId:slot.id};setBooking(b);onBooked(b);setMsgs(p=>[...p,{role:"assistant",content:`You're all set, ${info&&info.legalName.split(" ")[0]}! 🎉 Confirmed for ${slot.day}${slot.emergency?" — emergency dispatch":" at "+slot.time}. SMS sent to ${info&&info.phone}.`}]);setStage(STAGE.CONFIRMED);}}/>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function ZipCard({zips, ac, onResult}) {
+      const [zip,setZip]=useState(""), [st,setSt]=useState(null), ref=useRef(null);
+      useEffect(()=>{if(ref.current)ref.current.focus();},[]);
+      const check=()=>{if(zip.length!==5)return;setSt("checking");setTimeout(()=>{const ok=zips.includes(zip);setSt(ok?"ok":"no");if(ok)setTimeout(()=>onResult(true,zip),700);},600);};
+      return (
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",gap:7}}>
+            <span>📍</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Service Area Check</span>
+          </div>
+          <div style={{padding:14}}>
+            <p style={{fontSize:13,color:"#8080a8",marginBottom:11,lineHeight:1.6,fontFamily:"'Inter',sans-serif"}}>Enter your ZIP code to confirm we can reach you.</p>
+            <div style={{display:"flex",gap:8}}>
+              <input ref={ref} value={zip} onChange={e=>{setZip(e.target.value.replace(/\D/g,"").slice(0,5));setSt(null);}} onKeyDown={e=>e.key==="Enter"&&zip.length===5&&check()} placeholder="e.g. 80203" maxLength={5}
+                style={{flex:1,padding:"9px 14px",background:"#181b35",border:`1px solid ${st==="ok"?"#22c55e":st==="no"?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:16,letterSpacing:"0.15em",outline:"none",fontFamily:"'Inter',sans-serif",textAlign:"center",transition:"border-color 0.2s"}}/>
+              <button onClick={check} disabled={zip.length!==5} style={{padding:"9px 16px",borderRadius:10,border:"none",cursor:zip.length===5?"pointer":"not-allowed",background:zip.length===5?"linear-gradient(135deg,#38bdf8,#2563eb)":"#181b35",color:"#fff",fontSize:13,fontWeight:700,opacity:zip.length===5?1:0.4,fontFamily:"'Inter',sans-serif"}}>
+                {st==="checking"?"...":"Check"}
+              </button>
+            </div>
+            {st==="ok"&&<div style={{marginTop:9,padding:"9px 12px",background:"#001a0a",border:"1px solid #22c55e40",borderRadius:10,fontSize:12,color:"#22c55e",animation:"fadeUp 0.2s ease",fontFamily:"'Inter',sans-serif"}}>✅ ZIP {zip} is in our service area!</div>}
+            {st==="no"&&<div style={{marginTop:9,padding:"9px 12px",background:"#1c0000",border:"1px solid #ef444440",borderRadius:10,fontSize:12,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>❌ ZIP {zip} is outside our service area. Call us for referrals.</div>}
+          </div>
+        </div>
+      );
+    }
+
+    function InfoForm({zip, ac, bizState, onSubmit}) {
+      const [f,setF]=useState({legalName:"",phone:"",street:"",city:"",state:bizState||"",zip});;
+      const [err,setErr]=useState({});
+      const [sub,setSub]=useState(false);
+      const set=(k,v)=>setF(p=>({...p,[k]:v}));
+      const go=()=>{
+        const e={};
+        if(f.legalName.trim().split(" ").length<2)e.legalName="Full legal name required";
+        if(!/^\+1 \(\d{3}\) \d{3}-\d{4}$/.test(f.phone))e.phone="Format: +1 (000) 000-0000";
+        if(!f.street.trim())e.street="Required";
+        if(!f.city.trim())e.city="Required";
+        if(Object.keys(e).length){setErr(e);return;}
+        setSub(true);setTimeout(()=>onSubmit(f),400);
+      };
+      const is=(k)=>({padding:"9px 11px",background:"#181b35",border:`1px solid ${err[k]?"#ef4444":"#2a2d52"}`,borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",fontFamily:"'Inter',sans-serif",width:"100%"});
+      const Lb=({c})=><label style={{fontSize:10,fontWeight:700,color:"#757aa8",letterSpacing:"0.06em",textTransform:"uppercase",display:"block",marginBottom:4,fontFamily:"'Inter',sans-serif"}}>{c}</label>;
+
+      return (
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+            <div style={{display:"flex",alignItems:"center",gap:7}}><span>👤</span><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Your Information</span></div>
+            <span style={{fontSize:10,padding:"2px 8px",background:"#001428",color:"#60a5fa",borderRadius:10,border:"1px solid #60a5fa40",fontFamily:"'Inter',sans-serif"}}>🔒 Secure</span>
+          </div>
+          <div style={{padding:14,display:"flex",flexDirection:"column",gap:9}}>
+            <div><Lb c="Legal Full Name"/><input value={f.legalName} onChange={e=>{set("legalName",e.target.value);setErr(v=>({...v,legalName:null}));}} placeholder="John Smith" style={is("legalName")}/>{err.legalName&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.legalName}</span>}</div>
+            <div><Lb c="Phone Number"/><input value={f.phone} onChange={e=>{set("phone",formatPhone(e.target.value));setErr(v=>({...v,phone:null}));}} placeholder="+1 (720) 555-0100" type="tel" style={is("phone")}/>{err.phone&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.phone}</span>}</div>
+            <div><Lb c="Street Address"/><input value={f.street} onChange={e=>{set("street",e.target.value);setErr(v=>({...v,street:null}));}} placeholder="123 Main St" style={is("street")}/>{err.street&&<span style={{fontSize:11,color:"#ef4444",fontFamily:"'Inter',sans-serif"}}>{err.street}</span>}</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 46px 76px",gap:7}}>
+              <div><Lb c="City"/><input value={f.city} onChange={e=>{set("city",e.target.value);setErr(v=>({...v,city:null}));}} placeholder="Denver" style={is("city")}/></div>
+              <div><Lb c="State"/><input value={f.state} onChange={e=>set("state", formatState(e.target.value))} maxLength={2} placeholder="NY" style={is("state")}/></div>
+              <div><Lb c="ZIP"/><input value={f.zip} onChange={e=>set("zip",e.target.value.replace(/\D/g,"").slice(0,5))} style={is("zip")}/></div>
+            </div>
+            <div style={{padding:"8px 11px",background:"#0b0d1e",borderRadius:9,border:"1px solid #262950",fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>🔒 Only shared with the assigned technician.</div>
+            <button onClick={go} disabled={sub} style={{padding:12,borderRadius:12,border:"none",cursor:"pointer",background:sub?"#181b35":`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontSize:14,fontWeight:700,fontFamily:"'Plus Jakarta Sans',sans-serif",transition:"all 0.2s"}}>
+              {sub?"Saving...":"Continue to Scheduling →"}
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    function SlotPick({slots, urgency, ac, onSelect}) {
+      const days=[...new Set(slots.map(s=>s.day))];
+      const [day,setDay]=useState(days[0]);
+      const ds=slots.filter(s=>s.day===day&&!s.booked);
+      return (
+        <div style={{background:"#13131e",border:"1px solid #2a2d4a",borderRadius:16,overflow:"hidden",margin:"6px 0",animation:"fadeUp 0.3s ease"}}>
+          <div style={{padding:"11px 15px",borderBottom:"1px solid #2a2d4a",display:"flex",alignItems:"center",gap:7}}>
+            <Ico name="cal" size={14}/><span style={{fontSize:11,fontWeight:700,color:"#a0a0c0",letterSpacing:"0.05em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>Available Times</span>
+          </div>
+          {urgency==="emergency"&&(
+            <div style={{padding:"9px 13px",borderBottom:"1px solid #2a2d4a"}}>
+              <button onClick={()=>onSelect({id:"emg",day:"Today",time:"ASAP",emergency:true})} style={{width:"100%",padding:"10px 14px",background:"#3d0000",border:"1px solid #ff4444",borderRadius:11,color:"#ff6666",cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:"'Inter',sans-serif"}}>
+                <span>🚨 Dispatch Emergency Tech Now</span><span style={{fontSize:11,opacity:0.8}}>30-60 min</span>
+              </button>
+            </div>
+          )}
+          <div style={{display:"flex",borderBottom:"1px solid #2a2d4a",overflowX:"auto"}}>
+            {days.map(d=><button key={d} onClick={()=>setDay(d)} style={{padding:"8px 12px",border:"none",background:"transparent",cursor:"pointer",color:day===d?ac:"#757aa8",fontSize:11,fontWeight:600,borderBottom:day===d?`2px solid ${ac}`:"2px solid transparent",whiteSpace:"nowrap",fontFamily:"'Inter',sans-serif",transition:"color 0.2s"}}>{d}</button>)}
+          </div>
+          <div style={{padding:"11px 13px",display:"grid",gridTemplateColumns:"1fr 1fr",gap:7}}>
+            {ds.length===0
+              ?<div style={{gridColumn:"span 2",textAlign:"center",color:"#6b6f9a",fontSize:13,padding:"14px 0",fontFamily:"'Inter',sans-serif"}}>No slots this day</div>
+              :ds.map(s=>(
+                <button key={s.id} onClick={()=>onSelect(s)} style={{padding:"9px 13px",background:"#1a1a2e",border:"1px solid #2a2d52",borderRadius:9,color:"#d0d0f0",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",gap:6,transition:"all 0.15s",fontFamily:"'Inter',sans-serif"}}
+                  onMouseEnter={e=>{e.currentTarget.style.background=ac+"20";e.currentTarget.style.borderColor=ac;e.currentTarget.style.color=ac;}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="#1a1a2e";e.currentTarget.style.borderColor="#2a2d52";e.currentTarget.style.color="#d0d0f0";}}>
+                  <Ico name="clk" size={12}/>{s.time}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+      );
+    }
+
+    // ── DASHBOARD ──
+    function Dash({bookings, settings, lang="en", onUpdateBooking}) {
+      const t = T[lang]||T.en;
+      const [filt,setFilt]=useState("all");
+      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#38bdf8"}, ac=tmpl.color;
+      const ord={emergency:0,high:1,normal:2};
+
+      const now = new Date();
+      const todayStr = now.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"});
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const days7 = Array.from({length:7},(_,i)=>{
+        const d=new Date(now); d.setDate(now.getDate()+i);
+        return {
+          key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
+          label: `${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          sub: i===0?"Today":i===1?"Tmrw":null,
+          date: d,
+        };
+      });
+
+      const active = bookings.filter(b=>b.status!=="completed"&&b.status!=="cancelled");
+      const sorted=[...active].sort((a,b)=>(ord[a.urgency]||3)-(ord[b.urgency]||3));
+      const todayBookings = sorted.filter(b=>b.day==="Today");
+      const shown = filt==="all"?sorted:sorted.filter(b=>b.urgency===filt);
+
+      const urgCol = u => u==="emergency"?"#ff4444":u==="high"?"#f97316":"#60a5fa";
+
+      // Weekly calendar: count active bookings per day label
+      const countByDay = {};
+      days7.forEach(({key})=>{ countByDay[key]=(active.filter(b=>b.day===key).length); });
+
+      return (
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818",overflowY:"auto"}}>
+
+          {/* ── Header ── */}
+          <div style={{padding:"16px 18px 0",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:9,marginBottom:13}}>
+              <span style={{fontSize:20}}>{tmpl.emoji}</span>
+              <div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
+                <div style={{fontSize:11,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
+              </div>
+            </div>
+
+            {/* ── Stats row ── */}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:9,marginBottom:13}}>
+              {[
+                [lang==="zh"?"待完成预约":"Pending",active.length,"#60a5fa"],
+                [lang==="zh"?"紧急":"Emergency",active.filter(b=>b.urgency==="emergency").length,"#ff4444"],
+                [lang==="zh"?"今日":"Today",active.filter(b=>b.day==="Today").length,"#22c55e"],
+              ].map(([l,v,c])=>(
+                <div key={l} style={{background:"#111428",borderRadius:11,padding:"11px 13px",border:"1px solid #262950"}}>
+                  <div style={{fontSize:22,fontWeight:800,color:c,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{v}</div>
+                  <div style={{fontSize:10,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{l}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Filter tabs ── */}
+            <div style={{display:"flex"}}>
+              {[["all",t.filterAll],["emergency",t.filterEmerg],["high",t.filterUrgent],["normal",t.filterStd]].map(([k,l])=>(
+                <button key={k} onClick={()=>setFilt(k)} style={{padding:"8px 10px",border:"none",background:"transparent",cursor:"pointer",color:filt===k?ac:"#6b6f9a",fontSize:10,fontWeight:600,borderBottom:filt===k?`2px solid ${ac}`:"2px solid transparent",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>{l}</button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:14}}>
+
+            {/* ── Today's date + urgency summary ── */}
+            <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+                  📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[
+                  {label:"🚨 Emergency", count:todayBookings.filter(b=>b.urgency==="emergency").length, col:"#ff4444", bg:"#3d000030"},
+                  {label:"⚡ Urgent",    count:todayBookings.filter(b=>b.urgency==="high").length,      col:"#f97316", bg:"#2d1a0030"},
+                  {label:"📅 Regular",  count:todayBookings.filter(b=>b.urgency==="normal").length,     col:"#60a5fa", bg:"#001a2d30"},
+                ].map(({label,count,col,bg})=>(
+                  <div key={label} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 10px",borderRadius:20,background:bg,border:`1px solid ${col}40`}}>
+                    <span style={{fontSize:11,color:col,fontWeight:700,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                    <span style={{fontSize:13,color:col,fontWeight:800,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{count}</span>
+                  </div>
+                ))}
+                {todayBookings.length===0&&<span style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>No appointments today</span>}
+              </div>
+            </div>
+
+            {/* ── Weekly calendar ── */}
+            <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+              <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>7-Day Booking Calendar</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5}}>
+                {days7.map(({key,label,date})=>{
+                  const cnt = countByDay[key]||0;
+                  const isToday = key==="Today";
+                  return (
+                    <div key={key} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",borderRadius:10,background:isToday?`${ac}15`:"transparent",border:isToday?`1px solid ${ac}40`:"1px solid transparent"}}>
+                      <div style={{fontSize:9,fontWeight:700,color:isToday?ac:"#8890b8",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                      <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?ac:"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                        <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt}</span>
+                      </div>
+                      {sub&&<div style={{fontSize:8,fontWeight:700,color:isToday?ac:"#f97316",fontFamily:"'Inter',sans-serif",letterSpacing:"0.04em"}}>{sub}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Booking list ── */}
+            {shown.length===0
+              ?<div style={{textAlign:"center",padding:"36px 0",color:"#52558a",fontFamily:"'Inter',sans-serif",fontSize:14}}><div style={{fontSize:30,marginBottom:8}}>📭</div>{t.noBookings}</div>
+              :shown.map((b,i)=>(
+                <div key={b.id||i} style={{background:"#111428",border:"1px solid #262950",borderRadius:13,padding:"13px 15px",borderLeft:`3px solid ${urgCol(b.urgency)}`,animation:"fadeUp 0.3s ease"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
+                    <div>
+                      <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
+                      <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'Inter',sans-serif"}}>{b.service}</div>
+                    </div>
+                    <Badge level={b.urgency||"normal"} lang={lang}/>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
+                    <span>🕐 {(()=>{
+                      const now=new Date();
+                      const tom=new Date(now); tom.setDate(now.getDate()+1);
+                      const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+                      const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                      if(b.day==="Today") return `Today, ${months[now.getMonth()]} ${now.getDate()}`;
+                      if(b.day==="Tomorrow") return `${days[tom.getDay()]}, ${months[tom.getMonth()]} ${tom.getDate()}`;
+                      return b.day;
+                    })()} · {b.time}</span>
+                    {b.day==="Tomorrow"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#f97316",background:"rgba(249,115,22,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>⏰ Tomorrow</span>}
+                    {b.day==="Today"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>📅 Today</span>}
+                    {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
+                    {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
+                  </div>
+                  <div style={{display:"flex",gap:7,alignItems:"center"}}>
+                    <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
+                      <Ico name="cal" size={11}/> {t.calUpdated}
+                    </div>
+                    <button onClick={()=>onUpdateBooking(b.id,"completed")}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
+                      onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
+                      ✓ Complete
+                    </button>
+                    <button onClick={()=>onUpdateBooking(b.id,"cancelled")}
+                      style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s",whiteSpace:"nowrap"}}
+                      onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
+                      onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
+                      ✕ Cancel
+                    </button>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      );
+    }
+
+    // ── RESPONSIVE HOOK ──
+    function useIsDesktop() {
+      const [desk, setDesk] = useState(window.innerWidth >= 900);
+      useEffect(() => {
+        const h = () => setDesk(window.innerWidth >= 900);
+        window.addEventListener("resize", h);
+        return () => window.removeEventListener("resize", h);
+      }, []);
+      return desk;
+    }
+
+    function LangToggle({lang, setLang, ac}) {
+      return (
+        <button onClick={()=>setLang(l=>l==="en"?"zh":"en")}
+          style={{padding:"4px 12px",borderRadius:14,border:`1.5px solid ${ac}60`,background:`${ac}15`,color:ac,cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em",transition:"all 0.2s"}}>
+          {lang==="en"?"🇨🇳 中文":"🇺🇸 EN"}
+        </button>
+      );
+    }
+
+    // ── DEMO FLOW SCREENS ──
+    // screen: "intro" | "setup" | "dashboard" | "chat"
+
+    // ── API KEY ENTRY SCREEN ──
+    // ── INTRO SCREEN ──
+    function IntroScreen({onStart}) {
+      const [hovered, setHovered] = useState(false);
+      return (
+        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"32px 24px",position:"relative",overflow:"hidden"}}>
+          {/* glow */}
+          <div style={{position:"absolute",width:600,height:600,borderRadius:"50%",background:"radial-gradient(circle,rgba(56,189,248,0.1) 0%,transparent 70%)",top:"50%",left:"50%",transform:"translate(-50%,-55%)",pointerEvents:"none"}}/>
+          
+
+          <div style={{position:"relative",zIndex:1,textAlign:"center",maxWidth:640,animation:"fadeUp 0.6s ease both"}}>
+            {/* badge */}
+            <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"6px 16px",borderRadius:20,border:"1px solid rgba(56,189,248,0.3)",background:"rgba(56,189,248,0.08)",fontSize:11,fontWeight:700,color:"#38bdf8",letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:28}}>
+              <span style={{width:6,height:6,borderRadius:"50%",background:"#38bdf8",animation:"pulse 2s infinite",display:"inline-block"}}/>
+              Interactive Demo
+            </div>
+
+            {/* logo */}
+            <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"clamp(48px,8vw,77px)",fontWeight:800,color:"#fff",letterSpacing:"-0.03em",marginBottom:16,lineHeight:1}}>
+              Annie<span style={{color:"#38bdf8"}}> the Agent</span>
+            </div>
+
+            <h1 style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:"clamp(22px,4vw,35px)",fontWeight:700,color:"#c0c0e0",lineHeight:1.3,marginBottom:18,letterSpacing:"-0.01em"}}>
+              Your AI agent that books appointments,<br/>handles emergencies, and never sleeps.
+            </h1>
+
+            <p style={{fontSize:15,color:"#6b6f9a",lineHeight:1.8,marginBottom:40,fontFamily:"'Inter',sans-serif",fontWeight:300}}>
+              In this demo, you'll set up your business in 60 seconds,<br/>
+              then watch your AI agent take a real booking from a customer.
+            </p>
+
+            {/* step pills */}
+            <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap",marginBottom:44}}>
+              {[["1","Set up your business","#38bdf8"],["2","See your dashboard","#22c55e"],["3","Watch AI take a booking","#f97316"],["4","Booking appears live","#a855f7"]].map(([n,label,c])=>(
+                <div key={n} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 14px",borderRadius:20,border:`1px solid ${c}30`,background:`${c}0e`,fontSize:12,color:c,fontFamily:"'Inter',sans-serif",fontWeight:600}}>
+                  <span style={{width:18,height:18,borderRadius:"50%",background:c,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:800,flexShrink:0}}>{n}</span>
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            <button onClick={onStart}
+              onMouseEnter={()=>setHovered(true)}
+              onMouseLeave={()=>setHovered(false)}
+              style={{padding:"16px 44px",borderRadius:14,border:"none",cursor:"pointer",background:"linear-gradient(135deg,#38bdf8,#818cf8)",color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,letterSpacing:"0.01em",boxShadow:hovered?"0 0 60px rgba(56,189,248,0.5)":"0 0 30px rgba(56,189,248,0.25)",transform:hovered?"translateY(-2px)":"none",transition:"all 0.2s"}}>
+              Try It Now →
+            </button>
+            <div style={{marginTop:16,fontSize:12,color:"#303050",fontFamily:"'Inter',sans-serif"}}>No sign-up needed · Takes about 2 minutes</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Color palette for custom business types
+    const COLOR_PALETTE = ["#38bdf8","#22c55e","#f97316","#a855f7","#ec4899","#f59e0b","#14b8a6","#ef4444"];
+    const EMOJI_OPTIONS = ["🏢","💈","🌿","🐾","🍕","🔑","🚗","💄","🏋️","🎨","🧹","🪟","⚡","🌳","🧰","🏥","📦","🛁"];
+
+    // Auto-format phone: type digits only → formats to +1 (000) 000-0000
+    const formatPhone = (raw) => {
+      const digits = raw.replace(/\D/g,"").replace(/^1/,"").slice(0,10);
+      if (!digits) return "";
+      if (digits.length <= 3) return `+1 (${digits}`;
+      if (digits.length <= 6) return `+1 (${digits.slice(0,3)}) ${digits.slice(3)}`;
+      return `+1 (${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    };
+
+    // Enforce 2-letter uppercase state abbreviation
+    const formatState = (raw) => raw.replace(/[^a-zA-Z]/g,"").toUpperCase().slice(0,2);
+
+    function SetupScreen({onLaunch}) {
+      const [step, setStep] = useState(0); // 0=bizType+info, 1=hours, 2=services, 3=area
+      const [type, setType] = useState("plumber");
+      const [name, setName] = useState(TEMPLATES["plumber"].name);
+      const [phone, setPhone] = useState(TEMPLATES["plumber"].phone);
+      const [city, setCity] = useState("Denver");
+      const [state, setState] = useState("CO");
+      const [showCustom, setShowCustom] = useState(false);
+      const [customLabel, setCustomLabel] = useState("");
+      const [customEmoji, setCustomEmoji] = useState("🏢");
+      const [customColor, setCustomColor] = useState("#38bdf8");
+      const [customTypes, setCustomTypes] = useState({});
+      const [zipIn, setZipIn] = useState("");
+
+      // Build full settings object for hours/services/area steps
+      const [s, setS] = useState(null);
+
+      const allTemplates = {...TEMPLATES, ...customTypes};
+      const currentTmpl = allTemplates[type] || TEMPLATES["plumber"];
+      const ac = currentTmpl.color;
+      const inp = {padding:"10px 13px",background:"#0c0e24",border:"1px solid #2a2d52",borderRadius:10,color:"#e0e0f8",fontSize:13,outline:"none",width:"100%",fontFamily:"'Inter',sans-serif",transition:"border-color 0.2s"};
+
+      const addCustomType = () => {
+        if (!customLabel.trim()) return;
+        const key = "custom_" + customLabel.toLowerCase().replace(/\s+/g,"_") + "_" + Date.now();
+        const newTmpl = {
+          emoji: customEmoji, label: customLabel.trim(), color: customColor,
+          name: customLabel.trim() + " Business", phone: "",
+          services: [], prices: {}, emergencyWords: [],
+          greeting: "How can I help you today?",
+        };
+        setCustomTypes(p=>({...p,[key]:newTmpl}));
+        setType(key);
+        setName(newTmpl.name);
+        setPhone("");
+        setCustomLabel(""); setShowCustom(false);
+      };
+
+      const goToStep1 = () => {
+        const isBuiltIn = !!TEMPLATES[type];
+        const settings = isBuiltIn ? defaultSettings(type) : defaultSettings(type, currentTmpl);
+        settings.businessName = name;
+        settings.phone = phone;
+        settings.city = city;
+        settings.state = state;
+        if (!isBuiltIn) {
+          settings.customEmoji = currentTmpl.emoji;
+          settings.customLabel = currentTmpl.label;
+          settings.customColor = currentTmpl.color;
+          settings.customGreeting = currentTmpl.greeting;
+        }
+        setS(settings);
+        setStep(1);
+      };
+
+      const launch = () => { onLaunch(s); };
+
+      const updH = (d,f,v) => setS(p=>({...p,hours:{...p.hours,[d]:{...p.hours[d],[f]:v}}}));
+      const addZip = () => { const z=zipIn.trim(); if(z.length===5&&/^\d+$/.test(z)&&!s.serviceZips.includes(z)){setS(p=>({...p,serviceZips:[...p.serviceZips,z]}));setZipIn("");} };
+      const delZip = (z) => setS(p=>({...p,serviceZips:p.serviceZips.filter(x=>x!==z)}));
+
+      const STEPS = ["Business Info","Hours","Services","Service Area"];
+      const STEP_ICONS = ["🏢","🕐","🔧","📍"];
+
+      // ── STEP INDICATOR ──
+      const StepBar = () => (
+        <div style={{display:"flex",alignItems:"center",gap:0,marginBottom:28,position:"relative"}}>
+          {STEPS.map((label,i)=>{
+            const done = i < step;
+            const active = i === step;
+            return (
+              <React.Fragment key={i}>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",flex:1,position:"relative",zIndex:1}}>
+                  <div style={{width:36,height:36,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,
+                    background:done?"#22c55e":active?ac:"#222645",
+                    border:`2px solid ${done?"#22c55e":active?ac:"#2a2d52"}`,
+                    transition:"all 0.3s",marginBottom:5,
+                    boxShadow:active?`0 0 20px ${ac}70`:"none"}}>
+                    {done ? "✓" : STEP_ICONS[i]}
+                  </div>
+                  <div style={{fontSize:9,fontWeight:700,color:active?ac:done?"#22c55e":"#52558a",fontFamily:"'Inter',sans-serif",textTransform:"uppercase",letterSpacing:"0.06em",textAlign:"center",whiteSpace:"nowrap"}}>{label}</div>
+                </div>
+                {i < STEPS.length-1 && (
+                  <div style={{flex:1,height:2,background:done?"#22c55e30":"#222645",marginTop:-18,zIndex:0,transition:"all 0.3s"}}/>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      );
+
+      return (
+        <div style={{minHeight:"100dvh",background:"#05071a",display:"flex",alignItems:"center",justifyContent:"center",padding:"32px 20px",overflowY:"auto"}}>
+          <div style={{width:"100%",maxWidth:500,animation:"fadeUp 0.5s ease both"}}>
+            {/* Header */}
+            <div style={{textAlign:"center",marginBottom:28}}>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:22,fontWeight:800,color:"#fff",marginBottom:8}}>
+                Annie<span style={{color:"#38bdf8"}}> the Agent</span>
+              </div>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:24,fontWeight:800,color:"#f0f0ff",marginBottom:6}}>Set up your AI agent</div>
+              <div style={{fontSize:13,color:"#6b6f9a",fontFamily:"'Inter',sans-serif"}}>Takes 60 seconds. You can change everything later.</div>
+            </div>
+
+            <StepBar/>
+
+            {/* ── STEP 0: Business Type + Info ── */}
+            {step===0&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                {/* business type grid */}
+                <div style={{marginBottom:20}}>
+                  <div style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>What kind of business?</div>
+                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8}}>
+                    {Object.entries(allTemplates).map(([key,tmplOpt])=>(
+                      <button key={key} onClick={()=>{setType(key);setName(tmplOpt.name||"");setPhone(tmplOpt.phone||"");}}
+                        style={{padding:"14px 8px",borderRadius:12,border:`2px solid ${type===key?tmplOpt.color:"#222645"}`,background:type===key?`${tmplOpt.color}15`:"#0a0c20",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                        <span style={{fontSize:22}}>{tmplOpt.emoji}</span>
+                        <span style={{fontSize:11,fontWeight:700,color:type===key?tmplOpt.color:"#6b6f9a",fontFamily:"'Inter',sans-serif",textAlign:"center"}}>{tmplOpt.label}</span>
+                      </button>
+                    ))}
+                    <button onClick={()=>setShowCustom(s=>!s)}
+                      style={{padding:"14px 8px",borderRadius:12,border:`2px dashed ${showCustom?"#818cf8":"#2a2d4a"}`,background:showCustom?"#818cf815":"transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                      <span style={{fontSize:22}}>＋</span>
+                      <span style={{fontSize:11,fontWeight:700,color:showCustom?"#818cf8":"#52558a",fontFamily:"'Inter',sans-serif"}}>Other</span>
+                    </button>
+                  </div>
+                  {showCustom && (
+                    <div style={{marginTop:10,padding:"14px",background:"#0a0c20",border:"1px solid #818cf830",borderRadius:12,animation:"fadeUp 0.3s ease"}}>
+                      <div style={{fontSize:10,fontWeight:700,color:"#818cf8",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>Create your business type</div>
+                      <input value={customLabel} onChange={e=>setCustomLabel(e.target.value)} placeholder="e.g. Pet Grooming, Lawn Care..."
+                        onKeyDown={e=>e.key==="Enter"&&addCustomType()}
+                        style={{...inp,marginBottom:10,width:"calc(100% - 26px)"}}/>
+                      <div style={{marginBottom:10}}>
+                        <div style={{fontSize:10,color:"#52558a",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>Pick an emoji:</div>
+                        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+                          {EMOJI_OPTIONS.map(e=>(
+                            <button key={e} onClick={()=>setCustomEmoji(e)}
+                              style={{width:32,height:32,borderRadius:8,border:`1.5px solid ${customEmoji===e?"#818cf8":"#2a2d4a"}`,background:customEmoji===e?"#818cf820":"transparent",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{marginBottom:12}}>
+                        <div style={{fontSize:10,color:"#52558a",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>Pick a color:</div>
+                        <div style={{display:"flex",gap:8}}>
+                          {COLOR_PALETTE.map(c=>(
+                            <button key={c} onClick={()=>setCustomColor(c)}
+                              style={{width:24,height:24,borderRadius:"50%",background:c,border:`2.5px solid ${customColor===c?"#fff":"transparent"}`,cursor:"pointer",transition:"all 0.15s"}}/>
+                          ))}
+                        </div>
+                      </div>
+                      <button onClick={addCustomType} disabled={!customLabel.trim()}
+                        style={{width:"100%",padding:"9px",borderRadius:8,border:"none",cursor:customLabel.trim()?"pointer":"not-allowed",background:customLabel.trim()?"#818cf8":"#2a2d4a",color:"#fff",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",opacity:customLabel.trim()?1:0.5}}>
+                        Add Business Type
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Business info fields */}
+                <div style={{display:"flex",flexDirection:"column",gap:12,marginBottom:24}}>
+                  {[["Business Name",name,setName,"e.g. ProFix Plumbing","text"],["Phone Number",phone,setPhone,"+1 (555) 000-0000","tel"],["City",city,setCity,"Denver","text"],["State",state,setState,"CO","text"]].map(([label,val,setter,ph,tp])=>(
+                    <div key={label}>
+                      <div style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:6,fontFamily:"'Inter',sans-serif"}}>{label}</div>
+                      <input value={val}
+                        onChange={e=>setter(tp==="tel" ? formatPhone(e.target.value) : label==="State" ? formatState(e.target.value) : e.target.value)}
+                        placeholder={ph} type={tp}
+                        maxLength={label==="State"?2:undefined}
+                        style={{...inp, width:"calc(100% - 26px)"}}
+                        onFocus={e=>e.target.style.borderColor=ac}
+                        onBlur={e=>e.target.style.borderColor="#2a2d52"}/>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Preview card */}
+                <div style={{padding:"13px 16px",background:"#0a0c20",borderRadius:12,border:`1px solid ${ac}30`,marginBottom:20,display:"flex",alignItems:"center",gap:12}}>
+                  <div style={{width:42,height:42,borderRadius:11,background:`linear-gradient(135deg,${ac},#2563eb)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>{currentTmpl.emoji}</div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#f0f0ff",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{name||"Your Business"}</div>
+                    <div style={{fontSize:11,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginTop:2}}>{phone||"—"} · {city}, {state}</div>
+                  </div>
+                  <div style={{marginLeft:"auto",fontSize:10,color:"#22c55e",fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                    <span style={{width:5,height:5,borderRadius:"50%",background:"#22c55e",display:"inline-block",animation:"pulse 2s infinite"}}/>AI Ready
+                  </div>
+                </div>
+
+                <button onClick={goToStep1} style={{width:"100%",padding:"14px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,boxShadow:`0 0 24px ${ac}40`,transition:"all 0.2s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.opacity="0.88";e.currentTarget.style.transform="translateY(-1px)";}}
+                  onMouseLeave={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="none";}}>
+                  Next: Set Your Hours →
+                </button>
+              </div>
+            )}
+
+            {/* ── STEP 1: Hours ── */}
+            {step===1&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:14}}>🕐 When are you open?</div>
+                <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:24}}>
+                  {["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>{
+                    const h=s.hours[day];
+                    return (
+                      <div key={day} style={{background:"#0c0e24",borderRadius:11,border:`1px solid ${h.open?ac+"40":"#161930"}`,padding:"11px 13px",opacity:h.open?1:0.55,transition:"all 0.2s"}}>
+                        <div style={{display:"flex",alignItems:"center",gap:10}}>
+                          <button onClick={()=>updH(day,"open",!h.open)} style={{width:34,height:19,borderRadius:10,border:"none",cursor:"pointer",background:h.open?ac:"#2a2d4a",position:"relative",transition:"background 0.2s",flexShrink:0}}>
+                            <span style={{position:"absolute",top:2,left:h.open?16:2,width:15,height:15,borderRadius:"50%",background:"#fff",transition:"left 0.2s",display:"block"}} />
+                          </button>
+                          <span style={{fontSize:12,fontWeight:700,color:h.open?"#d0d0f0":"#52558a",fontFamily:"'Inter',sans-serif",minWidth:28}}>{day}</span>
+                          {h.open?(
+                            <div style={{display:"flex",alignItems:"center",gap:6,flex:1}}>
+                              <select value={h.start} onChange={e=>updH(day,"start",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                              <span style={{color:"#6b6f9a",fontSize:11}}>–</span>
+                              <select value={h.end} onChange={e=>updH(day,"end",e.target.value)} style={{...inp,flex:1,padding:"5px 8px",width:"auto"}}>
+                                {HOURS_LIST.map(({label,h:hv})=><option key={hv} value={`${String(hv).padStart(2,"0")}:00`}>{label}</option>)}
+                              </select>
+                            </div>
+                          ):<span style={{fontSize:11,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>Closed</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div style={{display:"flex",gap:10}}>
+                  <button onClick={()=>setStep(0)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={()=>setStep(2)} style={{flex:2,padding:"13px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,boxShadow:`0 0 20px ${ac}30`}}>
+                    Next: Set Your Services →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 2: Services ── */}
+            {step===2&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:14}}>🔧 What services do you offer?</div>
+                <SvcTab s={s} setS={setS} ac={ac} lang="en" t={{activeServices:"Active Services",priceRange:"Price Range",addService:"Add Service",addServicePlaceholder:"Service name",addServicePrice:"Price"}}/>
+                <div style={{display:"flex",gap:10,marginTop:20}}>
+                  <button onClick={()=>setStep(1)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={()=>setStep(3)} style={{flex:2,padding:"13px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:800,boxShadow:`0 0 20px ${ac}30`}}>
+                    Next: Set Your Service Area →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 3: Service Area (ZIPs) ── */}
+            {step===3&&s&&(
+              <div style={{animation:"fadeUp 0.35s ease"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:6}}>📍 Which ZIP codes do you serve?</div>
+                <div style={{fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:16}}>Annie will only book customers within these ZIP codes.</div>
+                <AreaTab s={s} setS={setS} ac={ac} inp={inp} lang="en" t={{serviceArea:"Service Area",addZip:"Add ZIP",zipPlaceholder:"e.g. 80202"}} zipIn={zipIn} setZipIn={setZipIn} addZip={addZip} delZip={delZip}/>
+                <div style={{display:"flex",gap:10,marginTop:20}}>
+                  <button onClick={()=>setStep(2)} style={{flex:1,padding:"13px",borderRadius:12,border:"1px solid #2a2d52",background:"transparent",color:"#6b6f9a",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:14,fontWeight:700,cursor:"pointer"}}>← Back</button>
+                  <button onClick={launch} style={{flex:2,padding:"15px",borderRadius:12,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#2563eb)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,letterSpacing:"0.01em",boxShadow:`0 0 30px ${ac}40`,transition:"all 0.2s"}}
+                    onMouseEnter={e=>{e.currentTarget.style.opacity="0.88";e.currentTarget.style.transform="translateY(-1px)";}}
+                    onMouseLeave={e=>{e.currentTarget.style.opacity="1";e.currentTarget.style.transform="none";}}>
+                    🚀 Launch My AI Agent →
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      );
+    }
+
+
+    // Dash with "Try Your AI" CTA button
+    // ── BOOKING CARD (reusable) ──
+    function BookingCard({b, ac, lang, onUpdateBooking, isNew=false, showRestore=false}) {
+      return (
+        <div style={{background:isNew?"#0d1a0d":"#111428",border:`1px solid ${isNew?"#22c55e80":"#252850"}`,borderRadius:13,padding:"13px 15px",borderLeft:`4px solid ${b.urgency==="emergency"?"#ff5555":b.urgency==="high"?"#fb923c":"#38bdf8"}`,animation:isNew?"newBooking 0.6s ease":"fadeUp 0.3s ease",position:"relative"}}>
+          {isNew&&<div style={{position:"absolute",top:8,right:10,fontSize:10,fontWeight:700,color:"#22c55e",fontFamily:"'Inter',sans-serif",background:"#22c55e18",padding:"2px 8px",borderRadius:10,border:"1px solid #22c55e40"}}>✨ New</div>}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:5}}>
+            <div>
+              <div style={{fontSize:14,fontWeight:700,color:"#e0e0f8",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{b.info&&b.info.legalName||"Unknown"}</div>
+              <div style={{fontSize:12,color:ac,marginTop:1,fontFamily:"'Inter',sans-serif"}}>{b.service}</div>
+            </div>
+            <Badge level={b.urgency||"normal"} lang={lang}/>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:2,fontSize:12,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",marginBottom:9}}>
+            <span>🕐 {(()=>{
+              const now=new Date();
+              const tom=new Date(now); tom.setDate(now.getDate()+1);
+              const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+              const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+              if(b.day==="Today") return `Today, ${months[now.getMonth()]} ${now.getDate()}`;
+              if(b.day==="Tomorrow") return `${days[tom.getDay()]}, ${months[tom.getMonth()]} ${tom.getDate()}`;
+              return b.day;
+            })()} · {b.time}</span>
+            {b.day==="Tomorrow"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#f97316",background:"rgba(249,115,22,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>⏰ Tomorrow</span>}
+            {b.day==="Today"&&<span style={{display:"inline-flex",alignItems:"center",gap:4,marginTop:2,fontSize:10,fontWeight:700,color:"#22c55e",background:"rgba(34,197,94,0.12)",padding:"2px 8px",borderRadius:6,fontFamily:"'Inter',sans-serif"}}>📅 Today</span>}
+            {b.info&&b.info.phone&&<span>📞 {b.info.phone}</span>}
+            {b.info&&<span>📍 {b.info.street}, {b.info.city} {b.info.zip}</span>}
+          </div>
+          <div style={{display:"flex",gap:7,alignItems:"center"}}>
+            <div style={{flex:1,padding:"5px 9px",background:"#001428",borderRadius:7,fontSize:11,color:"#2563eb",display:"flex",alignItems:"center",gap:5,fontFamily:"'Inter',sans-serif"}}>
+              <Ico name="cal" size={11}/> Google Calendar updated ✓
+            </div>
+            {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"completed")}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #22c55e40",background:"#00200f",color:"#22c55e",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#22c55e";e.currentTarget.style.color="#000";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#00200f";e.currentTarget.style.color="#22c55e";}}>
+              ✓ Complete
+            </button>}
+            {!showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"cancelled")}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #ff444440",background:"#200000",color:"#ff4444",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#ff4444";e.currentTarget.style.color="#fff";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#200000";e.currentTarget.style.color="#ff4444";}}>
+              ✕ Cancel
+            </button>}
+            {showRestore&&<button onClick={()=>onUpdateBooking&&onUpdateBooking(b.id,"pending")}
+              style={{padding:"5px 11px",borderRadius:7,border:"1px solid #a78bfa40",background:"#1a0030",color:"#a78bfa",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="#a78bfa";e.currentTarget.style.color="#000";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="#1a0030";e.currentTarget.style.color="#a78bfa";}}>
+              ↩ Restore
+            </button>}
+          </div>
+        </div>
+      );
+    }
+
+    function DashWithCTA({bookings, settings, lang, onTryChat, newBookingId, onUpdateBooking}) {
+      const t = T[lang]||T.en;
+      const tmpl=TEMPLATES[settings.businessType]||{emoji:settings.customEmoji||"🏢",label:settings.customLabel||settings.businessType,color:settings.customColor||"#38bdf8"}, ac=tmpl.color;
+      const now = new Date();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+      const days7 = Array.from({length:7},(_,i)=>{
+        const d=new Date(now); d.setDate(now.getDate()+i);
+        return {
+          key: i===0?"Today":i===1?"Tomorrow":`${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}`,
+          label: `${["Su","Mo","Tu","We","Th","Fr","Sa"][d.getDay()]}\n${d.getDate()}`,
+          sub: i===0?"Today":i===1?"Tmrw":null,
+        };
+      });
+      const active = bookings.filter(b=>b.status!=="completed"&&b.status!=="cancelled");
+      const todayBookings = active.filter(b=>b.day==="Today");
+      const countByDay={};
+      days7.forEach(({key})=>{ countByDay[key]=active.filter(b=>b.day===key).length; });
+
+      // Today section: which urgency group is open
+      const [todayOpen, setTodayOpen] = useState(null); // "emergency"|"high"|"normal"|null
+      // Calendar
+      const [calDay, setCalDay] = useState(null);
+      // Pending section
+      const [pendingOpen, setPendingOpen] = useState(false);
+      const [pendingGroup, setPendingGroup] = useState(null);
+      const [archiveTab, setArchiveTab] = useState(null); // null|"completed"|"cancelled"
+      const [archiveGroup, setArchiveGroup] = useState(null);
+
+      // Sort by time for pending list
+      const timeToMin = (b) => {
+        if (!b.time) return 9999;
+        const m = b.time.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (!m) return 9999;
+        let h=parseInt(m[1]), mn=parseInt(m[2]), ap=m[3].toUpperCase();
+        if(ap==="PM"&&h!==12) h+=12;
+        if(ap==="AM"&&h===12) h=0;
+        return h*60+mn;
+      };
+      const sortedActive = [...active].sort((a,b)=>{
+        const dayOrdA = days7.findIndex(d=>d.key===a.day); 
+        const dayOrdB = days7.findIndex(d=>d.key===b.day);
+        const dA = dayOrdA===-1?99:dayOrdA, dB = dayOrdB===-1?99:dayOrdB;
+        if(dA!==dB) return dA-dB;
+        return timeToMin(a)-timeToMin(b);
+      });
+
+      const TodayUrgencySection = ({urgency, label, col}) => {
+        const items = todayBookings.filter(b=>b.urgency===urgency);
+        const isOpen = todayOpen===urgency;
+        return (
+          <div style={{borderRadius:10,overflow:"hidden",border:`1px solid ${col}30`,marginBottom:6}}>
+            <button onClick={()=>setTodayOpen(isOpen?null:urgency)}
+              style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{items.length}</span>
+              </div>
+              <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
+            </button>
+            {isOpen&&(
+              <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
+                {items.length===0
+                  ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>No appointments</div>
+                  :items.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
+                }
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      return (
+        <div style={{display:"flex",flexDirection:"column",height:"100%",background:"#070818",overflowY:"auto"}}>
+          {/* ── Sticky header ── */}
+          <div style={{padding:"14px 18px 12px",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0,display:"flex",alignItems:"center",gap:9}}>
+            <span style={{fontSize:20}}>{tmpl.emoji}</span>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#f0f0ff"}}>{settings.businessName}</div>
+              <div style={{fontSize:11,color:"#6b6f9a",marginTop:2,fontFamily:"'Inter',sans-serif"}}>{t.aiLive} · {settings.serviceZips.length} {t.zips} · {settings.services.length} {t.services}</div>
+            </div>
+          </div>
+
+          <div style={{padding:"14px 18px",display:"flex",flexDirection:"column",gap:10}}>
+
+            {/* ── CTA (no bookings yet) ── */}
+            {bookings.length===0&&(
+              <div style={{background:"linear-gradient(135deg,rgba(56,189,248,0.08),rgba(129,140,248,0.08))",border:`1px solid ${ac}40`,borderRadius:14,padding:"18px 16px",textAlign:"center",animation:"fadeUp 0.4s ease"}}>
+                <div style={{fontSize:28,marginBottom:8}}>🤖</div>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:15,fontWeight:800,color:"#e0e0ff",marginBottom:6}}>Your AI agent is live!</div>
+                <div style={{fontSize:13,color:"#757aa8",fontFamily:"'Inter',sans-serif",marginBottom:14,lineHeight:1.6}}>
+                  See it in action — try booking an appointment as a customer would.
+                </div>
+                <button onClick={onTryChat} style={{padding:"11px 28px",borderRadius:10,border:"none",cursor:"pointer",background:`linear-gradient(135deg,${ac},#818cf8)`,color:"#fff",fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:13,fontWeight:800,boxShadow:`0 0 20px ${ac}40`,transition:"all 0.2s"}}
+                  onMouseEnter={e=>e.currentTarget.style.opacity="0.85"}
+                  onMouseLeave={e=>e.currentTarget.style.opacity="1"}>
+                  💬 Talk to your AI agent →
+                </button>
+              </div>
+            )}
+
+            {/* ── TODAY section ── */}
+            {bookings.length>0&&(
+              <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif",marginBottom:10}}>
+                  📅 {now.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+                </div>
+                {todayBookings.length===0
+                  ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif"}}>No appointments today</div>
+                  :<div>
+                    <TodayUrgencySection urgency="emergency" label="🚨 Emergency" col="#ff4444"/>
+                    <TodayUrgencySection urgency="high"      label="⚡ Urgent"    col="#f97316"/>
+                    <TodayUrgencySection urgency="normal"    label="📅 Regular"   col="#60a5fa"/>
+                  </div>
+                }
+              </div>
+            )}
+
+            {/* ── 7-DAY CALENDAR ── */}
+            {bookings.length>0&&(
+              <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,padding:"12px 14px"}}>
+                <div style={{fontSize:10,fontWeight:700,color:"#52558a",letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>7-Day Booking Calendar</div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:5,marginBottom:calDay?12:0}}>
+                  {days7.map(({key,label,sub})=>{
+                    const cnt=countByDay[key]||0, isToday=key==="Today", isSel=calDay===key;
+                    return (
+                      <div key={key} onClick={()=>setCalDay(isSel?null:key)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"8px 4px",borderRadius:10,cursor:"pointer",background:isSel?`${ac}30`:isToday?`${ac}15`:"transparent",border:isSel?`1px solid ${ac}`:isToday?`1px solid ${ac}40`:"1px solid transparent",transition:"all 0.15s"}}
+                        onMouseEnter={e=>{if(!isSel)e.currentTarget.style.background=`${ac}10`;}}
+                        onMouseLeave={e=>{if(!isSel)e.currentTarget.style.background=isToday?`${ac}15`:"transparent";}}>
+                        <div style={{fontSize:9,fontWeight:700,color:isSel||isToday?ac:"#6b6f9a",fontFamily:"'Inter',sans-serif",textAlign:"center",whiteSpace:"pre-line",lineHeight:1.3}}>{label}</div>
+                        <div style={{width:24,height:24,borderRadius:"50%",background:cnt>0?(isSel?ac:`${ac}80`):"#1a1a28",display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.15s"}}>
+                          <span style={{fontSize:11,fontWeight:800,color:cnt>0?"#fff":"#303050",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{cnt||""}</span>
+                        </div>
+                        {sub&&<div style={{fontSize:8,fontWeight:700,color:isToday?ac:"#f97316",fontFamily:"'Inter',sans-serif",letterSpacing:"0.04em"}}>{sub}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+                {calDay&&(()=>{
+                  const dayBookings=[...active.filter(b=>b.day===calDay)].sort((a,b)=>timeToMin(a)-timeToMin(b));
+                  return (
+                    <div style={{borderTop:"1px solid #222645",paddingTop:10}}>
+                      <div style={{fontSize:10,fontWeight:700,color:ac,letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>{calDay}</div>
+                      {dayBookings.length===0
+                        ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"8px 0"}}>No appointments</div>
+                        :dayBookings.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking}/>)
+                      }
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            {/* ── PENDING / COMPLETED / CANCELLED row ── */}
+            {bookings.length>0&&(()=>{
+              const completed = [...bookings.filter(b=>b.status==="completed")].sort((a,b)=>timeToMin(a)-timeToMin(b));
+              const cancelled = [...bookings.filter(b=>b.status==="cancelled")].sort((a,b)=>timeToMin(a)-timeToMin(b));
+
+              const ArchiveSection = ({tab, label, col, items}) => {
+                const isTabOpen = archiveTab===tab;
+                return (
+                  <div style={{background:"#0c0e24",border:`1px solid ${col}30`,borderRadius:12,overflow:"hidden"}}>
+                    <button onClick={()=>{setArchiveTab(isTabOpen?null:tab); setArchiveGroup(null);}}
+                      style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:13,fontWeight:700,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{label}</span>
+                        <span style={{fontSize:14,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 10px",borderRadius:12}}>{items.length}</span>
+                      </div>
+                      <span style={{fontSize:11,color:col,opacity:0.6}}>{isTabOpen?"▲":"▼"}</span>
+                    </button>
+                    {isTabOpen&&(
+                      <div style={{borderTop:`1px solid ${col}20`,padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                        {items.length===0
+                          ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
+                          :[
+                            {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
+                            {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
+                            {key:"normal",   label:"📅 Regular",  col:"#60a5fa"},
+                          ].map(({key,label:gl,col:gc})=>{
+                            const grp=items.filter(b=>b.urgency===key);
+                            const isOpen=archiveGroup===`${tab}-${key}`;
+                            return (
+                              <div key={key} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${gc}30`}}>
+                                <button onClick={()=>setArchiveGroup(isOpen?null:`${tab}-${key}`)}
+                                  style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${gc}15`:"transparent",border:"none",cursor:"pointer"}}>
+                                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                    <span style={{fontSize:12,fontWeight:700,color:gc,fontFamily:"'Inter',sans-serif"}}>{gl}</span>
+                                    <span style={{fontSize:12,fontWeight:800,color:gc,background:`${gc}20`,padding:"1px 8px",borderRadius:10,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>{grp.length}</span>
+                                  </div>
+                                  <span style={{fontSize:10,color:gc,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
+                                </button>
+                                {isOpen&&(
+                                  <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${gc}08`}}>
+                                    {grp.length===0
+                                      ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
+                                      :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} showRestore={true}/>)
+                                    }
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })
+                        }
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
+              return (
+                <>
+                  {/* Pending */}
+                  <div style={{background:"#0c0e24",border:"1px solid #262950",borderRadius:12,overflow:"hidden"}}>
+                    <button onClick={()=>{setPendingOpen(o=>!o); setPendingGroup(null);}}
+                      style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"13px 14px",background:"transparent",border:"none",cursor:"pointer"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:10}}>
+                        <span style={{fontSize:13,fontWeight:700,color:"#d0d0f0",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>Pending</span>
+                        <span style={{fontSize:16,fontWeight:800,color:"#60a5fa",fontFamily:"'Plus Jakarta Sans',sans-serif",background:"#60a5fa20",padding:"1px 10px",borderRadius:12}}>{active.length}</span>
+                      </div>
+                      <span style={{fontSize:11,color:"#6b6f9a"}}>{pendingOpen?"▲":"▼"}</span>
+                    </button>
+                    {pendingOpen&&(
+                      <div style={{borderTop:"1px solid #222645",padding:"10px 14px",display:"flex",flexDirection:"column",gap:6}}>
+                        {[
+                          {key:"emergency",label:"🚨 Emergency",col:"#ff4444"},
+                          {key:"high",     label:"⚡ Urgent",   col:"#f97316"},
+                          {key:"normal",   label:"📅 Regular",  col:"#60a5fa"},
+                        ].map(({key,label,col})=>{
+                          const grp=sortedActive.filter(b=>b.urgency===key);
+                          const isOpen=pendingGroup===key;
+                          return (
+                            <div key={key} style={{borderRadius:10,overflow:"hidden",border:`1px solid ${col}30`}}>
+                              <button onClick={()=>setPendingGroup(isOpen?null:key)}
+                                style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 12px",background:isOpen?`${col}15`:"transparent",border:"none",cursor:"pointer",transition:"all 0.15s"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                                  <span style={{fontSize:12,fontWeight:700,color:col,fontFamily:"'Inter',sans-serif"}}>{label}</span>
+                                  <span style={{fontSize:13,fontWeight:800,color:col,fontFamily:"'Plus Jakarta Sans',sans-serif",background:`${col}20`,padding:"1px 8px",borderRadius:10}}>{grp.length}</span>
+                                </div>
+                                <span style={{fontSize:10,color:col,opacity:0.7}}>{isOpen?"▲":"▼"}</span>
+                              </button>
+                              {isOpen&&(
+                                <div style={{padding:"8px 10px",display:"flex",flexDirection:"column",gap:7,background:`${col}08`}}>
+                                  {grp.length===0
+                                    ?<div style={{fontSize:12,color:"#52558a",fontFamily:"'Inter',sans-serif",padding:"6px 2px"}}>None</div>
+                                    :grp.map((b,i)=><BookingCard key={b.id||i} b={b} ac={ac} lang={lang} onUpdateBooking={onUpdateBooking} isNew={b.id===newBookingId}/>)
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Completed */}
+                  <ArchiveSection tab="completed" label="✓ Completed" col="#22c55e" items={completed}/>
+
+                  {/* Cancelled */}
+                  <ArchiveSection tab="cancelled" label="✕ Cancelled" col="#ff4444" items={cancelled}/>
+                </>
+              );
+            })()}
+
+            {/* Book another */}
+            {bookings.length>0&&(
+              <button onClick={onTryChat} style={{padding:"10px",borderRadius:10,border:`1px solid ${ac}30`,background:"transparent",cursor:"pointer",color:ac,fontFamily:"'Inter',sans-serif",fontSize:12,fontWeight:600,transition:"all 0.2s"}}
+                onMouseEnter={e=>e.currentTarget.style.background=ac+"10"}
+                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                + Book another appointment
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── MAIN APP ──
+    function App() {
+      // Demo flow: "intro" → "setup" → "main"
+      const [screen, setScreen] = useState("intro");
+
+      const [settings, setSettings] = useState(defaultSettings("plumber"));
+      const [bookings, setBookings] = useState([]);
+      const [chatKey, setChatKey] = useState(0);
+      const [showChat, setShowChat] = useState(false);
+      const [showSettings, setShowSettings] = useState(false);
+      const [lang, setLang] = useState("en");
+      const [newBookingId, setNewBookingId] = useState(null);
+      const isDesktop = useIsDesktop();
+      const t = T[lang]||T.en;
+      const ac = (TEMPLATES[settings.businessType]||{color:settings.customColor||'#38bdf8'}).color;
+
+      const handleLaunch = (s) => { setSettings(s); setScreen("main"); setShowChat(false); };
+
+      const [bookedSlotIds, setBookedSlotIds] = useState([]);
+
+      const handleBooked = (b) => {
+        const id = Date.now().toString();
+        b.id = id;
+        setBookings(p=>[b,...p]);
+        if (b.slotId) setBookedSlotIds(p=>[...p, b.slotId]);
+        setNewBookingId(id);
+        setShowChat(false);
+        setTimeout(()=>setNewBookingId(null), 5000);
+      };
+
+      const handleUpdateBooking = (id, status) => {
+        setBookings(p => p.map(b => b.id===id ? {...b, status: status==="pending" ? undefined : status} : b));
+      };
+
+      const handleTryChat = () => { setChatKey(k=>k+1); setShowChat(true); };
+
+      // Show key entry if not set
+
+      if (screen==="intro") return <IntroScreen onStart={()=>setScreen("setup")}/>;
+      if (screen==="setup") return <SetupScreen onLaunch={handleLaunch}/>;
+
+      // ── MAIN SCREEN (desktop) ──
+      if (isDesktop) {
+        return (
+          <div style={{display:"flex",flexDirection:"column",height:"100dvh",background:"#080810"}}>
+            {/* top bar */}
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"7px 20px",flexShrink:0}}>
+              <div style={{display:"flex",alignItems:"center",gap:14}}>
+                <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:17,fontWeight:800,color:"#fff",letterSpacing:"-0.01em"}}>Annie<span style={{color:ac}}> the Agent</span></div>
+                <div style={{width:1,height:16,background:"#222645"}}/>
+                <button onClick={()=>setScreen("setup")} style={{fontSize:11,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",background:"none",border:"none",cursor:"pointer",padding:0}}
+                  onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
+                  onMouseLeave={e=>e.currentTarget.style.color="#6b6f9a"}>
+                  ← Change business type
+                </button>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <LangToggle lang={lang} setLang={setLang} ac={ac}/>
+                <button onClick={()=>setShowSettings(s=>!s)} style={{padding:"5px 14px",borderRadius:10,border:`1px solid ${showSettings?ac+"80":"#2a2d4a"}`,background:showSettings?`${ac}18`:"transparent",color:showSettings?ac:"#757aa8",cursor:"pointer",fontSize:11,fontWeight:700,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:5,transition:"all 0.2s"}}>
+                  <Ico name={showSettings?"grid":"cog"} size={13}/>
+                  {showSettings ? t.backDash : t.openSettings}
+                </button>
+              </div>
+            </div>
+
+            {/* main area */}
+            <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+              {/* LEFT: dashboard or settings */}
+              <div style={{flex:1,overflow:"hidden",borderRight:showChat?"1px solid #1a1a28":"none"}}>
+                {showSettings
+                  ? <Settings settings={settings} onSave={(ns)=>{setSettings(ns);setShowSettings(false);}} lang={lang}/>
+                  : <DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId} onUpdateBooking={handleUpdateBooking}/>
+                }
+              </div>
+
+              {/* RIGHT: chat panel — slides in when active */}
+              {showChat&&(
+                <div style={{width:"44%",display:"flex",flexDirection:"column",overflow:"hidden",animation:"slideIn 0.35s ease"}}>
+                  <div style={{padding:"10px 16px",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <span style={{fontSize:10,fontWeight:700,color:"#6b6f9a",letterSpacing:"0.08em",textTransform:"uppercase",fontFamily:"'Inter',sans-serif"}}>💬 Customer View</span>
+                    <button onClick={()=>setShowChat(false)} style={{background:"none",border:"none",color:"#6b6f9a",cursor:"pointer",fontSize:11,fontFamily:"'Inter',sans-serif",display:"flex",alignItems:"center",gap:4}}
+                      onMouseEnter={e=>e.currentTarget.style.color="#a0a0c0"}
+                      onMouseLeave={e=>e.currentTarget.style.color="#6b6f9a"}>
+                      ← Back to dashboard
+                    </button>
+                  </div>
+                  <div style={{flex:1,overflow:"hidden"}}>
+                    <Chat key={chatKey} settings={settings} bookedSlotIds={bookedSlotIds} onBooked={handleBooked}/>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // ── MOBILE MAIN ──
+      const mobileView = showChat ? "chat" : showSettings ? "settings" : "dashboard";
+      return (
+        <div style={{maxWidth:430,margin:"0 auto",height:"100dvh",display:"flex",flexDirection:"column"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#070710",borderBottom:"1px solid #141420",padding:"9px 14px",flexShrink:0}}>
+            <div style={{fontFamily:"'Plus Jakarta Sans',sans-serif",fontSize:16,fontWeight:800,color:"#fff"}}>Annie<span style={{color:ac}}> the Agent</span></div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <LangToggle lang={lang} setLang={setLang} ac={ac}/>
+              <button onClick={()=>setScreen("setup")} style={{fontSize:10,color:"#6b6f9a",fontFamily:"'Inter',sans-serif",background:"none",border:"1px solid #2a2d4a",borderRadius:8,cursor:"pointer",padding:"4px 8px"}}>← Setup</button>
+            </div>
+          </div>
+          {/* nav tabs */}
+          <div style={{display:"flex",background:"#0b0d1e",borderBottom:"1px solid #222645",flexShrink:0}}>
+            {[{k:"dashboard",l:t.navDashboard,i:"grid"},{k:"settings",l:t.navSettings,i:"cog"}].map(tab=>{
+              const active=mobileView===tab.k;
+              return (
+                <button key={tab.k} onClick={()=>{setShowChat(false);setShowSettings(tab.k==="settings");}}
+                  style={{flex:1,padding:"10px 4px",border:"none",background:"transparent",cursor:"pointer",color:active?ac:"#6b6f9a",fontSize:10,fontWeight:600,borderBottom:active?`2px solid ${ac}`:"2px solid transparent",display:"flex",flexDirection:"column",alignItems:"center",gap:3,fontFamily:"'Inter',sans-serif",letterSpacing:"0.05em",textTransform:"uppercase",transition:"color 0.2s"}}>
+                  <Ico name={tab.i} size={15}/>{tab.l}
+                  {tab.k==="dashboard"&&bookings.length>0&&!showChat&&<span style={{position:"absolute",marginTop:-8,marginLeft:16,width:14,height:14,background:ac,borderRadius:"50%",fontSize:8,display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontWeight:700}}>{bookings.length}</span>}
+                </button>
+              );
+            })}
+          </div>
+          <div style={{flex:1,overflow:"hidden"}}>
+            {mobileView==="chat"&&<Chat key={chatKey} settings={settings} bookedSlotIds={bookedSlotIds} onBooked={handleBooked}/>}
+            {mobileView==="settings"&&<Settings settings={settings} onSave={(ns)=>{setSettings(ns);setShowSettings(false);}} lang={lang}/>}
+            {mobileView==="dashboard"&&<DashWithCTA bookings={bookings} settings={settings} lang={lang} onTryChat={handleTryChat} newBookingId={newBookingId} onUpdateBooking={handleUpdateBooking}/>}
+          </div>
+        </div>
+      );
+    }
+
+    try {
+      ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+    } catch(e) {
+      document.getElementById("root").innerHTML = '<div style="color:#ff4444;padding:40px;font-family:monospace;background:#0a0010;min-height:100vh;"><h2>JS Error:</h2><pre>' + e.message + '</pre><pre>' + (e.stack||'') + '</pre></div>';
+    }
+  </script>
+</body>
+</html>
