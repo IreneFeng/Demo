@@ -399,28 +399,165 @@
 
     // ── AREA TAB ──
     function AreaTab({s, setS, ac, inp, lang, t, zipIn, setZipIn, addZip, delZip}) {
-      const [autoStatus, setAutoStatus] = useState(null); // null | "loading" | "done" | "error"
+      const [autoStatus, setAutoStatus] = useState(null);
       const [autoCount, setAutoCount] = useState(0);
+      const [citySearch, setCitySearch] = useState("");
+      const [cityResults, setCityResults] = useState([]);
+      const [cityStatus, setCityStatus] = useState(null);
+      const [cityCount, setCityCount] = useState(0);
+      const [radiusMiles, setRadiusMiles] = useState("10");
+      const [radiusStatus, setRadiusStatus] = useState(null);
+      const [radiusCount, setRadiusCount] = useState(0);
 
+      // Fetch ZIPs from business address — REPLACE existing ZIPs
       const autoGenZips = async () => {
         const city = s.city?.trim();
         const state = s.state?.trim();
         if (!city || !state) { setAutoStatus("error"); return; }
         setAutoStatus("loading");
         try {
-          // Use zippopotam.us free API - search by city+state
           const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(state)}/${encodeURIComponent(city)}`);
           if (!res.ok) throw new Error("not found");
           const data = await res.json();
           const newZips = data.places.map(p => p["post code"]);
-          const merged = [...new Set([...s.serviceZips, ...newZips])];
-          setS(p => ({...p, serviceZips: merged}));
+          setS(p => ({...p, serviceZips: newZips})); // REPLACE, not merge
           setAutoCount(newZips.length);
           setAutoStatus("done");
           setTimeout(() => setAutoStatus(null), 3000);
         } catch(e) {
           setAutoStatus("error");
           setTimeout(() => setAutoStatus(null), 3000);
+        }
+      };
+
+      // Radius-based ZIP fetch — geocode address then find all ZIPs within N miles
+      const fetchByRadius = async () => {
+        const city = s.city?.trim();
+        const state = s.state?.trim();
+        const miles = parseFloat(radiusMiles);
+        if (!city || !state || isNaN(miles) || miles<=0) { setRadiusStatus("error"); return; }
+        setRadiusStatus("loading");
+        try {
+          // Step 1: geocode the business address to get lat/lng
+          const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(city+", "+state+", US")}&limit=1&layer=city&countrycode=us`);
+          if (!geoRes.ok) throw new Error();
+          const geoData = await geoRes.json();
+          if (!geoData.features?.length) throw new Error();
+          const [lng, lat] = geoData.features[0].geometry.coordinates;
+
+          // Step 2: convert miles to degrees (approx: 1 degree lat ≈ 69 miles)
+          const degLat = miles / 69;
+          const degLng = miles / (69 * Math.cos(lat * Math.PI / 180));
+
+          // Step 3: use GeoNames nearby postal codes API (free, no key needed for basic)
+          // Alternative: use zipcodestack or use bounding box approach with zippopotam
+          // We'll use the free api.zippopotam.us bounding box workaround:
+          // Fetch surrounding cities and collect their ZIPs
+          const bbox = {
+            minLat: lat - degLat, maxLat: lat + degLat,
+            minLng: lng - degLng, maxLng: lng + degLng,
+          };
+
+          // Use GeoNames free API for nearby postal codes
+          const nearbyRes = await fetch(
+            `http://api.geonames.org/findNearbyPostalCodesJSON?lat=${lat}&lng=${lng}&radius=${miles}&maxRows=200&country=US&username=demo`
+          );
+          if (!nearbyRes.ok) throw new Error();
+          const nearbyData = await nearbyRes.json();
+
+          if (nearbyData.postalCodes?.length) {
+            const newZips = [...new Set(nearbyData.postalCodes.map(p => p.postalCode))];
+            setS(p => ({...p, serviceZips: [...new Set([...p.serviceZips, ...newZips])]}));
+            setRadiusCount(newZips.length);
+            setRadiusStatus("done");
+            setTimeout(() => setRadiusStatus(null), 3000);
+          } else {
+            throw new Error("no results");
+          }
+        } catch(e) {
+          // Fallback: use photon + zippopotam for surrounding cities
+          try {
+            const miles2 = parseFloat(radiusMiles);
+            const geoRes2 = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent((s.city||"")+" "+(s.state||"")+" US")}&limit=1&countrycode=us`);
+            const geoData2 = await geoRes2.json();
+            const [lng2, lat2] = geoData2.features[0].geometry.coordinates;
+            // Get nearby places within bounding box
+            const nearRes = await fetch(`https://photon.komoot.io/api/?lat=${lat2}&lon=${lng2}&q=&limit=20&layer=city&countrycode=us&bbox=${lng2-miles2/50},${lat2-miles2/69},${lng2+miles2/50},${lat2+miles2/69}`);
+            const nearData = await nearRes.json();
+            const cities = nearData.features?.map(f=>({city:f.properties.name, state:f.properties.stateCode||f.properties.state})).filter(c=>c.city&&c.state)||[];
+            const allZips = new Set(s.serviceZips);
+            let added = 0;
+            for (const c of cities.slice(0,8)) {
+              try {
+                const zr = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(c.state)}/${encodeURIComponent(c.city)}`);
+                if (zr.ok) {
+                  const zd = await zr.json();
+                  zd.places?.forEach(p => allZips.add(p["post code"]));
+                  added += zd.places?.length||0;
+                }
+              } catch{}
+            }
+            setS(p => ({...p, serviceZips: [...allZips]}));
+            setRadiusCount(added);
+            setRadiusStatus("done");
+            setTimeout(() => setRadiusStatus(null), 3000);
+          } catch {
+            setRadiusStatus("error");
+            setTimeout(() => setRadiusStatus(null), 3000);
+          }
+        }
+      };
+
+      // City search — debounced, searches zippopotam.us by partial city name
+      const searchCity = async (val) => {
+        setCitySearch(val);
+        setCityResults([]);
+        if (val.trim().length < 2) return;
+        setCityStatus("loading");
+        try {
+          // Search across common states using GeoNames-style lookup via zippopotam
+          // We'll search the city name across US by fetching from a public city search API
+          const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(val.trim())}`);
+          // zippopotam doesn't support city-only search, use alternative approach:
+          // fetch from photon geocoder which is free and supports city search
+          const geoRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val.trim())}&limit=8&layer=city&countrycode=us`);
+          if (!geoRes.ok) throw new Error();
+          const geoData = await geoRes.json();
+          const results = geoData.features
+            .filter(f => f.properties.country === "United States")
+            .map(f => ({
+              city: f.properties.name,
+              state: f.properties.state,
+              stateCode: f.properties.stateCode || f.properties.state,
+              label: `${f.properties.name}, ${f.properties.stateCode || f.properties.state}`
+            }))
+            .filter((v,i,a) => a.findIndex(x=>x.label===v.label)===i) // dedupe
+            .slice(0,6);
+          setCityResults(results);
+          setCityStatus(null);
+        } catch(e) {
+          setCityStatus(null);
+          setCityResults([]);
+        }
+      };
+
+      // Add ZIPs for a selected city
+      const addCityZips = async (city, stateCode) => {
+        setCityStatus("loading");
+        setCityResults([]);
+        setCitySearch("");
+        try {
+          const res = await fetch(`https://api.zippopotam.us/us/${encodeURIComponent(stateCode)}/${encodeURIComponent(city)}`);
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          const newZips = data.places.map(p => p["post code"]);
+          setS(p => ({...p, serviceZips: [...new Set([...p.serviceZips, ...newZips])]}));
+          setCityCount(newZips.length);
+          setCityStatus("done");
+          setTimeout(() => setCityStatus(null), 3000);
+        } catch(e) {
+          setCityStatus("error");
+          setTimeout(() => setCityStatus(null), 3000);
         }
       };
 
@@ -433,29 +570,85 @@
             <strong style={{color:"#d0d0f0"}}>{s.serviceZips.length} ZIPs</strong> {lang==="zh"?"个邮编已覆盖":"covered"}. {lang==="zh"?"范围外客户会被自动提示。":"Customers outside are redirected automatically."}
           </p>
 
-          {/* Auto-generate from address */}
+          {/* Auto-generate from business address */}
           <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:`1px solid ${ac}30`,borderRadius:12}}>
-            <div style={{fontSize:11,fontWeight:700,color:ac,marginBottom:6,fontFamily:"'Inter',sans-serif"}}>
-              📍 {lang==="zh"?"根据商家地址自动生成邮编":"Auto-generate ZIPs from business address"}
+            <div style={{fontSize:11,fontWeight:700,color:ac,marginBottom:4,fontFamily:"'Inter',sans-serif"}}>
+              📍 {lang==="zh"?"根据商家地址自动生成邮编":"Auto-generate from business address"}
             </div>
-            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
-              {lang==="zh"
-                ? `当前地址: ${s.city||"—"}, ${s.state||"—"} · 在Business标签修改地址`
-                : `Current: ${s.city||"—"}, ${s.state||"—"} · Edit in Business tab`}
+            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              {`${s.city||"—"}, ${s.state||"—"}`} · <span style={{color:"#ff444490",fontSize:10}}>{lang==="zh"?"⚠️ 会替换现有邮编":"⚠️ Replaces existing ZIPs"}</span>
             </div>
-            <button onClick={autoGenZips} disabled={autoStatus==="loading"} style={{width:"100%",padding:"9px",borderRadius:10,border:`1px solid ${ac}60`,background:autoStatus==="loading"?`${ac}10`:`${ac}18`,color:autoStatus==="loading"?"#757aa8":ac,cursor:autoStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-              {autoStatus==="loading"
-                ? <><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {lang==="zh"?"查询中...":"Searching..."}</>
-                : autoStatus==="done"
-                ? `✅ ${lang==="zh"?`已添加 ${autoCount} 个邮编`:`Added ${autoCount} ZIPs`}`
-                : autoStatus==="error"
-                ? `❌ ${lang==="zh"?"未找到，请检查城市名":"Not found, check city name"}`
-                : `🔍 ${lang==="zh"?"自动获取周边邮编":"Fetch ZIPs for my area"}`
-              }
+            <button onClick={autoGenZips} disabled={autoStatus==="loading"} style={{width:"100%",padding:"8px",borderRadius:9,border:`1px solid ${ac}50`,background:`${ac}15`,color:autoStatus==="loading"?"#757aa8":ac,cursor:autoStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {autoStatus==="loading"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> {lang==="zh"?"查询中...":"Searching..."}</>
+               :autoStatus==="done"?`✅ ${autoCount} ZIPs loaded`
+               :autoStatus==="error"?`❌ Not found`
+               :`🔍 ${lang==="zh"?"自动获取周边邮编":"Fetch ZIPs for my area"}`}
             </button>
           </div>
 
-          {/* Manual add */}
+          {/* Radius-based fetch */}
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:"1px solid #262950",borderRadius:12}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8890b8",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              📡 {lang==="zh"?"按服务半径添加邮编":"Add ZIPs by service radius"}
+            </div>
+            <div style={{fontSize:11,color:"#6b6f9a",marginBottom:10,fontFamily:"'Inter',sans-serif"}}>
+              {lang==="zh"?"从商家地址向外扩展，自动添加范围内所有邮编":"Auto-adds all ZIPs within your chosen radius from your business address"}
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+              <input
+                value={radiusMiles}
+                onChange={e=>setRadiusMiles(e.target.value.replace(/[^\d.]/g,""))}
+                placeholder="10"
+                style={{...inp,width:70,textAlign:"center",padding:"8px 10px"}}
+              />
+              <span style={{fontSize:13,color:"#8890b8",fontFamily:"'Inter',sans-serif",whiteSpace:"nowrap"}}>miles from {s.city||"your address"}</span>
+            </div>
+            <div style={{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap"}}>
+              {["5","10","15","25","50"].map(m=>(
+                <button key={m} onClick={()=>setRadiusMiles(m)}
+                  style={{padding:"4px 12px",borderRadius:14,border:`1.5px solid ${radiusMiles===m?ac:"#262950"}`,background:radiusMiles===m?`${ac}18`:"transparent",color:radiusMiles===m?ac:"#6b6f9a",fontSize:11,fontWeight:700,cursor:"pointer",fontFamily:"'Inter',sans-serif",transition:"all 0.15s"}}>
+                  {m} mi
+                </button>
+              ))}
+            </div>
+            <button onClick={fetchByRadius} disabled={radiusStatus==="loading"} style={{width:"100%",padding:"8px",borderRadius:9,border:"1px solid #262950",background:"#111428",color:radiusStatus==="loading"?"#757aa8":"#8890b8",cursor:radiusStatus==="loading"?"not-allowed":"pointer",fontSize:12,fontWeight:700,fontFamily:"'Inter',sans-serif",transition:"all 0.2s",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+              {radiusStatus==="loading"?<><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Searching...</>
+               :radiusStatus==="done"?`✅ Added ${radiusCount} ZIPs within ${radiusMiles} miles`
+               :radiusStatus==="error"?`❌ Could not fetch — try a different radius`
+               :`📡 Fetch ZIPs within ${radiusMiles} miles`}
+            </button>
+          </div>
+
+          {/* City search */}
+          <div style={{marginBottom:14,padding:"12px 14px",background:"#0c0e24",border:"1px solid #262950",borderRadius:12,position:"relative"}}>
+            <div style={{fontSize:11,fontWeight:700,color:"#8890b8",marginBottom:8,fontFamily:"'Inter',sans-serif"}}>
+              🏙️ {lang==="zh"?"按城市添加邮编":"Add ZIPs by city"}
+            </div>
+            <input
+              value={citySearch}
+              onChange={e=>searchCity(e.target.value)}
+              placeholder={lang==="zh"?"输入城市名，如 Harrison...":"Search city, e.g. Harrison..."}
+              style={{...inp,marginBottom:cityResults.length>0?6:0}}
+            />
+            {cityStatus==="loading"&&<div style={{fontSize:11,color:"#6b6f9a",marginTop:4,fontFamily:"'Inter',sans-serif"}}>⟳ Searching...</div>}
+            {cityStatus==="done"&&<div style={{fontSize:11,color:"#22c55e",marginTop:4,fontFamily:"'Inter',sans-serif"}}>✅ Added {cityCount} ZIPs</div>}
+            {cityStatus==="error"&&<div style={{fontSize:11,color:"#ff4444",marginTop:4,fontFamily:"'Inter',sans-serif"}}>❌ City not found</div>}
+            {cityResults.length>0&&(
+              <div style={{background:"#080a1f",border:"1px solid #262950",borderRadius:10,overflow:"hidden",marginTop:4}}>
+                {cityResults.map((r,i)=>(
+                  <button key={i} onClick={()=>addCityZips(r.city, r.stateCode)}
+                    style={{width:"100%",padding:"9px 12px",background:"transparent",border:"none",borderBottom:i<cityResults.length-1?"1px solid #1a1d38":"none",color:"#ccd2f0",fontSize:13,fontFamily:"'Inter',sans-serif",cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",transition:"background 0.15s"}}
+                    onMouseEnter={e=>e.currentTarget.style.background="#0c0e24"}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <span>{r.label}</span>
+                    <span style={{fontSize:11,color:ac}}>+ Add ZIPs</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Manual ZIP input */}
           <div style={{display:"flex",gap:8,marginBottom:10}}>
             <input value={zipIn} onChange={e=>setZipIn(e.target.value.replace(/\D/g,"").slice(0,5))} onKeyDown={e=>e.key==="Enter"&&addZip()} placeholder={t.addZip} maxLength={5} style={{...inp,flex:1}} />
             <button onClick={addZip} disabled={zipIn.length!==5} style={{padding:"9px 14px",borderRadius:10,border:"none",cursor:zipIn.length===5?"pointer":"not-allowed",background:zipIn.length===5?ac:"#2a2d4a",color:"#fff",opacity:zipIn.length===5?1:0.4}}>
@@ -463,7 +656,7 @@
             </button>
           </div>
 
-          {/* Quick presets + clear */}
+          {/* Clear all */}
           <div style={{display:"flex",gap:7,marginBottom:12,flexWrap:"wrap"}}>
             <button onClick={clearAll} style={{padding:"4px 11px",borderRadius:14,border:"1px solid #3d0000",background:"transparent",color:"#ff4444",fontSize:11,cursor:"pointer",fontFamily:"'Inter',sans-serif"}}>{t.clearAll}</button>
           </div>
