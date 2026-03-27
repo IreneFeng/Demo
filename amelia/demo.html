@@ -2257,59 +2257,8 @@ function setPri(p){
   });
 }
 
-function saveCalTask(){
-  const val=document.getElementById('cal-task-inp').value.trim();
-  if(!val||!calCurrentDate) return;
-  const ds=calCurrentDate.toDateString();
-  if(!calUserTasks[ds]) calUserTasks[ds]=[];
-  calUserTasks[ds].push({text:val,pri:calPri});
-  if(ds===NOW.toDateString()){
-    const list=document.getElementById('home-task-list');
-    const el=document.createElement('div'); el.className='todo-row';
-    el.onclick=function(){togTask(this);};
-    el.innerHTML=`<div class="chk"></div><div class="todo-body"><div class="todo-t">${val}</div><div class="todo-m"><span class="pdot ${calPri}"></span>Added · ${calPri==='h'?'High':calPri==='m'?'Medium':'Low'}</div></div><span class="tag ${calPri==='h'?'urg':calPri==='m'?'act':'ok'}">${calPri==='h'?'High':calPri==='m'?'Medium':'Low'}</span>`;
-    list.insertBefore(el,list.querySelector('.todo-row'));
-  }
-  // Refresh schedule panel if open
-  if(calSelectedDate&&calSelectedDate.toDateString()===calCurrentDate.toDateString()) showDaySchedule(calCurrentDate);
-  renderCal(); closeCal();
-}
 
 // ── TASKS ──────────────────────────────────────
-function togTask(el) {
-  const chk = el.querySelector('.chk');
-  const t = el.querySelector('.todo-t');
-  const tag = el.querySelector('.tag');
-  chk.classList.toggle('done');
-  t.classList.toggle('done');
-  if(chk.classList.contains('done')) {
-    tag.className = 'tag ok';
-    tag.textContent = 'Done';
-  }
-  updateTaskCount();
-}
-
-function updateTaskCount() {
-  const all = document.querySelectorAll('#home-task-list .todo-row').length;
-  const done = document.querySelectorAll('#home-task-list .chk.done').length;
-  document.getElementById('task-count').textContent = `${done}/${all} done`;
-}
-
-function addHomeTask() {
-  const inp = document.getElementById('home-task-inp');
-  const val = inp.value.trim(); if(!val) return;
-  const list = document.getElementById('home-task-list');
-  const el = document.createElement('div');
-  el.className = 'todo-row';
-  el.onclick = function(){ togTask(this); };
-  el.innerHTML = `<div class="chk"></div><div class="todo-body"><div class="todo-t">${val}</div><div class="todo-m"><span class="pdot m"></span>Added just now</div></div><span class="tag act">Medium</span>`;
-  list.insertBefore(el, list.querySelector('.todo-row'));
-  inp.value = '';
-  updateTaskCount();
-}
-
-document.getElementById('home-task-inp').addEventListener('keydown', e => { if(e.key==='Enter') addHomeTask(); });
-
 // ── BRIEF MODE ──────────────────────────────────────
 function setMode(mode) {
   const isMorn = mode === 'morning';
@@ -2703,17 +2652,6 @@ async function regenDraft(id, context) {
 }
 
 // ── MEETING EXPAND ──
-function toggleMeeting(id, event) {
-  // Don't toggle if clicking a button inside
-  if(event && event.target.closest('button,input,.tex-tab,.upload-zone,.linked-note,.tl-expand')) return;
-  const panel = document.getElementById('expand-'+id);
-  const arrow = document.getElementById(id+'-arrow');
-  if(!panel) return;
-  const isOpen = panel.classList.contains('on');
-  panel.classList.toggle('on');
-  if(arrow) arrow.textContent = isOpen ? '▸' : '▾';
-}
-
 // ── PROJECT EXPAND ──
 function toggleProj(id) {
   const panel = document.getElementById('expand-'+id);
@@ -3282,9 +3220,8 @@ function renderMtgNav() {
     const el = document.createElement('div');
     el.className = 'mp-item' + (m.conflict?' conflict-item':'');
     if(m.now) el.style.background = 'var(--red-s)';
-    el.innerHTML = `
-      <div class="mp-time">${m.time.replace(' ','
-').replace('AM','<br>AM').replace('PM','<br>PM')}</div>
+    const _td = m.time.replace(' AM','<br>AM').replace(' PM','<br>PM');
+    el.innerHTML = `<div class="mp-time">${_td}</div>
       <div class="mp-dot" style="background:${m.done?'var(--green)':m.conflict?'var(--red)':'var(--ink3)'}"></div>
       <div class="mp-body">
         <div class="mp-title">${m.title}${m.done?' <span class="tag ok" style="font-size:9px;padding:1px 5px;border-radius:3px;">Done</span>':''}${m.now?' <span class="mp-now">Now</span>':''}${m.conflict?' <span style="font-size:9px;color:var(--red);font-weight:600;">⚠️</span>':''}</div>
