@@ -2086,13 +2086,28 @@ const CAL_EVENTS = (() => {
 })();
 
 function calDayKey(d){return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;}
-function calHasEvents(d){return(CAL_EVENTS[calDayKey(d)]||[]).length>0||(calUserTasks[d.toDateString()]||[]).length>0;}
+function calHasEvents(d){
+  const ck = calDayKey(d);
+  const dk = ck; // dateKey uses same format
+  const hasCalEvents = (CAL_EVENTS[ck]||[]).length>0;
+  const hasUserTasks = (calUserTasks[d.toDateString()]||[]).length>0;
+  const hasStoreTasks = typeof taskStore!=='undefined' && (taskStore[dk]||[]).length>0;
+  const hasMeetings = typeof meetingStore!=='undefined' && (meetingStore[dk]||[]).length>0;
+  return hasCalEvents||hasUserTasks||hasStoreTasks||hasMeetings;
+}
 
 function buildDots(d){
-  const evs=CAL_EVENTS[calDayKey(d)]||[];
-  const ut=calUserTasks[d.toDateString()]||[];
-  const all=[...evs,...ut.map(t=>({color:'amber'}))];
-  const cols=[...new Set(all.map(e=>e.color||'blue'))].slice(0,3);
+  const dk = calDayKey(d);
+  const evs = CAL_EVENTS[dk]||[];
+  const ut = calUserTasks[d.toDateString()]||[];
+  const storeTasks = (typeof taskStore!=='undefined' ? taskStore[dk]||[] : []);
+  const storeMtgs = (typeof meetingStore!=='undefined' ? meetingStore[dk]||[] : []);
+  const dots = [];
+  if(evs.length) dots.push(...evs.map(e=>e.color||'blue'));
+  if(ut.length) dots.push('amber');
+  if(storeMtgs.length) dots.push('plum');
+  if(storeTasks.filter(t=>!t.done).length) dots.push('blue');
+  const cols = [...new Set(dots)].slice(0,3);
   return cols.map(c=>`<div class="cal-dot ${c==='blue'?'':c}" style="display:block;"></div>`).join('');
 }
 
@@ -2206,6 +2221,10 @@ function showDaySchedule(d){
   title.textContent=(isToday?'Today':'') +' — '+d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const evs=CAL_EVENTS[calDayKey(d)]||[];
   const ut=calUserTasks[d.toDateString()]||[];
+  // Also pull from taskStore
+  const dk2 = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  const storeTasks = (typeof taskStore!=='undefined' ? taskStore[dk2]||[] : []);
+  const storeMtgs = (typeof meetingStore!=='undefined' ? meetingStore[dk2]||[] : []);
   const allEvs=[...evs,...ut.map(t=>({type:'task',color:'amber',title:t.text,time:'',meta:t.pri==='h'?'High':'Medium',archive:null}))];
   if(!allEvs.length){
     content.innerHTML='<div class="day-sched-empty">No events or tasks for this day.</div>';
@@ -3013,7 +3032,8 @@ const TIME_RE = /(\d{1,2})(:\d{2})?\s*(am|pm)/i;
 const PROJECT_WORDS = /(project|milestone|deadline|launch|deploy|release|sprint)/i;
 
 function detectInput(text) {
-  let targetDate = new Date(addDays(today, taskNavOffset));
+  // Always detect relative to TODAY, not current nav view
+  let targetDate = new Date(today);
   let dateOffset = null;
 
   // Check for future date keywords
@@ -3125,11 +3145,12 @@ function addHomeTask() {
 
   renderTaskNav();
   renderMtgNav();
+  renderCal(); // sync calendar dots
 
   // Flash feedback
   const hint = document.getElementById('detect-hint');
   hint.innerHTML = type === 'meeting'
-    ? `✓ Meeting added to ${dateLabel(targetDate)} — visible in Meetings tab`
+    ? `✓ Meeting added to ${dateLabel(targetDate)} — also visible in Meetings tab`
     : `✓ Task added to ${dateLabel(targetDate)}`;
   hint.classList.add('on');
   setTimeout(()=>hint.classList.remove('on'), 2500);
