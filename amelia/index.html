@@ -80,36 +80,43 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,244,240,.95);backdrop-
 
 /* Hero right — avatar + floating card */
 .hero-right{position:relative;display:flex;align-items:flex-end;justify-content:center;animation:fadeUp .7s .1s ease both;}
-@media(max-width:859px){.hero-right{margin-top:32px;height:420px;}}
+@media(max-width:859px){.hero-right{margin-top:0;height:360px;}}
 @media(min-width:860px){.hero-right{height:100%;min-height:560px;}}
 
 .avatar-wrap{position:relative;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;}
-.avatar-img{height:520px;width:auto;object-fit:contain;object-position:bottom;position:relative;z-index:2;filter:drop-shadow(0 20px 40px rgba(0,0,0,.08));}
-@media(max-width:859px){.avatar-img{height:380px;}}
+/* Avatar — centered, face fully visible */
+.avatar-img{height:520px;width:auto;object-fit:contain;object-position:bottom center;position:relative;z-index:2;filter:drop-shadow(0 20px 40px rgba(0,0,0,.08));}
+@media(max-width:859px){.avatar-img{height:340px;}}
 
-/* Floating chat card */
-.float-card{position:absolute;top:48px;left:-20px;background:var(--white);border:1px solid var(--brd);border-radius:14px;padding:16px 18px;width:280px;box-shadow:0 8px 32px rgba(0,0,0,.08);z-index:3;animation:floatIn .8s .4s ease both;}
-@media(max-width:859px){.float-card{left:0;top:16px;width:240px;}}
-.float-card-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.float-card-av{width:28px;height:28px;background:var(--ink);border-radius:7px;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--f-display);font-size:12px;font-style:italic;}
+/* Floating brief card — bottom-left, below face */
+.float-card{position:absolute;bottom:120px;left:0;background:var(--white);border:1px solid var(--brd);border-radius:14px;padding:14px 16px;width:270px;box-shadow:0 8px 32px rgba(0,0,0,.08);z-index:3;animation:floatIn .8s .4s ease both;}
+@media(max-width:859px){.float-card{display:none;}}
+.float-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.float-card-av{width:26px;height:26px;background:var(--ink);border-radius:7px;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--f-display);font-size:11px;font-style:italic;}
 .float-card-name{font-size:12px;font-weight:700;color:var(--ink);}
-.float-card-time{font-size:10.5px;color:var(--ink4);margin-left:auto;}
-.float-card-msg{font-size:13px;color:var(--ink2);line-height:1.55;margin-bottom:12px;}
+.float-card-time{font-size:10px;color:var(--ink4);margin-left:auto;}
+.float-card-msg{font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:10px;}
 .float-card-msg strong{color:var(--ink);}
-.float-tags{display:flex;gap:6px;flex-wrap:wrap;}
-.ftag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;}
+.float-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.ftag{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:4px;}
 .ftag.red{background:var(--red-s);color:var(--red);}
 .ftag.amber{background:var(--gold-s);color:var(--gold);}
 .ftag.green{background:var(--green-s);color:var(--green);}
 
-/* Second floating card */
-.float-card-2{position:absolute;bottom:80px;right:-10px;background:var(--ink);border-radius:12px;padding:14px 16px;width:220px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:3;animation:floatIn .8s .6s ease both;}
-@media(max-width:859px){.float-card-2{right:0;bottom:20px;width:190px;}}
-.float-card-2-label{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.float-card-2-stat{font-family:var(--f-display);font-size:32px;font-weight:400;color:white;line-height:1;}
-.float-card-2-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;}
+/* Second floating card — bottom-right, below face */
+.float-card-2{position:absolute;bottom:40px;right:0;background:var(--ink);border-radius:12px;padding:14px 16px;width:200px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:3;animation:floatIn .8s .6s ease both;}
+@media(max-width:859px){.float-card-2{display:none;}}
+.float-card-2-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.float-card-2-stat{font-family:var(--f-display);font-size:30px;font-weight:400;color:white;line-height:1;}
+.float-card-2-sub{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:4px;}
 .float-card-2-bar{height:3px;background:rgba(255,255,255,.15);border-radius:3px;margin-top:12px;overflow:hidden;}
 .float-card-2-fill{height:100%;background:var(--blue-m);border-radius:3px;width:72%;animation:barGrow 1.2s .8s ease both;}
+
+/* Mobile: show brief card inline below avatar */
+.hero-brief-mobile{display:none;}
+@media(max-width:859px){
+  .hero-brief-mobile{display:flex;flex-direction:column;gap:8px;background:var(--white);border:1px solid var(--brd);border-radius:14px;padding:14px 16px;margin:16px 0 32px;}
+}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 @keyframes floatIn{from{opacity:0;transform:translateY(12px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
@@ -161,8 +168,8 @@ section{padding:96px 32px;max-width:1280px;margin:0 auto;}
 .feat-text{font-size:13px;color:var(--ink2);line-height:1.6;}
 
 /* ── PRICING ── */
-.pricing-grid{display:grid;gap:20px;margin-top:48px;}
-@media(min-width:720px){.pricing-grid{grid-template-columns:repeat(3,1fr);}}
+.pricing-grid{display:grid;gap:16px;margin-top:48px;}
+@media(min-width:720px){.pricing-grid:not([style*="grid-template-columns:1fr"]){grid-template-columns:repeat(3,1fr);}}
 .price-card{background:var(--white);border:1px solid var(--brd);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:0;transition:all .15s;position:relative;}
 .price-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.07);}
 .price-card.featured{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink);}
@@ -192,7 +199,8 @@ section{padding:96px 32px;max-width:1280px;margin:0 auto;}
 .cta-section::before{content:'';position:absolute;top:-100px;right:-100px;width:400px;height:400px;background:radial-gradient(circle,rgba(41,82,204,.3) 0%,transparent 70%);pointer-events:none;}
 .cta-section::after{content:'';position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(200,212,245,.15) 0%,transparent 70%);pointer-events:none;}
 .cta-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px;}
-.cta-h2{font-family:var(--f-display);font-size:clamp(32px,5vw,56px);font-weight:400;font-style:italic;color:white;letter-spacing:-.4px;line-height:1.1;margin-bottom:16px;}
+.cta-h2{font-family:var(--f-display);font-size:clamp(32px,5vw,56px);font-weight:400;color:white;letter-spacing:-.4px;line-height:1.1;margin-bottom:16px;}
+.cta-h2 em{font-style:italic;color:var(--blue-m);}
 .cta-sub{font-size:16px;color:rgba(255,255,255,.6);max-width:480px;margin:0 auto 36px;line-height:1.6;}
 .cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
 .btn-cta-white{background:white;color:var(--ink);border:none;border-radius:9px;padding:14px 32px;font-size:14px;font-weight:700;font-family:var(--f-body);cursor:pointer;transition:all .15s;}
@@ -290,6 +298,21 @@ footer a:hover{color:var(--ink);}
         <div class="float-card-2-bar"><div class="float-card-2-fill"></div></div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Mobile brief card (shown only on mobile) -->
+  <div class="hero-brief-mobile">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:24px;height:24px;background:var(--ink);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--f-display);font-size:11px;font-style:italic;">A</div>
+      <span style="font-size:12px;font-weight:700;color:var(--ink);">Amelia</span>
+      <span style="font-size:10px;color:var(--ink4);margin-left:auto;">Just now</span>
+    </div>
+    <p style="font-size:13px;color:var(--ink2);line-height:1.55;">Good morning. <strong style="color:var(--ink);">3 urgent emails</strong>, a conflict at 10 AM, and your board prep deck is due by 1:30.</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <span class="ftag red">🔴 3 Urgent</span>
+      <span class="ftag amber">⚠️ Conflict</span>
+      <span class="ftag green">📋 5 Meetings</span>
     </div>
   </div>
 </div>
@@ -411,7 +434,7 @@ footer a:hover{color:var(--ink);}
 <section id="features">
   <div class="reveal">
     <div class="section-label">Features</div>
-    <h2 class="section-h2">Everything <em>an EA needs.</em></h2>
+    <h2 class="section-h2">Everything <em>Amelia</em> handles for you.</h2>
     <p class="section-sub">Built around how executive assistants actually work — not a generic productivity app.</p>
   </div>
 
@@ -469,7 +492,7 @@ footer a:hover{color:var(--ink);}
 <div style="max-width:1280px;margin:0 auto;padding:0 32px;">
   <div class="reveal">
     <div class="section-label">Pricing</div>
-    <h2 class="section-h2">Amelia's <em>pricing.</em></h2>
+    <h2 class="section-h2"><em>Amelia's</em> pricing.</h2>
     <p class="section-sub">Start free. Upgrade when Amelia becomes indispensable — which usually happens on day one.</p>
   </div>
 
@@ -545,7 +568,7 @@ footer a:hover{color:var(--ink);}
 <div style="max-width:1280px;margin:80px auto 0;">
   <div class="cta-section reveal">
     <div class="cta-label">Ready?</div>
-    <h2 class="cta-h2">Let Amelia take it<br>from here.</h2>
+    <h2 class="cta-h2">Let <em>Amelia</em> take it<br>from here.</h2>
     <p class="cta-sub">See Amelia in action right now — your daily brief, inbox, and meeting prep, all in one place.</p>
     <div class="cta-actions">
       <a href="demo.html"><button class="btn-cta-white">Launch Amelia Demo →</button></a>
@@ -561,15 +584,9 @@ footer a:hover{color:var(--ink);}
     <span>Amelia · by <a href="https://annietheagent.ai/hub.html">Annie the Agent</a></span>
   </div>
   <span>For the people who keep everything running</span>
-  <span>Questions? <a href="mailto:hello@annietheagent.ai">hello@annietheagent.ai</a></span>
+  <span>Questions? <a href="/cdn-cgi/l/email-protection#9df5f8f1f1f2ddfcf3f3f4f8e9f5f8fcfaf8f3e9b3fcf4"><span class="__cf_email__" data-cfemail="6d05080101022d0c030304081905080c0a080319430c04">[email&#160;protected]</span></a></span>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // Scroll reveal
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('on'); });
-}, {threshold:.12});
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
-</body>
-</html>
+const o
