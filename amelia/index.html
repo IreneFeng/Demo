@@ -79,9 +79,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,244,240,.95);backdrop-
 .hero-proof-item::before{content:'✓';color:var(--green);font-weight:700;}
 
 /* Hero right — avatar + floating card */
-.hero-right{position:relative;display:flex;align-items:flex-end;justify-content:center;animation:fadeUp .7s .1s ease both;}
-@media(max-width:859px){.hero-right{margin-top:0;height:360px;}}
-@media(min-width:860px){.hero-right{height:100%;min-height:560px;}}
+.hero-right{display:flex;align-items:center;justify-content:center;animation:fadeUp .7s .1s ease both;padding:40px 0;}
+@media(max-width:859px){.hero-right{padding:24px 0;}}
 
 .avatar-wrap{position:relative;width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center;}
 /* Avatar — centered, face fully visible */
@@ -218,6 +217,60 @@ footer a:hover{color:var(--ink);}
 /* ── SCROLL ANIMATIONS ── */
 .reveal{opacity:1;transform:none;transition:none;}
 .reveal.on{opacity:1;transform:none;}
+
+/* ── Dashboard Mockup ── */
+.dash-mockup{width:100%;max-width:560px;border-radius:14px;overflow:hidden;border:1px solid var(--brd);box-shadow:0 20px 60px rgba(0,0,0,.1),0 4px 16px rgba(0,0,0,.06);background:var(--bg);animation:fadeUp .7s .15s ease both;}
+.dash-chrome{background:#EDECE8;padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--brd);}
+.dash-dots{display:flex;gap:5px;}
+.dash-dots span{width:10px;height:10px;border-radius:50%;background:var(--brd2);}
+.dash-dots span:nth-child(1){background:#FF5F57;}
+.dash-dots span:nth-child(2){background:#FFBD2E;}
+.dash-dots span:nth-child(3){background:#28CA41;}
+.dash-url{font-size:11px;color:var(--ink3);background:var(--white);border-radius:5px;padding:3px 12px;flex:1;text-align:center;border:1px solid var(--brd);}
+.dash-nav{background:var(--white);border-bottom:1px solid var(--brd);padding:0 14px;display:flex;align-items:center;gap:12px;height:38px;}
+.dash-logo{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink);font-family:var(--f-display);flex-shrink:0;}
+.dash-logo-mark{width:18px;height:18px;background:var(--ink);border-radius:4px;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-style:italic;font-family:var(--f-display);}
+.dash-nav-tabs{display:flex;gap:2px;overflow:hidden;}
+.dash-tab{font-size:10px;font-weight:500;color:var(--ink3);padding:4px 8px;border-radius:5px;white-space:nowrap;}
+.dash-tab.active{background:var(--ink);color:white;}
+.dash-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+@media(max-width:520px){.dash-body{grid-template-columns:1fr;}}
+.dash-left{padding:12px;display:flex;flex-direction:column;gap:8px;border-right:1px solid var(--brd);}
+.dash-right{padding:12px;}
+/* Brief */
+.dash-brief{background:var(--white);border:1px solid var(--brd);border-left:2px solid var(--ink);border-radius:8px;padding:10px 12px;}
+.dash-brief-label{font-size:7.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.dash-brief-title{font-family:var(--f-display);font-size:11.5px;font-style:italic;color:var(--ink);margin-bottom:8px;line-height:1.4;}
+.dash-brief-items{display:flex;flex-direction:column;gap:4px;}
+.dash-brief-item{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--ink2);line-height:1.4;}
+.dash-bi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.dash-bi-dot.red{background:var(--red);}
+.dash-bi-dot.amber{background:var(--gold);}
+.dash-bi-dot.blue{background:var(--blue);}
+.dash-bi-dot.green{background:var(--green);}
+/* Stats */
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.dash-stat{background:var(--white);border:1px solid var(--brd);border-radius:7px;padding:7px 9px;}
+.dash-stat.red-border{border-left:2px solid var(--red);}
+.dash-stat.amber-border{border-left:2px solid var(--gold);}
+.dash-stat-num{font-family:var(--f-display);font-size:20px;font-weight:400;color:var(--ink);line-height:1;}
+.dash-stat-label{font-size:9.5px;font-weight:500;color:var(--ink2);margin-top:1px;}
+.dash-stat-sub{font-size:9px;color:var(--ink3);}
+/* Card */
+.dash-card{background:var(--white);border:1px solid var(--brd);border-radius:8px;overflow:hidden;}
+.dash-card-head{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--brd);font-size:10px;font-weight:600;color:var(--ink);}
+.dash-card-badge{font-size:9.5px;color:var(--ink3);}
+.dash-task{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--brd);font-size:10px;}
+.dash-task:last-child{border-bottom:none;}
+.dash-task.done{opacity:.55;}
+.dash-chk{width:12px;height:12px;border:1.5px solid var(--brd2);border-radius:3px;flex-shrink:0;}
+.dash-chk.checked{background:var(--green);border-color:var(--green);color:white;font-size:8px;display:flex;align-items:center;justify-content:center;}
+.dash-task-t{flex:1;color:var(--ink);font-weight:400;}
+.done-t{text-decoration:line-through;color:var(--ink3);}
+.dash-tag{font-size:8.5px;font-weight:600;padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.dash-tag.red{background:var(--red-s);color:var(--red);}
+.dash-tag.amber{background:var(--gold-s);color:var(--gold);}
+.dash-tag.green{background:var(--green-s);color:var(--green);}
 </style>
 </head>
 <body>
@@ -261,7 +314,7 @@ footer a:hover{color:var(--ink);}
 
     <div class="hero-actions">
       <a href="demo.html"><button class="btn-hero">Launch Demo →</button></a>
-      <button class="btn-hero-sec" onclick="document.getElementById('why').scrollIntoView({behavior:'smooth'})">See how it works</button>
+      <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com').then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Contact Us',2000)})" style="background:transparent;color:var(--ink2);border:1px solid var(--brd);border-radius:9px;padding:14px 28px;font-size:14px;font-weight:500;font-family:var(--f-body);cursor:pointer;transition:all .15s;" onmouseover="this.style.borderColor='var(--brd2)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--ink2)'">Contact Us</button>
     </div>
 
     <div class="hero-proof">
@@ -271,52 +324,78 @@ footer a:hover{color:var(--ink);}
     </div>
   </div>
 
-  <div class="hero-right">
-    <div class="avatar-wrap">
+  <!-- Dashboard mockup -->
+  <div class="hero-right" style="align-items:center;">
+    <div class="dash-mockup">
 
-      <!-- Floating brief card -->
-      <div class="float-card">
-        <div class="float-card-head">
-          <div class="float-card-av">A</div>
-          <span class="float-card-name">Amelia</span>
-          <span class="float-card-time">Just now</span>
-        </div>
-        <p class="float-card-msg">Good morning. Here's what's on your plate today — <strong>3 urgent emails</strong>, a schedule conflict at 10 AM, and your board prep deck is due by 1:30.</p>
-        <div class="float-tags">
-          <span class="ftag red">🔴 3 Urgent</span>
-          <span class="ftag amber">⚠️ Conflict</span>
-          <span class="ftag green">📋 5 Meetings</span>
+      <!-- Mockup chrome bar -->
+      <div class="dash-chrome">
+        <div class="dash-dots"><span></span><span></span><span></span></div>
+        <div class="dash-url">amelia · today</div>
+      </div>
+
+      <!-- Mockup nav -->
+      <div class="dash-nav">
+        <div class="dash-logo"><div class="dash-logo-mark">A</div><span>Amelia <em style="color:var(--blue);">✦</em></span></div>
+        <div class="dash-nav-tabs">
+          <div class="dash-tab active">🏠 Today</div>
+          <div class="dash-tab">📧 Email</div>
+          <div class="dash-tab">📅 Meetings</div>
+          <div class="dash-tab">📁 Projects</div>
         </div>
       </div>
 
-      <!-- Avatar -->
-      <img class="avatar-img" src="https://raw.githubusercontent.com/IreneFeng/Demo/main/amelia/amelia-avatar.png" alt="Amelia" />
+      <!-- Mockup body -->
+      <div class="dash-body">
 
-      <!-- Floating stat card -->
-      <div class="float-card-2">
-        <div class="float-card-2-label">Tasks today</div>
-        <div class="float-card-2-stat">4<span style="font-size:18px;opacity:.5;">/9</span></div>
-        <div class="float-card-2-sub">done · 5 remaining</div>
-        <div class="float-card-2-bar"><div class="float-card-2-fill"></div></div>
+        <!-- Left col -->
+        <div class="dash-left">
+          <!-- Brief panel -->
+          <div class="dash-brief">
+            <div class="dash-brief-label">✦ AMELIA · MORNING BRIEF</div>
+            <div class="dash-brief-title">Good morning. Here's what's on your plate.</div>
+            <div class="dash-brief-items">
+              <div class="dash-brief-item"><span class="dash-bi-dot red"></span><span>3 urgent emails need replies today</span></div>
+              <div class="dash-brief-item"><span class="dash-bi-dot amber"></span><span>Schedule conflict 10–11 AM</span></div>
+              <div class="dash-brief-item"><span class="dash-bi-dot blue"></span><span>Board prep deck due by 1:30 PM</span></div>
+              <div class="dash-brief-item"><span class="dash-bi-dot green"></span><span>Free window 12–1:30 — focus time</span></div>
+            </div>
+          </div>
+
+          <!-- Stat strip -->
+          <div class="dash-stats">
+            <div class="dash-stat red-border" >
+              <div class="dash-stat-num">3</div>
+              <div class="dash-stat-label">Emails<div class="dash-stat-sub">3 urgent</div></div>
+            </div>
+            <div class="dash-stat amber-border">
+              <div class="dash-stat-num">5</div>
+              <div class="dash-stat-label">Meetings<div class="dash-stat-sub">1 conflict</div></div>
+            </div>
+            <div class="dash-stat">
+              <div class="dash-stat-num">3</div>
+              <div class="dash-stat-label">Projects<div class="dash-stat-sub">4/9 done</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div class="dash-right">
+          <!-- Task list -->
+          <div class="dash-card">
+            <div class="dash-card-head"><span>✓ Today's Tasks</span><span class="dash-card-badge">4/9</span></div>
+            <div class="dash-task"><div class="dash-chk"></div><div class="dash-task-t">Update board deck slide 7</div><div class="dash-tag red">High</div></div>
+            <div class="dash-task"><div class="dash-chk"></div><div class="dash-task-t">Confirm Nobu lunch — Maya</div><div class="dash-tag red">High</div></div>
+            <div class="dash-task"><div class="dash-chk"></div><div class="dash-task-t">Process invoice #2891</div><div class="dash-tag amber">Med</div></div>
+            <div class="dash-task done"><div class="dash-chk checked">✓</div><div class="dash-task-t done-t">Send standup agenda</div><div class="dash-tag green">Done</div></div>
+            <div class="dash-task done"><div class="dash-chk checked">✓</div><div class="dash-task-t done-t">Book SF flights</div><div class="dash-tag green">Done</div></div>
+          </div>
+        </div>
+
       </div>
-
     </div>
   </div>
 
-  <!-- Mobile brief card (shown only on mobile) -->
-  <div class="hero-brief-mobile">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <div style="width:24px;height:24px;background:var(--ink);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--f-display);font-size:11px;font-style:italic;">A</div>
-      <span style="font-size:12px;font-weight:700;color:var(--ink);">Amelia</span>
-      <span style="font-size:10px;color:var(--ink4);margin-left:auto;">Just now</span>
-    </div>
-    <p style="font-size:13px;color:var(--ink2);line-height:1.55;">Good morning. <strong style="color:var(--ink);">3 urgent emails</strong>, a conflict at 10 AM, and your board prep deck is due by 1:30.</p>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <span class="ftag red">🔴 3 Urgent</span>
-      <span class="ftag amber">⚠️ Conflict</span>
-      <span class="ftag green">📋 5 Meetings</span>
-    </div>
-  </div>
 </div>
 </div>
 
@@ -583,7 +662,7 @@ footer a:hover{color:var(--ink);}
       <div class="pf">Dedicated onboarding session</div>
     </div>
     <div>
-      <button class="btn-price secondary" style="width:fit-content;padding:11px 24px;" onclick="window.location.href='mailto:hello@annietheagent.ai?subject=Amelia Connected Waitlist'">Join Waitlist</button>
+      <button class="btn-price secondary" style="width:fit-content;padding:11px 24px;" onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com').then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Join Waitlist',2000)})">Join Waitlist</button>
     </div>
   </div>
 
@@ -651,7 +730,6 @@ footer a:hover{color:var(--ink);}
     <p class="cta-sub">See <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> in action right now — your daily brief, inbox, and meeting prep, all in one place.</p>
     <div class="cta-actions">
       <a href="demo.html"><button class="btn-cta-white">Launch Amelia Demo →</button></a>
-      <a href="https://annietheagent.ai/hub.html"><button class="btn-cta-ghost">← All Agents</button></a>
     </div>
   </div>
 </div>
@@ -663,9 +741,9 @@ footer a:hover{color:var(--ink);}
     <span>Amelia · by <a href="https://annietheagent.ai/hub.html">Annie the Agent</a></span>
   </div>
   <span>For the people who keep everything running</span>
-  <span>Questions? <a href="/cdn-cgi/l/email-protection#9df5f8f1f1f2ddfcf3f3f4f8e9f5f8fcfaf8f3e9b3fcf4"><span class="__cf_email__" data-cfemail="6d05080101022d0c030304081905080c0a080319430c04">[email&#160;protected]</span></a></span>
+  <button onclick="navigator.clipboard.writeText('dkellykennedy@gmail.com').then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Questions? Contact us',2000)})" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink3);font-family:var(--f-body);padding:0;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink3)'">Questions? Contact us</button>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // Scroll reveal
 const o
