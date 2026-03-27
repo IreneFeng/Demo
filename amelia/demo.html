@@ -2673,11 +2673,9 @@ function viewArc(id){
   setTimeout(()=>{ arcSelectAll(); openReport(); },150);
 }
 
-// ── INIT ARCHIVE ──
-renderArcTasks();
+// ── INIT ARCHIVE ── (called in final init block)
 
-// ── INIT CALENDAR ──
-renderCal();
+// ── INIT CALENDAR ── (called in final init block)
 
 // ── DRAFT: editable + use + regenerate ──
 function useDraft(id) {
@@ -2894,8 +2892,7 @@ function updateClock() {
   if(el) el.textContent = h + ':' + m;
   if(ds) ds.textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 }
-updateClock();
-setInterval(updateClock, 30000);
+setInterval(updateClock, 30000); // init call moved to end
 
 // ── Alert: show all meetings within next 60 min, in time order ──
 function updateAlerts() {
@@ -2948,8 +2945,7 @@ function updateAlerts() {
     ? `<div style="font-size:11px;color:var(--ink4);margin-top:8px;padding-left:17px;">+${upcoming.length - alertable.length} more later today</div>`
     : '');
 }
-updateAlerts();
-setInterval(updateAlerts, 60000);
+setInterval(updateAlerts, 60000); // init call moved to end
 
 // ── QUICK NOTE ──────────────────────────────────────
 const quickNotes = JSON.parse(localStorage.getItem('amelia_quicknotes') || '[]');
@@ -3321,12 +3317,21 @@ function saveCalTask() {
 }
 
 
-// ── INIT DATE SYSTEM ──
-renderTaskNav();
-renderMtgNav();
-// Re-run alerts now that meetingStore is populated
-updateAlerts();
-updateClock();
+// ── FINAL INIT ──
+function ameliaInit() {
+  renderArcTasks();
+  renderCal();
+  renderTaskNav();
+  renderMtgNav();
+  updateClock();
+  updateAlerts();
+}
+
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', ameliaInit);
+} else {
+  ameliaInit();
+}
 </script>
 </body>
 </html>
