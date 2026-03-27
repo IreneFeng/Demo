@@ -169,6 +169,8 @@ section{padding:96px 32px;max-width:1280px;margin:0 auto;}
 
 /* ── PRICING ── */
 .pricing-grid{display:grid;gap:16px;margin-top:48px;}
+#phase1-grid{display:grid;gap:16px;}
+@media(min-width:720px){#phase1-grid{grid-template-columns:1fr 1fr;}}
 @media(min-width:720px){.pricing-grid:not([style*="grid-template-columns:1fr"]){grid-template-columns:repeat(3,1fr);}}
 .price-card{background:var(--white);border:1px solid var(--brd);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:0;transition:all .15s;position:relative;}
 .price-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.07);}
@@ -490,77 +492,154 @@ footer a:hover{color:var(--ink);}
 <!-- ══ PRICING ══ -->
 <section id="pricing" style="background:var(--white);border-top:1px solid var(--brd);max-width:100%;padding:96px 0;">
 <div style="max-width:1280px;margin:0 auto;padding:0 32px;">
-  <div class="reveal">
-    <div class="section-label">Pricing</div>
-    <h2 class="section-h2"><em>Amelia's</em> pricing.</h2>
-    <p class="section-sub">Start free. Upgrade when <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> becomes indispensable — which usually happens on day one.</p>
+
+  <div class="section-label">Pricing</div>
+  <h2 class="section-h2"><em>Amelia's</em> pricing.</h2>
+  <p class="section-sub" style="margin-bottom:0;">Built around how you grow — start with the full dashboard today, connect your tools as you need them.</p>
+
+  <!-- Phase roadmap strip -->
+  <div style="display:flex;gap:8px;margin-top:28px;margin-bottom:36px;flex-wrap:wrap;align-items:center;padding:12px 16px;background:var(--surf);border:1px solid var(--brd);border-radius:10px;width:fit-content;">
+    <div style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--green);"><span style="width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;"></span>Phase 1 · Live</div>
+    <span style="color:var(--brd2);font-size:12px;padding:0 2px;">→</span>
+    <div style="font-size:12px;font-weight:500;color:var(--gold);">Phase 2 · Google Workspace</div>
+    <span style="color:var(--brd2);font-size:12px;padding:0 2px;">→</span>
+    <div style="font-size:12px;font-weight:500;color:var(--ink3);">Phase 3 · Multi-Principal</div>
+    <span style="color:var(--brd2);font-size:12px;padding:0 2px;">→</span>
+    <div style="font-size:12px;font-weight:500;color:var(--ink3);">Phase 4 · Messaging &amp; PM</div>
   </div>
 
-  <div class="pricing-grid">
-    <div class="price-card reveal">
+  <!-- Phase 1: Live now — 2 cards -->
+  <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+    <span style="width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;box-shadow:0 0 0 3px var(--green-s);"></span>Phase 1 · Available now
+  </div>
+  <div style="display:grid;gap:16px;margin-bottom:40px;" id="phase1-grid">
+    <!-- Free tier -->
+    <div class="price-card">
       <div class="price-tier">Starter</div>
-      <div class="price-name">Essential</div>
+      <div class="price-name"><em style="font-family:var(--f-display);font-style:italic;color:var(--blue);">Amelia</em> Free</div>
       <div class="price-amount">$0<span>/mo</span></div>
       <div class="price-period">Free forever · No credit card</div>
       <div class="price-status live">✦ Available Now</div>
       <div class="price-divider"></div>
       <div class="price-features">
-        <div class="pf">Daily brief (morning + evening)</div>
+        <div class="pf">AI daily brief — morning &amp; evening modes</div>
         <div class="pf">Email inbox with AI draft replies</div>
-        <div class="pf">Meeting timeline & agenda templates</div>
-        <div class="pf">Task management</div>
-        <div class="pf">Live transcription & AI meeting notes</div>
+        <div class="pf">Meeting timeline, notes &amp; agenda templates</div>
+        <div class="pf">Task dashboard — daily planner view</div>
+        <div class="pf">Live transcription &amp; AI meeting minutes</div>
         <div class="pf">3 active projects</div>
-        <div class="pf">Quick Note & Archive</div>
+        <div class="pf">Quick Note &amp; Archive with reports</div>
+        <div class="pf">Google Workspace quick-open (Docs, Sheets, Slides)</div>
       </div>
-      <div class="price-cta">
-        <a href="demo.html"><button class="btn-price secondary">Try Demo</button></a>
+      <div class="price-cta" style="margin-top:20px;">
+        <a href="demo.html"><button class="btn-price secondary">Try Demo →</button></a>
       </div>
     </div>
 
-    <div class="price-card featured reveal" style="transition-delay:.1s">
+    <!-- Pro tier -->
+    <div class="price-card featured">
       <div class="price-featured-badge">Most Popular</div>
       <div class="price-tier">Pro</div>
-      <div class="price-name">Professional</div>
+      <div class="price-name"><em style="font-family:var(--f-display);font-style:italic;color:var(--blue);">Amelia</em> Pro</div>
       <div class="price-amount">$19<span>/mo</span></div>
       <div class="price-period">Per user · Billed monthly</div>
       <div class="price-status live">✦ Available Now</div>
       <div class="price-divider"></div>
       <div class="price-features">
-        <div class="pf">Everything in Essential</div>
-        <div class="pf">Unlimited projects</div>
-        <div class="pf">Google Calendar sync</div>
-        <div class="pf">Gmail integration — real inbox</div>
+        <div class="pf">Everything in Free</div>
+        <div class="pf">Unlimited projects &amp; archives</div>
+        <div class="pf">Shareable PDF archive reports</div>
         <div class="pf">Advanced AI brief customisation</div>
-        <div class="pf">Archive reports — shareable PDF</div>
         <div class="pf">Priority support</div>
       </div>
-      <div class="price-cta">
+      <div class="price-cta" style="margin-top:20px;">
         <a href="demo.html"><button class="btn-price primary">Get Started →</button></a>
       </div>
     </div>
+  </div>
 
-    <div class="price-card reveal" style="transition-delay:.2s">
-      <div class="price-tier">Team</div>
-      <div class="price-name">Business</div>
-      <div class="price-amount">$49<span>/mo</span></div>
-      <div class="price-period">Up to 5 users · Billed monthly</div>
-      <div class="price-status soon">⚡ Coming Soon</div>
-      <div class="price-divider"></div>
-      <div class="price-features">
-        <div class="pf">Everything in Pro</div>
-        <div class="pf">Shared project workspace</div>
-        <div class="pf">Team task assignment</div>
-        <div class="pf">Shared archive & reports</div>
-        <div class="pf">Admin dashboard</div>
-        <div class="pf">Dedicated onboarding</div>
-        <div class="pf">Custom integrations</div>
+  <!-- Phase 2: Connected -->
+  <div style="font-size:10px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+    <span style="font-size:13px;">⚡</span>Phase 2 · Coming Soon — Google Workspace Connected
+  </div>
+  <div style="background:var(--white);border:1px solid var(--brd);border-radius:16px;padding:28px 32px;margin-bottom:40px;display:grid;gap:24px;" id="phase2-card">
+    <div style="display:grid;gap:4px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div>
+          <div class="price-tier" style="margin-bottom:4px;">Connected</div>
+          <div style="font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.02em;"><em style="font-family:var(--f-display);font-style:italic;color:var(--blue);">Amelia</em> Connected</div>
+        </div>
+        <div style="font-family:var(--f-display);font-size:32px;font-weight:400;color:var(--ink);margin-left:auto;">$39<span style="font-size:16px;color:var(--ink3);font-family:var(--f-body);font-weight:400;">/mo per user</span></div>
       </div>
-      <div class="price-cta">
-        <button class="btn-price secondary" onclick="alert('Join the waitlist at hello@annietheagent.ai')">Join Waitlist</button>
+      <div class="price-status soon" style="width:fit-content;">⚡ Phase 2 — Coming Soon</div>
+    </div>
+    <div style="height:1px;background:var(--brd);"></div>
+    <div style="display:grid;gap:10px;" id="p2-features">
+      <div style="font-size:12px;font-weight:600;color:var(--ink3);margin-bottom:2px;">Everything in Pro, plus:</div>
+      <div class="pf">Google Calendar — live two-way sync via OAuth</div>
+      <div class="pf">Gmail — real inbox replaces mock data</div>
+      <div class="pf">Auto-generate meeting links — Zoom, Google Meet, or Microsoft Teams when creating events</div>
+      <div class="pf">Google Drive — attach files directly to meetings &amp; projects</div>
+      <div class="pf">Dedicated onboarding session</div>
+    </div>
+    <div>
+      <button class="btn-price secondary" style="width:fit-content;padding:11px 24px;" onclick="window.location.href='mailto:hello@annietheagent.ai?subject=Amelia Connected Waitlist'">Join Waitlist</button>
+    </div>
+  </div>
+
+  <!-- Phase 3 & 4: Roadmap -->
+  <div style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+    <span style="width:6px;height:6px;border-radius:50%;border:1.5px solid var(--ink3);display:inline-block;"></span>On the roadmap
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+
+    <div style="background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:22px 28px;display:flex;align-items:flex-start;gap:18px;">
+      <div style="font-size:22px;flex-shrink:0;">👥</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;">Phase 3 · Multi-Principal</span>
+          <span style="font-size:11px;font-weight:600;color:var(--gold);background:var(--gold-s);border-radius:4px;padding:2px 8px;">Roadmap</span>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:8px;">Manage every calendar on your desk</div>
+        <p style="font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:12px;">Create a dedicated calendar for each manager or executive you support — directly in your dashboard, no action needed on their end. If they choose to connect Google Calendar, events sync automatically. Either way, you stay in control with a one-click switch between principals.</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:500;color:var(--ink3);background:var(--white);border:1px solid var(--brd);border-radius:4px;padding:2px 9px;">EA-managed calendars</span>
+          <span style="font-size:11px;font-weight:500;color:var(--ink3);background:var(--white);border:1px solid var(--brd);border-radius:4px;padding:2px 9px;">Optional Google sync per principal</span>
+          <span style="font-size:11px;font-weight:500;color:var(--ink3);background:var(--white);border:1px solid var(--brd);border-radius:4px;padding:2px 9px;">Cross-calendar conflict detection</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--surf);border:1px solid var(--brd);border-radius:14px;padding:22px 28px;display:flex;align-items:flex-start;gap:18px;opacity:.8;">
+      <div style="font-size:22px;flex-shrink:0;">🔗</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="font-size:10px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;">Phase 4 · Messaging &amp; PM</span>
+          <span style="font-size:11px;font-weight:600;color:var(--ink3);background:var(--white);border:1px solid var(--brd);border-radius:4px;padding:2px 8px;">Roadmap</span>
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:8px;">All your tools, surfaced in one place</div>
+        <p style="font-size:13px;color:var(--ink2);line-height:1.65;margin-bottom:12px;">Connect the platforms you communicate in every day. Amelia surfaces action items, mentions, and deadlines alongside your calendar and tasks.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--white);border:1px solid var(--brd);border-radius:8px;">
+            <span style="font-size:14px;">💬</span><div><div style="font-size:11.5px;font-weight:600;color:var(--ink);">Slack</div><div style="font-size:10px;color:var(--green);font-weight:500;">✓ Confirmed</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--white);border:1px solid var(--brd);border-radius:8px;">
+            <span style="font-size:14px;">🎫</span><div><div style="font-size:11.5px;font-weight:600;color:var(--ink);">Jira</div><div style="font-size:10px;color:var(--green);font-weight:500;">✓ Confirmed</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--white);border:1px solid var(--brd);border-radius:8px;">
+            <span style="font-size:14px;">🟢</span><div><div style="font-size:11.5px;font-weight:600;color:var(--ink);">WhatsApp</div><div style="font-size:10px;color:var(--green);font-weight:500;">✓ Business API</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--white);border:1px solid var(--brd);border-radius:8px;">
+            <span style="font-size:14px;">🟦</span><div><div style="font-size:11.5px;font-weight:600;color:var(--ink);">Teams</div><div style="font-size:10px;color:var(--green);font-weight:500;">✓ Confirmed</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--white);border:1px solid var(--brd);border-radius:8px;">
+            <span style="font-size:14px;">🎮</span><div><div style="font-size:11.5px;font-weight:600;color:var(--ink);">Discord</div><div style="font-size:10px;color:var(--green);font-weight:500;">✓ Confirmed</div></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
 </div>
 </section>
 
