@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Amelia Demo — AI Copilot for Executive Assistants</title>
+<title>Amelia</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ── TOKENS ── */
@@ -55,7 +55,6 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
 .nav-r{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 .date-chip{font-size:12px;font-weight:500;color:var(--ink3);background:var(--bg);border:1px solid var(--brd);border-radius:20px;padding:4px 12px;display:none;}
 @media(min-width:640px){.date-chip{display:block;}}
-@media(min-width:640px){#back-link{display:flex!important;}}
 .av{width:30px;height:30px;border-radius:50%;background:var(--ink);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
 
 /* ── LAYOUT ── */
@@ -568,6 +567,22 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
 .sched-archive-link{font-size:10.5px;font-weight:500;color:var(--ink2);background:var(--surf);border:1px solid var(--brd);border-radius:4px;padding:2px 7px;white-space:nowrap;cursor:pointer;transition:all .12s;}
 .sched-archive-link:hover{border-color:var(--brd2);color:var(--ink);}
 
+
+/* ── Date Navigator ── */
+.date-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--surf);border-bottom:1px solid var(--brd);}
+.date-nav-btn{background:none;border:1px solid var(--brd);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink2);font-size:14px;transition:all .13s;font-family:var(--f-body);}
+.date-nav-btn:hover{background:var(--white);border-color:var(--brd2);}
+.date-nav-label{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.date-nav-label.today-indicator::after{content:'Today';font-size:10px;font-weight:600;color:var(--blue);background:var(--blue-s);border-radius:4px;padding:1px 6px;}
+.date-nav-sub{font-size:11px;color:var(--ink3);font-weight:400;}
+/* Smart detect badge */
+.detect-badge{display:none;font-size:11px;font-weight:600;padding:3px 9px;border-radius:4px;margin-left:8px;animation:fadeUp .15s ease;}
+.detect-badge.meeting{background:var(--plum-s);color:var(--plum);display:inline-flex;align-items:center;gap:4px;}
+.detect-badge.project{background:var(--blue-s);color:var(--blue);display:inline-flex;align-items:center;gap:4px;}
+.detect-badge.future{background:var(--amber-s);color:var(--amber);display:inline-flex;align-items:center;gap:4px;}
+.add-row-wrap{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--brd);}
+.detect-hint{display:none;padding:6px 16px;background:var(--surf);font-size:11.5px;color:var(--ink3);border-bottom:1px solid var(--brd);}
+.detect-hint.on{display:flex;align-items:center;gap:6px;}
 </style>
 </head>
 <body>
@@ -591,7 +606,7 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
   </div>
   <div class="nav-r">
     <div class="date-chip" id="date-chip"></div>
-    <a href="index.html" style="font-size:12px;font-weight:500;color:var(--ink3);text-decoration:none;padding:5px 10px;border:1px solid var(--brd);border-radius:var(--rs);white-space:nowrap;transition:all .14s;display:none;" onmouseover="this.style.borderColor='var(--brd2)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--brd)';this.style.color='var(--ink3)'" id="back-link">← About Amelia</a>
+    <button onclick="promptApiKey()" title="API Key Settings" style="background:none;border:1px solid var(--brd);border-radius:var(--rs);padding:5px 10px;font-size:11px;font-weight:500;color:var(--ink3);cursor:pointer;font-family:var(--f-body);transition:all .13s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink3)'">⚙ API Key</button>
     <div class="av">EA</div>
   </div>
 </nav>
@@ -748,8 +763,16 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
 
     <!-- Tasks -->
     <div class="card">
-      <div class="card-h">
-        <div class="card-t">✓ Today's Tasks</div>
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="taskNavShift(-1)">‹</button>
+        <div>
+          <div class="date-nav-label" id="task-date-label">Today</div>
+          <div class="date-nav-sub" id="task-date-sub"></div>
+        </div>
+        <button class="date-nav-btn" onclick="taskNavShift(1)">›</button>
+      </div>
+      <div class="card-h" style="padding:10px 20px;">
+        <div class="card-t" id="task-card-title">✓ Tasks</div>
         <span style="font-size:11px;color:var(--ink3);font-weight:500;" id="task-count">4/9 done</span>
       </div>
       <div id="home-task-list">
@@ -826,20 +849,31 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
           <span class="tag ok">Done</span>
         </div>
       </div>
-      <div class="add-row">
-        <input class="add-inp" id="home-task-inp" placeholder="Add a task..."/>
-        <button class="add-btn" onclick="addHomeTask()">+ Add</button>
+      <div class="add-row-wrap">
+        <div class="detect-hint" id="detect-hint"></div>
+        <div class="add-row">
+          <input class="add-inp" id="home-task-inp" placeholder="Add task, meeting, or note..."/>
+          <button class="add-btn" onclick="addHomeTask()">+ Add</button>
+        </div>
       </div>
       <div class="ai-resp" id="home-task-resp"></div>
     </div>
 
     <!-- Meetings -->
     <div class="card">
-      <div class="card-h">
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="mtgNavShift(-1)">‹</button>
+        <div>
+          <div class="date-nav-label" id="mtg-date-label">Today</div>
+          <div class="date-nav-sub" id="mtg-date-sub"></div>
+        </div>
+        <button class="date-nav-btn" onclick="mtgNavShift(1)">›</button>
+      </div>
+      <div class="card-h" style="padding:10px 20px;">
         <div class="card-t">📅 Meetings</div>
         <button class="card-a" onclick="go('meetings', document.querySelectorAll('.ntab')[2])">All →</button>
       </div>
-      <div class="mtg-preview">
+      <div class="mtg-preview" id="home-mtg-list">
         <div class="mp-item">
           <div class="mp-time">9:00<br>AM</div>
           <div class="mp-dot" style="background:var(--green)"></div>
@@ -2317,12 +2351,50 @@ async function regenBrief(btn) {
 // ── CLAUDE API ──────────────────────────────────────
 const SYS = `You are Amelia — an AI day planner that helps EAs and busy professionals stay organized and on top of their work. You speak to the person managing the schedule, not to their executive. Be warm but efficient: clear, practical, no filler. Help them work smarter. 3-5 sentences max unless drafting.`;
 
+// ── API KEY MANAGEMENT ──────────────────────────────
+function getApiKey() {
+  return localStorage.getItem('amelia_api_key') || '';
+}
+
+function promptApiKey() {
+  const existing = getApiKey();
+  const key = prompt(
+    existing
+      ? 'Update your Anthropic API key (leave blank to keep current):'
+      : 'Enter your Anthropic API key to enable AI features:\n(Stored locally in your browser only)',
+    existing ? '••••••••' + existing.slice(-4) : ''
+  );
+  if(key && key !== '••••••••' + existing.slice(-4)) {
+    localStorage.setItem('amelia_api_key', key.trim());
+    return key.trim();
+  }
+  return existing;
+}
+
 async function claude(user, sys=SYS) {
+  let key = getApiKey();
+  if(!key) {
+    key = promptApiKey();
+    if(!key) throw new Error('No API key provided.');
+  }
   const r = await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST", headers:{"Content-Type":"application/json"},
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "x-api-key": key,
+      "anthropic-version":"2023-06-01",
+      "anthropic-dangerous-direct-browser-access":"true"
+    },
     body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sys,messages:[{role:"user",content:user}]})
   });
   const d = await r.json();
+  if(d.error) {
+    if(d.error.type === 'authentication_error') {
+      localStorage.removeItem('amelia_api_key');
+      throw new Error('Invalid API key. Please try again.');
+    }
+    throw new Error(d.error.message);
+  }
   return d.content?.[0]?.text || "Could not get a response.";
 }
 
@@ -2823,43 +2895,58 @@ function updateClock() {
   if(ds) ds.textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
 }
 updateClock();
-setInterval(updateClock, 10000);
+setInterval(updateClock, 30000);
 
-// Auto-update alerts based on time
+// ── Alert: show all meetings within next 60 min, in time order ──
 function updateAlerts() {
   const now = new Date();
   const curMins = now.getHours()*60 + now.getMinutes();
-  const MEETINGS = [
-    {title:'Team Standup', time:'9:00 AM', h:9, m:0, loc:'Google Meet', ppl:'8 ppl', color:'green'},
-    {title:'Product Review — Q2', time:'10:00 AM', h:10, m:0, loc:'Conf Room A', ppl:'12 ppl', color:'red'},
-    {title:'Vendor Call — Salesforce', time:'11:00 AM', h:11, m:0, loc:'Zoom', ppl:'4 ppl', color:'red'},
-    {title:'Board Prep — CEO + CFO', time:'2:00 PM', h:14, m:0, loc:'Private', ppl:'3 ppl', color:'amber'},
-    {title:'CEO 1:1 Weekly Sync', time:'4:30 PM', h:16, m:30, loc:'CEO Office', ppl:'', color:'ink3'},
-  ];
+
+  // Pull from live meetingStore for today
+  const todayKey = dateKey(new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate()));
+  const MEETINGS = (meetingStore[todayKey] || []).map(m => ({
+    title: m.title,
+    time: m.time,
+    h: Math.floor(m.timeSort/60),
+    m: m.timeSort%60,
+    loc: m.loc,
+    color: m.conflict ? 'red' : m.done ? 'green' : 'amber'
+  }));
+
   const container = document.getElementById('clock-alerts');
   if(!container) return;
-  // Find next upcoming meeting
-  const upcoming = MEETINGS.filter(mt => mt.h*60+mt.m > curMins);
+
+  // All meetings from now onwards
+  const upcoming = MEETINGS.filter(mt => mt.h*60+mt.m >= curMins);
+
   if(!upcoming.length) {
     container.innerHTML = '<div class="alert-empty">No more meetings today</div>';
     return;
   }
-  const next = upcoming[0];
-  const diffMins = (next.h*60+next.m) - curMins;
-  const diffStr = diffMins < 60
-    ? `in ${diffMins} min`
-    : `in ${Math.round(diffMins/60)}h ${diffMins%60>0?diffMins%60+'m':''}`;
-  const urgent = diffMins <= 15;
-  container.innerHTML = `
-    <div class="alert-item">
-      <div class="alert-dot ${next.color}"></div>
+
+  // Show: any starting within 60 min + always show the very next one
+  const alertable = upcoming.filter((mt, i) => {
+    const diff = (mt.h*60+mt.m) - curMins;
+    return i === 0 || diff <= 60; // always show next, plus any within 60 min
+  });
+
+  container.innerHTML = alertable.map((mt, i) => {
+    const diff = (mt.h*60+mt.m) - curMins;
+    const isNow = diff <= 0;
+    const diffStr = isNow ? 'Now' : diff < 60 ? `in ${diff} min` : `in ${Math.floor(diff/60)}h${diff%60?` ${diff%60}m`:''}`;
+    const urgColor = isNow ? 'red' : diff <= 15 ? 'red' : diff <= 30 ? 'amber' : mt.color;
+    return `<div class="alert-item" style="${i>0?'margin-top:8px;padding-top:8px;border-top:1px solid var(--brd);':''}">
+      <div class="alert-dot ${urgColor}"></div>
       <div class="alert-body">
-        <div class="alert-label">Next · ${diffStr}</div>
-        <div class="alert-title">${next.title}</div>
-        <div class="alert-sub">${next.time}${next.loc?' · '+next.loc:''}${next.ppl?' · '+next.ppl:''}</div>
+        <div class="alert-label">${isNow ? '🔴 Happening now' : i===0 ? `Next · ${diffStr}` : `Also · ${diffStr}`}</div>
+        <div class="alert-title">${mt.title}</div>
+        <div class="alert-sub">${mt.time}${mt.loc?' · '+mt.loc:''}</div>
       </div>
-    </div>
-    ${upcoming.length > 1 ? `<div style="font-size:11px;color:var(--ink4);margin-top:6px;padding-left:17px;">${upcoming.length-1} more today</div>` : ''}`;
+    </div>`;
+  }).join('') +
+  (upcoming.length > alertable.length
+    ? `<div style="font-size:11px;color:var(--ink4);margin-top:8px;padding-left:17px;">+${upcoming.length - alertable.length} more later today</div>`
+    : '');
 }
 updateAlerts();
 setInterval(updateAlerts, 60000);
@@ -2912,6 +2999,334 @@ function archiveQuickNote() {
 function openGwsPicker() { document.getElementById('gws-modal')?.classList.add('on'); }
 function closeGwsPicker() { document.getElementById('gws-modal')?.classList.remove('on'); }
 
+
+// ══════════════════════════════════════════════
+// SMART DATE-AWARE TASK + MEETING SYSTEM
+// ══════════════════════════════════════════════
+
+// ── Date utilities ──
+const DAY_MS = 86400000;
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function dateKey(d) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function dateLabel(d) {
+  const diff = Math.round((d - new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate())) / DAY_MS);
+  if(diff === -1) return 'Yesterday';
+  if(diff === 0) return 'Today';
+  if(diff === 1) return 'Tomorrow';
+  if(diff > 0 && diff < 7) return DAYS[d.getDay()];
+  return `${DAYS[d.getDay()]}, ${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
+}
+function dateSubLabel(d) {
+  return `${DAYS[d.getDay()]}, ${MONTHS_SHORT[d.getMonth()]} ${d.getDate()}`;
+}
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate() + n); return r;
+}
+
+// ── Task store ──
+// Pre-populate today's tasks
+const taskStore = {}; // { dateKey: [{text, type, time, pri, done, meta}] }
+const today = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
+
+taskStore[dateKey(today)] = [
+  {text:'Update board deck slide 7 with Q3 numbers', type:'task', pri:'h', done:false, meta:'Due EOD · 📧 James'},
+  {text:'Confirm Thursday Nobu lunch — Maya Reyes', type:'task', pri:'h', done:false, meta:'Due today · 📧 Inbox'},
+  {text:'Process overdue invoice #2891 — $4,200', type:'task', pri:'h', done:false, meta:'Overdue Mar 15 · Finance'},
+  {text:'Prepare CEO brief for 4:30 PM 1:1', type:'task', pri:'h', done:false, meta:'Due 4:00 PM'},
+  {text:'Reschedule vendor call — resolve conflict', type:'task', pri:'m', done:false, meta:'Before 10 AM'},
+  {text:'Send team standup agenda', type:'task', pri:'h', done:true, meta:'Done · 8:45 AM'},
+  {text:'Book flights for SF trip (Apr 3–5)', type:'task', pri:'m', done:true, meta:'Done · Mar 22'},
+  {text:'Send Friday all-hands meeting notes', type:'task', pri:'m', done:true, meta:'Done · 9:00 AM'},
+  {text:'Order office supplies — Q2 request', type:'task', pri:'l', done:true, meta:'Done'},
+];
+
+// ── Meeting store ──
+const meetingStore = {}; // { dateKey: [{title, time, duration, loc, type}] }
+meetingStore[dateKey(today)] = [
+  {title:'Team Standup', time:'9:00 AM', timeSort:540, duration:'30 min', loc:'Google Meet', done:true, conflict:false},
+  {title:'Product Review Q2', time:'10:00 AM', timeSort:600, duration:'90 min', loc:'Conf Room A', done:false, conflict:true, now:true},
+  {title:'Vendor Call — Salesforce', time:'11:00 AM', timeSort:660, duration:'60 min', loc:'Zoom', done:false, conflict:false},
+  {title:'Board Prep — CEO + CFO', time:'2:00 PM', timeSort:840, duration:'60 min', loc:'Private', done:false, conflict:false},
+  {title:'CEO 1:1 Weekly Sync', time:'4:30 PM', timeSort:990, duration:'30 min', loc:'CEO Office', done:false, conflict:false},
+];
+
+// ── Navigation state ──
+let taskNavOffset = 0;  // 0 = today
+let mtgNavOffset  = 0;
+
+// ── Smart input detection ──
+const MEETING_WORDS = /(meeting|call|sync|standup|stand-up|interview|demo|review|catchup|catch-up|lunch|dinner|coffee|chat)/i;
+const FUTURE_PATTERNS = [
+  { re: /tomorrow/i,      offset: 1 },
+  { re: /next\s+monday/i, weekday: 1 },
+  { re: /next\s+tuesday/i, weekday: 2 },
+  { re: /next\s+wednesday/i, weekday: 3 },
+  { re: /next\s+thursday/i, weekday: 4 },
+  { re: /next\s+friday/i, weekday: 5 },
+  { re: /monday/i, weekday: 1 },
+  { re: /tuesday/i, weekday: 2 },
+  { re: /wednesday/i, weekday: 3 },
+  { re: /thursday/i, weekday: 4 },
+  { re: /friday/i, weekday: 5 },
+  { re: /saturday/i, weekday: 6 },
+  { re: /sunday/i, weekday: 0 },
+];
+const TIME_RE = /(\d{1,2})(:\d{2})?\s*(am|pm)/i;
+const PROJECT_WORDS = /(project|milestone|deadline|launch|deploy|release|sprint)/i;
+
+function detectInput(text) {
+  let targetDate = new Date(addDays(today, taskNavOffset));
+  let dateOffset = null;
+
+  // Check for future date keywords
+  for(const p of FUTURE_PATTERNS) {
+    if(p.re.test(text)) {
+      if(p.offset !== undefined) {
+        targetDate = addDays(today, p.offset);
+        dateOffset = p.offset;
+      } else if(p.weekday !== undefined) {
+        const curr = today.getDay();
+        let diff = p.weekday - curr;
+        if(diff <= 0) diff += 7;
+        targetDate = addDays(today, diff);
+        dateOffset = diff;
+      }
+      break;
+    }
+  }
+
+  // Extract time
+  const timeMatch = text.match(TIME_RE);
+  let timeStr = timeMatch ? timeMatch[0].trim() : null;
+
+  // Detect type
+  let type = 'task';
+  if(MEETING_WORDS.test(text)) type = 'meeting';
+  else if(PROJECT_WORDS.test(text)) type = 'project';
+
+  return { targetDate, dateOffset, type, timeStr };
+}
+
+// Live detection — update hint as user types
+document.getElementById('home-task-inp').addEventListener('input', function() {
+  const val = this.value.trim();
+  const hint = document.getElementById('detect-hint');
+  if(!val) { hint.classList.remove('on'); hint.innerHTML = ''; return; }
+
+  const {targetDate, dateOffset, type, timeStr} = detectInput(val);
+  const parts = [];
+
+  if(dateOffset !== null && dateOffset !== 0) {
+    parts.push(`📅 <strong>${dateLabel(targetDate)}</strong>`);
+  }
+  if(timeStr) parts.push(`🕐 ${timeStr}`);
+  if(type === 'meeting') parts.push(`📅 <em>Meeting</em> — will appear in Meetings`);
+  else if(type === 'project') parts.push(`📁 <em>Project task</em>`);
+
+  if(parts.length) {
+    hint.innerHTML = '✦ Detected: ' + parts.join(' · ');
+    hint.classList.add('on');
+  } else {
+    hint.classList.remove('on');
+    hint.innerHTML = '';
+  }
+});
+
+// ── Add task / meeting ──
+function addHomeTask() {
+  const inp = document.getElementById('home-task-inp');
+  const val = inp.value.trim();
+  if(!val) return;
+
+  const {targetDate, dateOffset, type, timeStr} = detectInput(val);
+  const key = dateKey(targetDate);
+  if(!taskStore[key]) taskStore[key] = [];
+
+  const meta = [
+    timeStr,
+    dateOffset !== null && dateOffset !== 0 ? dateLabel(targetDate) : null,
+    type === 'meeting' ? '📅 Meeting' : type === 'project' ? '📁 Project' : null,
+  ].filter(Boolean).join(' · ') || 'Added just now';
+
+  const item = {
+    text: val, type, pri: type === 'meeting' ? 'm' : 'm',
+    done: false, meta, time: timeStr || ''
+  };
+  taskStore[key].unshift(item);
+
+  // If it's a meeting, also add to meetingStore
+  if(type === 'meeting') {
+    if(!meetingStore[key]) meetingStore[key] = [];
+    // Parse time to sort
+    let timeSort = 480;
+    if(timeStr) {
+      const m = timeStr.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+      if(m) {
+        let h = parseInt(m[1]);
+        const min = parseInt(m[2]||'0');
+        if(m[3].toLowerCase()==='pm' && h!==12) h+=12;
+        if(m[3].toLowerCase()==='am' && h===12) h=0;
+        timeSort = h*60+min;
+      }
+    }
+    meetingStore[key].push({
+      title: val.replace(TIME_RE,'').replace(/tomorrow/i,'').replace(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i,'').trim(),
+      time: timeStr || 'TBD', timeSort, duration: '', loc: '', done: false, conflict: false
+    });
+    meetingStore[key].sort((a,b)=>a.timeSort-b.timeSort);
+  }
+
+  inp.value = '';
+  document.getElementById('detect-hint').classList.remove('on');
+
+  // Navigate to the correct date if it's different from current view
+  if(dateOffset !== null) {
+    taskNavOffset = dateOffset;
+    if(type === 'meeting') mtgNavOffset = dateOffset;
+  }
+
+  renderTaskNav();
+  renderMtgNav();
+
+  // Flash feedback
+  const hint = document.getElementById('detect-hint');
+  hint.innerHTML = type === 'meeting'
+    ? `✓ Meeting added to ${dateLabel(targetDate)} — visible in Meetings tab`
+    : `✓ Task added to ${dateLabel(targetDate)}`;
+  hint.classList.add('on');
+  setTimeout(()=>hint.classList.remove('on'), 2500);
+}
+
+// ── Render task list for current nav date ──
+function renderTaskNav() {
+  const d = addDays(today, taskNavOffset);
+  const key = dateKey(d);
+  const label = document.getElementById('task-date-label');
+  const sub = document.getElementById('task-date-sub');
+  const title = document.getElementById('task-card-title');
+  const list = document.getElementById('home-task-list');
+
+  if(label) {
+    label.textContent = dateLabel(d);
+    label.className = 'date-nav-label' + (taskNavOffset===0?' today-indicator':'');
+  }
+  if(sub) sub.textContent = taskNavOffset===0 ? '' : dateSubLabel(d);
+  if(title) title.textContent = '✓ ' + dateLabel(d) + "'s Tasks";
+
+  const tasks = taskStore[key] || [];
+  if(!list) return;
+  list.innerHTML = '';
+
+  if(!tasks.length) {
+    list.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--ink3);font-style:italic;text-align:center;">No tasks for this day.<br><span style="font-size:11.5px;">Type above to add one.</span></div>';
+  } else {
+    tasks.forEach((t, i) => {
+      const el = document.createElement('div');
+      el.className = 'todo-row';
+      el.onclick = () => { t.done = !t.done; renderTaskNav(); updateTaskCount(); };
+      const priClass = t.pri==='h'?'h':t.pri==='m'?'m':'l';
+      const tagClass = t.done?'ok':t.pri==='h'?'urg':'act';
+      const tagText = t.done?'Done':t.pri==='h'?'High':'Medium';
+      const typeIcon = t.type==='meeting'?'📅 ':t.type==='project'?'📁 ':'';
+      el.innerHTML = `
+        <div class="chk${t.done?' done':''}">
+          ${t.done?'<span style="color:white;font-size:10px;font-weight:700;">✓</span>':''}
+        </div>
+        <div class="todo-body">
+          <div class="todo-t${t.done?' done':''}">${typeIcon}${t.text}</div>
+          <div class="todo-m"><span class="pdot ${priClass}"></span>${t.meta}</div>
+        </div>
+        <span class="tag ${tagClass}">${tagText}</span>`;
+      list.appendChild(el);
+    });
+  }
+  updateTaskCount();
+}
+
+function updateTaskCount() {
+  const d = addDays(today, taskNavOffset);
+  const tasks = taskStore[dateKey(d)] || [];
+  const done = tasks.filter(t=>t.done).length;
+  const el = document.getElementById('task-count');
+  if(el) el.textContent = `${done}/${tasks.length} done`;
+}
+
+function taskNavShift(n) {
+  taskNavOffset += n;
+  renderTaskNav();
+}
+
+// ── Render meeting list for current nav date ──
+function renderMtgNav() {
+  const d = addDays(today, mtgNavOffset);
+  const key = dateKey(d);
+  const label = document.getElementById('mtg-date-label');
+  const sub = document.getElementById('mtg-date-sub');
+  const list = document.getElementById('home-mtg-list');
+
+  if(label) {
+    label.textContent = dateLabel(d);
+    label.className = 'date-nav-label' + (mtgNavOffset===0?' today-indicator':'');
+  }
+  if(sub) sub.textContent = mtgNavOffset===0 ? '' : dateSubLabel(d);
+
+  const meetings = meetingStore[key] || [];
+  if(!list) return;
+  list.innerHTML = '';
+
+  if(!meetings.length) {
+    list.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--ink3);font-style:italic;text-align:center;">No meetings for this day.</div>';
+    return;
+  }
+  meetings.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'mp-item' + (m.conflict?' conflict-item':'');
+    if(m.now) el.style.background = 'var(--red-s)';
+    el.innerHTML = `
+      <div class="mp-time">${m.time.replace(' ','
+').replace('AM','<br>AM').replace('PM','<br>PM')}</div>
+      <div class="mp-dot" style="background:${m.done?'var(--green)':m.conflict?'var(--red)':'var(--ink3)'}"></div>
+      <div class="mp-body">
+        <div class="mp-title">${m.title}${m.done?' <span class="tag ok" style="font-size:9px;padding:1px 5px;border-radius:3px;">Done</span>':''}${m.now?' <span class="mp-now">Now</span>':''}${m.conflict?' <span style="font-size:9px;color:var(--red);font-weight:600;">⚠️</span>':''}</div>
+        <div class="mp-meta">${[m.duration,m.loc].filter(Boolean).join(' · ')}</div>
+      </div>
+      <button class="mp-notes-btn" onclick="openNoteFor('${m.title}')">Notes</button>`;
+    list.appendChild(el);
+  });
+}
+
+function mtgNavShift(n) {
+  mtgNavOffset += n;
+  renderMtgNav();
+}
+
+// ── INIT: render both ──
+// (override old addHomeTask, renderCal will call renderTaskNav via saveCalTask)
+function saveCalTask() {
+  const val = document.getElementById('cal-task-inp').value.trim();
+  if(!val || !calCurrentDate) return;
+  const key = dateKey(calCurrentDate);
+  if(!taskStore[key]) taskStore[key] = [];
+  taskStore[key].push({text:val, type:'task', pri:calPri, done:false, meta:'Added · '+dateLabel(calCurrentDate)});
+  // If navigating to this date, re-render
+  const diffMs = calCurrentDate - today;
+  const diffDays = Math.round(diffMs / DAY_MS);
+  taskNavOffset = diffDays;
+  renderCal(); renderTaskNav();
+  closeCal();
+}
+
+
+// ── INIT DATE SYSTEM ──
+renderTaskNav();
+renderMtgNav();
+// Re-run alerts now that meetingStore is populated
+updateAlerts();
+updateClock();
 </script>
 </body>
 </html>
