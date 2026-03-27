@@ -52,15 +52,15 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,244,240,.95);backdrop-
 @media(max-width:640px){.nav-links{display:none;}.nav-back{display:none;}}
 
 /* ── HERO ── */
-.hero{min-height:calc(100vh - 56px);display:grid;padding:0 32px;max-width:1280px;margin:0 auto;position:relative;overflow:hidden;}
+.hero{min-height:calc(100vh - 56px);display:grid;padding:0 32px;max-width:1280px;margin:0 auto;position:relative;overflow:visible;}
 @media(min-width:860px){.hero{grid-template-columns:1fr 1fr;align-items:center;gap:40px;padding:80px 32px;}}
 @media(max-width:859px){.hero{grid-template-columns:1fr;padding:48px 24px 0;gap:0;}}
 
 .hero-left{display:flex;flex-direction:column;gap:28px;animation:fadeUp .6s ease both;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:var(--white);border:1px solid var(--brd);border-radius:20px;width:fit-content;}
 .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-s);}
-.hero-badge-text{font-size:12px;font-weight:500;color:var(--ink2);}
-.hero-badge-sep{color:var(--brd);font-size:12px;}
+.hero-badge-text{font-size:12px;font-weight:500;color:var(--ink3);}
+.hero-badge-sep{color:var(--ink4);font-size:12px;}
 
 .hero-h1{font-family:var(--f-display);font-size:clamp(42px,6vw,72px);font-weight:400;line-height:1.05;letter-spacing:-.5px;color:var(--ink);}
 .hero-h1 em{font-style:italic;color:var(--blue);}
@@ -89,7 +89,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,244,240,.95);backdrop-
 @media(max-width:859px){.avatar-img{height:340px;}}
 
 /* Floating brief card — bottom-left, below face */
-.float-card{position:absolute;bottom:120px;left:0;background:var(--white);border:1px solid var(--brd);border-radius:14px;padding:14px 16px;width:270px;box-shadow:0 8px 32px rgba(0,0,0,.08);z-index:3;animation:floatIn .8s .4s ease both;}
+.float-card{position:absolute;top:16px;left:-32px;background:var(--white);border:1px solid var(--brd);border-radius:14px;padding:14px 16px;width:264px;box-shadow:0 8px 32px rgba(0,0,0,.08);z-index:3;animation:floatIn .8s .4s ease both;}
 @media(max-width:859px){.float-card{display:none;}}
 .float-card-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 .float-card-av{width:26px;height:26px;background:var(--ink);border-radius:7px;display:flex;align-items:center;justify-content:center;color:white;font-family:var(--f-display);font-size:11px;font-style:italic;}
@@ -104,7 +104,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,244,240,.95);backdrop-
 .ftag.green{background:var(--green-s);color:var(--green);}
 
 /* Second floating card — bottom-right, below face */
-.float-card-2{position:absolute;bottom:40px;right:0;background:var(--ink);border-radius:12px;padding:14px 16px;width:200px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:3;animation:floatIn .8s .6s ease both;}
+.float-card-2{position:absolute;bottom:16px;right:-24px;background:var(--ink);border-radius:12px;padding:14px 16px;width:190px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:3;animation:floatIn .8s .6s ease both;}
 @media(max-width:859px){.float-card-2{display:none;}}
 .float-card-2-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
 .float-card-2-stat{font-family:var(--f-display);font-size:30px;font-weight:400;color:white;line-height:1;}
@@ -214,7 +214,7 @@ footer a{color:var(--ink3);transition:color .13s;}
 footer a:hover{color:var(--ink);}
 
 /* ── SCROLL ANIMATIONS ── */
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .5s ease;}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease;}
 .reveal.on{opacity:1;transform:translateY(0);}
 </style>
 </head>
@@ -242,7 +242,7 @@ footer a:hover{color:var(--ink);}
 </nav>
 
 <!-- ══ HERO ══ -->
-<div style="background:var(--white);border-bottom:1px solid var(--brd);">
+<div style="background:var(--white);border-bottom:1px solid var(--brd);overflow:visible;">
 <div class="hero">
 
   <div class="hero-left">
@@ -250,12 +250,12 @@ footer a:hover{color:var(--ink);}
       <div class="hero-badge-dot"></div>
       <span class="hero-badge-text">Annie the Agent</span>
       <span class="hero-badge-sep">·</span>
-      <span class="hero-badge-text">Amelia · AI EA Copilot · Live</span>
+      <span class="hero-badge-text" style="color:var(--ink2);">Amelia · AI EA Copilot · Live</span>
     </div>
 
     <h1 class="hero-h1">Meet <em>Amelia.</em><br>She keeps you<br>one step ahead.</h1>
 
-    <p class="hero-sub">Amelia is your AI-powered day planner — she organises your inbox, prepares your meetings, tracks your tasks, and delivers a sharp daily brief. <strong>So you can focus on what only you can do.</strong></p>
+    <p class="hero-sub"><em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> is your AI-powered day planner — she organises your inbox, prepares your meetings, tracks your tasks, and delivers a sharp daily brief. <strong>So you can focus on what only you can do.</strong></p>
 
     <div class="hero-actions">
       <a href="demo.html"><button class="btn-hero">Launch Demo →</button></a>
@@ -407,14 +407,14 @@ footer a:hover{color:var(--ink);}
   <div class="reveal">
     <div class="section-label">How it works</div>
     <h2 class="section-h2">Your day, <em>organised.</em></h2>
-    <p class="section-sub">From the moment you open Amelia to the end of your day — she handles the structure so you handle the substance.</p>
+    <p class="section-sub">From the moment you open <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> to the end of your day — she handles the structure so you handle the substance.</p>
   </div>
 
   <div class="steps-grid">
     <div class="step-card reveal">
       <div class="step-num">01</div>
       <div class="step-title">Morning Brief</div>
-      <p class="step-text">Amelia reads your day and delivers a sharp brief — urgent emails, meeting conflicts, task priorities, and your best focus window. Everything you need in 30 seconds.</p>
+      <p class="step-text"><em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> reads your day and delivers a sharp brief — urgent emails, meeting conflicts, task priorities, and your best focus window. Everything you need in 30 seconds.</p>
     </div>
     <div class="step-card reveal" style="transition-delay:.1s">
       <div class="step-num">02</div>
@@ -424,7 +424,7 @@ footer a:hover{color:var(--ink);}
     <div class="step-card reveal" style="transition-delay:.2s">
       <div class="step-num">03</div>
       <div class="step-title">Close it out</div>
-      <p class="step-text">Record meetings live or paste transcripts — Amelia structures them into minutes with decisions and action items. Archive completed work with a single click.</p>
+      <p class="step-text">Record meetings live or paste transcripts — <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> structures them into minutes with decisions and action items. Archive completed work with a single click.</p>
     </div>
   </div>
 </div>
@@ -493,7 +493,7 @@ footer a:hover{color:var(--ink);}
   <div class="reveal">
     <div class="section-label">Pricing</div>
     <h2 class="section-h2"><em>Amelia's</em> pricing.</h2>
-    <p class="section-sub">Start free. Upgrade when Amelia becomes indispensable — which usually happens on day one.</p>
+    <p class="section-sub">Start free. Upgrade when <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> becomes indispensable — which usually happens on day one.</p>
   </div>
 
   <div class="pricing-grid">
@@ -569,7 +569,7 @@ footer a:hover{color:var(--ink);}
   <div class="cta-section reveal">
     <div class="cta-label">Ready?</div>
     <h2 class="cta-h2">Let <em>Amelia</em> take it<br>from here.</h2>
-    <p class="cta-sub">See Amelia in action right now — your daily brief, inbox, and meeting prep, all in one place.</p>
+    <p class="cta-sub">See <em style="font-family:var(--f-display);font-style:italic;color:var(--blue);font-size:1.05em;">Amelia</em> in action right now — your daily brief, inbox, and meeting prep, all in one place.</p>
     <div class="cta-actions">
       <a href="demo.html"><button class="btn-cta-white">Launch Amelia Demo →</button></a>
       <a href="https://annietheagent.ai/hub.html"><button class="btn-cta-ghost">← All Agents</button></a>
