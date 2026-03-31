@@ -606,7 +606,7 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
   </div>
   <div class="nav-r">
     <div class="date-chip" id="date-chip"></div>
-    <button onclick="promptApiKey()" title="API Key Settings" style="background:none;border:1px solid var(--brd);border-radius:var(--rs);padding:5px 10px;font-size:11px;font-weight:500;color:var(--ink3);cursor:pointer;font-family:var(--f-body);transition:all .13s;" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink3)'">⚙ API Key</button>
+    <a href="https://annietheagent.ai/amelia/index.html" style="font-size:12.5px;font-weight:500;color:var(--ink3);display:flex;align-items:center;gap:5px;transition:color .13s;padding:6px 10px;border-radius:6px;text-decoration:none;border:1px solid var(--brd);" onmouseover="this.style.color='var(--ink)';this.style.borderColor='var(--brd2)'" onmouseout="this.style.color='var(--ink3)';this.style.borderColor='var(--brd)'">← About Amelia</a>
     <div class="av">EA</div>
   </div>
 </nav>
@@ -2320,49 +2320,25 @@ async function regenBrief(btn) {
 const SYS = `You are Amelia — an AI day planner that helps EAs and busy professionals stay organized and on top of their work. You speak to the person managing the schedule, not to their executive. Be warm but efficient: clear, practical, no filler. Help them work smarter. 3-5 sentences max unless drafting.`;
 
 // ── API KEY MANAGEMENT ──────────────────────────────
-function getApiKey() {
-  return localStorage.getItem('amelia_api_key') || '';
-}
-
-function promptApiKey() {
-  const existing = getApiKey();
-  const key = prompt(
-    existing
-      ? 'Update your Anthropic API key (leave blank to keep current):'
-      : 'Enter your Anthropic API key to enable AI features:\n(Stored locally in your browser only)',
-    existing ? '••••••••' + existing.slice(-4) : ''
-  );
-  if(key && key !== '••••••••' + existing.slice(-4)) {
-    localStorage.setItem('amelia_api_key', key.trim());
-    return key.trim();
-  }
-  return existing;
-}
+// ── AI via Cloudflare Worker proxy (API key stored server-side) ──
+const PROXY_URL = "https://amelia-proxy.irene901230.workers.dev";
 
 async function claude(user, sys=SYS) {
-  let key = getApiKey();
-  if(!key) {
-    key = promptApiKey();
-    if(!key) throw new Error('No API key provided.');
-  }
-  const r = await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "x-api-key": key,
-      "anthropic-version":"2023-06-01",
-      "anthropic-dangerous-direct-browser-access":"true"
-    },
-    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sys,messages:[{role:"user",content:user}]})
+  const r = await fetch(PROXY_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: sys,
+      messages: [{ role: "user", content: user }]
+    })
   });
-  const d = await r.json();
-  if(d.error) {
-    if(d.error.type === 'authentication_error') {
-      localStorage.removeItem('amelia_api_key');
-      throw new Error('Invalid API key. Please try again.');
-    }
-    throw new Error(d.error.message);
+  if(!r.ok) {
+    const err = await r.json().catch(()=>({}));
+    throw new Error(err.error?.message || `Request failed: ${r.status}`);
   }
+  const d = await r.json();
   return d.content?.[0]?.text || "Could not get a response.";
 }
 
@@ -2980,9 +2956,8 @@ function addDays(d, n) {
   const r = new Date(d); r.setDate(r.getDate() + n); return r;
 }
 
-// ── Task store ──
-// Pre-populate today's tasks
-const taskStore = {}; // { dateKey: [{text, type, time, pri, done, meta}] }
+// ── Task store (keyed by dateKey) ──
+const taskStore = {};
 const today = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
 
 taskStore[dateKey(today)] = [
@@ -2998,7 +2973,7 @@ taskStore[dateKey(today)] = [
 ];
 
 // ── Meeting store ──
-const meetingStore = {}; // { dateKey: [{title, time, duration, loc, type}] }
+const meetingStore = {};
 meetingStore[dateKey(today)] = [
   {title:'Team Standup', time:'9:00 AM', timeSort:540, duration:'30 min', loc:'Google Meet', done:true, conflict:false},
   {title:'Product Review Q2', time:'10:00 AM', timeSort:600, duration:'90 min', loc:'Conf Room A', done:false, conflict:true, now:true},
@@ -3008,64 +2983,70 @@ meetingStore[dateKey(today)] = [
 ];
 
 // ── Navigation state ──
-let taskNavOffset = 0;  // 0 = today
+let taskNavOffset = 0;
 let mtgNavOffset  = 0;
 
-// ── Smart input detection ──
-const MEETING_WORDS = /(meeting|call|sync|standup|stand-up|interview|demo|review|catchup|catch-up|lunch|dinner|coffee|chat)/i;
-const FUTURE_PATTERNS = [
-  { re: /tomorrow/i,      offset: 1 },
-  { re: /next\s+monday/i, weekday: 1 },
-  { re: /next\s+tuesday/i, weekday: 2 },
-  { re: /next\s+wednesday/i, weekday: 3 },
-  { re: /next\s+thursday/i, weekday: 4 },
-  { re: /next\s+friday/i, weekday: 5 },
-  { re: /monday/i, weekday: 1 },
-  { re: /tuesday/i, weekday: 2 },
-  { re: /wednesday/i, weekday: 3 },
-  { re: /thursday/i, weekday: 4 },
-  { re: /friday/i, weekday: 5 },
-  { re: /saturday/i, weekday: 6 },
-  { re: /sunday/i, weekday: 0 },
-];
-const TIME_RE = /(\d{1,2})(:\d{2})?\s*(am|pm)/i;
-const PROJECT_WORDS = /(project|milestone|deadline|launch|deploy|release|sprint)/i;
+// ── Smart input detection (no regex word boundaries) ──
+function containsWord(text, word) {
+  const t = text.toLowerCase();
+  const w = word.toLowerCase();
+  const idx = t.indexOf(w);
+  if(idx < 0) return false;
+  const before = idx === 0 || !/[a-z]/.test(t[idx-1]);
+  const after = idx+w.length >= t.length || !/[a-z]/.test(t[idx+w.length]);
+  return before && after;
+}
 
 function detectInput(text) {
-  // Always detect relative to TODAY, not current nav view
-  let targetDate = new Date(today);
+  const t = text.toLowerCase();
+  let targetDate = new Date(today); // always relative to TODAY
   let dateOffset = null;
 
-  // Check for future date keywords
-  for(const p of FUTURE_PATTERNS) {
-    if(p.re.test(text)) {
-      if(p.offset !== undefined) {
-        targetDate = addDays(today, p.offset);
-        dateOffset = p.offset;
-      } else if(p.weekday !== undefined) {
+  // Date detection — in priority order
+  if(containsWord(text, 'tomorrow')) {
+    dateOffset = 1;
+    targetDate = addDays(today, 1);
+  } else {
+    const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    for(let wi=0; wi<weekdays.length; wi++) {
+      if(containsWord(text, weekdays[wi])) {
         const curr = today.getDay();
-        let diff = p.weekday - curr;
+        let diff = wi - curr;
         if(diff <= 0) diff += 7;
-        targetDate = addDays(today, diff);
         dateOffset = diff;
+        targetDate = addDays(today, diff);
+        break;
       }
-      break;
     }
   }
 
-  // Extract time
-  const timeMatch = text.match(TIME_RE);
-  let timeStr = timeMatch ? timeMatch[0].trim() : null;
+  // Time extraction
+  let timeStr = null;
+  const timeMatch = text.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+  if(timeMatch) {
+    const h = timeMatch[1];
+    const m = timeMatch[2] ? ':'+timeMatch[2] : '';
+    const ap = timeMatch[3].toUpperCase();
+    timeStr = `${h}${m} ${ap}`;
+  }
 
-  // Detect type
+  // Type detection
+  const meetingWords = ['meeting','call','sync','standup','stand-up','interview','demo','review','catchup','lunch','dinner','coffee','chat','zoom','teams'];
+  const projectWords = ['project','milestone','deadline','launch','deploy','release','sprint'];
   let type = 'task';
-  if(MEETING_WORDS.test(text)) type = 'meeting';
-  else if(PROJECT_WORDS.test(text)) type = 'project';
+  for(const w of meetingWords) {
+    if(containsWord(text, w)) { type = 'meeting'; break; }
+  }
+  if(type === 'task') {
+    for(const w of projectWords) {
+      if(containsWord(text, w)) { type = 'project'; break; }
+    }
+  }
 
   return { targetDate, dateOffset, type, timeStr };
 }
 
-// Live detection — update hint as user types
+// Live detection hint
 document.getElementById('home-task-inp').addEventListener('input', function() {
   const val = this.value.trim();
   const hint = document.getElementById('detect-hint');
@@ -3090,6 +3071,11 @@ document.getElementById('home-task-inp').addEventListener('input', function() {
   }
 });
 
+// Enter key
+document.getElementById('home-task-inp').addEventListener('keydown', e => {
+  if(e.key === 'Enter') addHomeTask();
+});
+
 // ── Add task / meeting ──
 function addHomeTask() {
   const inp = document.getElementById('home-task-inp');
@@ -3106,57 +3092,56 @@ function addHomeTask() {
     type === 'meeting' ? '📅 Meeting' : type === 'project' ? '📁 Project' : null,
   ].filter(Boolean).join(' · ') || 'Added just now';
 
-  const item = {
-    text: val, type, pri: type === 'meeting' ? 'm' : 'm',
-    done: false, meta, time: timeStr || ''
-  };
-  taskStore[key].unshift(item);
+  taskStore[key].unshift({text:val, type, pri:'m', done:false, meta, time:timeStr||''});
 
-  // If it's a meeting, also add to meetingStore
+  // If meeting — also add to meetingStore
   if(type === 'meeting') {
     if(!meetingStore[key]) meetingStore[key] = [];
-    // Parse time to sort
     let timeSort = 480;
     if(timeStr) {
-      const m = timeStr.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+      const m = timeStr.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
       if(m) {
-        let h = parseInt(m[1]);
-        const min = parseInt(m[2]||'0');
-        if(m[3].toLowerCase()==='pm' && h!==12) h+=12;
-        if(m[3].toLowerCase()==='am' && h===12) h=0;
-        timeSort = h*60+min;
+        let h = parseInt(m[1]), mn = parseInt(m[2]||'0');
+        if(m[3].toUpperCase()==='PM' && h!==12) h+=12;
+        if(m[3].toUpperCase()==='AM' && h===12) h=0;
+        timeSort = h*60+mn;
       }
     }
-    meetingStore[key].push({
-      title: val.replace(TIME_RE,'').replace(/tomorrow/i,'').replace(/(monday|tuesday|wednesday|thursday|friday|saturday|sunday)/i,'').trim(),
-      time: timeStr || 'TBD', timeSort, duration: '', loc: '', done: false, conflict: false
+    // Clean title: remove date/time words
+    let title = val;
+    ['tomorrow','monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(w => {
+      const re = new RegExp('\\b'+w+'\\b','gi');
+      title = title.replace(re,'');
     });
+    if(timeStr) title = title.replace(timeStr,'');
+    title = title.replace(/\bat\b/gi,'').replace(/\s+/g,' ').trim();
+    meetingStore[key].push({title, time:timeStr||'TBD', timeSort, duration:'', loc:'', done:false, conflict:false});
     meetingStore[key].sort((a,b)=>a.timeSort-b.timeSort);
+    mtgNavOffset = dateOffset !== null ? dateOffset : mtgNavOffset;
   }
 
   inp.value = '';
   document.getElementById('detect-hint').classList.remove('on');
 
-  // Navigate to the correct date if it's different from current view
-  if(dateOffset !== null) {
-    taskNavOffset = dateOffset;
-    if(type === 'meeting') mtgNavOffset = dateOffset;
-  }
+  // Navigate task view to the target date
+  if(dateOffset !== null) taskNavOffset = dateOffset;
 
+  // Re-render everything
   renderTaskNav();
   renderMtgNav();
-  renderCal(); // sync calendar dots
+  renderCal();
 
-  // Flash feedback
+  // Feedback
   const hint = document.getElementById('detect-hint');
+  const label = dateOffset !== null && dateOffset !== 0 ? dateLabel(targetDate) : 'today';
   hint.innerHTML = type === 'meeting'
-    ? `✓ Meeting added to ${dateLabel(targetDate)} — also visible in Meetings tab`
-    : `✓ Task added to ${dateLabel(targetDate)}`;
+    ? `✓ Meeting added to <strong>${label}</strong> — visible in Meetings tab`
+    : `✓ Task added to <strong>${label}</strong>`;
   hint.classList.add('on');
-  setTimeout(()=>hint.classList.remove('on'), 2500);
+  setTimeout(() => hint.classList.remove('on'), 2500);
 }
 
-// ── Render task list for current nav date ──
+// ── Render task nav ──
 function renderTaskNav() {
   const d = addDays(today, taskNavOffset);
   const key = dateKey(d);
@@ -3167,7 +3152,7 @@ function renderTaskNav() {
 
   if(label) {
     label.textContent = dateLabel(d);
-    label.className = 'date-nav-label' + (taskNavOffset===0?' today-indicator':'');
+    label.className = 'date-nav-label' + (taskNavOffset===0 ? ' today-indicator' : '');
   }
   if(sub) sub.textContent = taskNavOffset===0 ? '' : dateSubLabel(d);
   if(title) title.textContent = '✓ ' + dateLabel(d) + "'s Tasks";
@@ -3179,21 +3164,18 @@ function renderTaskNav() {
   if(!tasks.length) {
     list.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--ink3);font-style:italic;text-align:center;">No tasks for this day.<br><span style="font-size:11.5px;">Type above to add one.</span></div>';
   } else {
-    tasks.forEach((t, i) => {
+    tasks.forEach(t => {
       const el = document.createElement('div');
       el.className = 'todo-row';
-      el.onclick = () => { t.done = !t.done; renderTaskNav(); updateTaskCount(); };
-      const priClass = t.pri==='h'?'h':t.pri==='m'?'m':'l';
-      const tagClass = t.done?'ok':t.pri==='h'?'urg':'act';
-      const tagText = t.done?'Done':t.pri==='h'?'High':'Medium';
-      const typeIcon = t.type==='meeting'?'📅 ':t.type==='project'?'📁 ':'';
+      el.onclick = () => { t.done = !t.done; renderTaskNav(); renderCal(); };
+      const tagClass = t.done ? 'ok' : t.pri==='h' ? 'urg' : 'act';
+      const tagText = t.done ? 'Done' : t.pri==='h' ? 'High' : 'Medium';
+      const typeIcon = t.type==='meeting' ? '📅 ' : t.type==='project' ? '📁 ' : '';
       el.innerHTML = `
-        <div class="chk${t.done?' done':''}">
-          ${t.done?'<span style="color:white;font-size:10px;font-weight:700;">✓</span>':''}
-        </div>
+        <div class="chk${t.done?' done':''}">${t.done?'<span style="color:white;font-size:10px;font-weight:700;">✓</span>':''}</div>
         <div class="todo-body">
           <div class="todo-t${t.done?' done':''}">${typeIcon}${t.text}</div>
-          <div class="todo-m"><span class="pdot ${priClass}"></span>${t.meta}</div>
+          <div class="todo-m"><span class="pdot ${t.pri}"></span>${t.meta}</div>
         </div>
         <span class="tag ${tagClass}">${tagText}</span>`;
       list.appendChild(el);
@@ -3215,7 +3197,7 @@ function taskNavShift(n) {
   renderTaskNav();
 }
 
-// ── Render meeting list for current nav date ──
+// ── Render meeting nav ──
 function renderMtgNav() {
   const d = addDays(today, mtgNavOffset);
   const key = dateKey(d);
@@ -3225,7 +3207,7 @@ function renderMtgNav() {
 
   if(label) {
     label.textContent = dateLabel(d);
-    label.className = 'date-nav-label' + (mtgNavOffset===0?' today-indicator':'');
+    label.className = 'date-nav-label' + (mtgNavOffset===0 ? ' today-indicator' : '');
   }
   if(sub) sub.textContent = mtgNavOffset===0 ? '' : dateSubLabel(d);
 
@@ -3239,16 +3221,17 @@ function renderMtgNav() {
   }
   meetings.forEach(m => {
     const el = document.createElement('div');
-    el.className = 'mp-item' + (m.conflict?' conflict-item':'');
+    el.className = 'mp-item' + (m.conflict ? ' conflict-item' : '');
     if(m.now) el.style.background = 'var(--red-s)';
-    const _td = m.time.replace(' AM','<br>AM').replace(' PM','<br>PM');
-    el.innerHTML = `<div class="mp-time">${_td}</div>
+    const td = m.time.replace(' AM','<br>AM').replace(' PM','<br>PM');
+    el.innerHTML = `
+      <div class="mp-time">${td}</div>
       <div class="mp-dot" style="background:${m.done?'var(--green)':m.conflict?'var(--red)':'var(--ink3)'}"></div>
       <div class="mp-body">
-        <div class="mp-title">${m.title}${m.done?' <span class="tag ok" style="font-size:9px;padding:1px 5px;border-radius:3px;">Done</span>':''}${m.now?' <span class="mp-now">Now</span>':''}${m.conflict?' <span style="font-size:9px;color:var(--red);font-weight:600;">⚠️</span>':''}</div>
+        <div class="mp-title">${m.title}${m.done?' <span class="tag ok" style="font-size:9px;">Done</span>':''}${m.now?' <span class="mp-now">Now</span>':''}${m.conflict?' <span style="font-size:9px;color:var(--red);">⚠️</span>':''}</div>
         <div class="mp-meta">${[m.duration,m.loc].filter(Boolean).join(' · ')}</div>
       </div>
-      <button class="mp-notes-btn" onclick="openNoteFor('${m.title}')">Notes</button>`;
+      <button class="mp-notes-btn" onclick="openNoteFor('${m.title.replace(/'/g,"\\'")}')">Notes</button>`;
     list.appendChild(el);
   });
 }
@@ -3258,21 +3241,20 @@ function mtgNavShift(n) {
   renderMtgNav();
 }
 
-// ── INIT: render both ──
-// (override old addHomeTask, renderCal will call renderTaskNav via saveCalTask)
 function saveCalTask() {
   const val = document.getElementById('cal-task-inp').value.trim();
   if(!val || !calCurrentDate) return;
   const key = dateKey(calCurrentDate);
   if(!taskStore[key]) taskStore[key] = [];
   taskStore[key].push({text:val, type:'task', pri:calPri, done:false, meta:'Added · '+dateLabel(calCurrentDate)});
-  // If navigating to this date, re-render
-  const diffMs = calCurrentDate - today;
-  const diffDays = Math.round(diffMs / DAY_MS);
+  const diffDays = Math.round((calCurrentDate - today) / DAY_MS);
   taskNavOffset = diffDays;
-  renderCal(); renderTaskNav();
+  renderTaskNav();
+  renderCal();
   closeCal();
 }
+
+// ── INIT ──
 
 
 // ── FINAL INIT ──
