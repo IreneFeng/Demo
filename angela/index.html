@@ -171,6 +171,27 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
 .flinks{display:flex;gap:18px}
 .flink{font-size:11px;color:rgba(255,255,255,.35);text-decoration:none;transition:color .15s}
 .flink:hover{color:var(--gold2)}
+
+/* SORT */
+.sort-sel{padding:4px 10px;border-radius:10px;border:1px solid #c8d4e4;background:#fff;color:var(--text2);font-size:11px;font-family:var(--sans);font-weight:500;outline:none;cursor:pointer;transition:border-color .15s}
+.sort-sel:focus{border-color:var(--gold)}
+
+/* CONTACT FINDER */
+.cf-btn{padding:3px 9px;border-radius:4px;border:1px solid var(--blue-b);background:var(--blue-bg);color:var(--blue);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap}
+.cf-btn:hover{background:var(--blue);color:#fff}
+.cf-btn:disabled{opacity:.5;cursor:default}
+.cf-btn.searching{background:var(--amber-bg);border-color:var(--amber-b);color:var(--amber)}
+.cf-btn.done{background:var(--green-bg);border-color:var(--green-b);color:var(--green)}
+.cf-result{margin-top:6px;padding:8px 10px;background:var(--slate4);border:1px solid var(--slate3);border-radius:5px;font-size:10px;line-height:1.6}
+.cf-name{font-weight:700;color:var(--navy);font-size:11px}
+.cf-title{color:var(--text3);margin-bottom:3px}
+.cf-email{color:var(--blue);font-family:var(--mono)}
+.cf-phone{color:var(--text3);font-family:var(--mono)}
+.cf-linkedin{color:var(--purple);font-weight:500}
+.cf-rec{color:var(--text2);font-style:italic;margin-top:4px;border-top:1px solid var(--slate3);padding-top:4px}
+.cf-conf-high{color:var(--green);font-weight:600}
+.cf-conf-med{color:var(--amber);font-weight:600}
+.cf-conf-low{color:var(--text3);font-weight:600}
 </style>
 </head>
 <body>
@@ -247,6 +268,12 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
     <button class="chip" onclick="setFilter('status','email_sent',this)">Email Sent</button>
     <button class="chip" onclick="setFilter('status','replied',this)">Replied</button>
     <button class="chip" onclick="setFilter('status','in_progress',this)">In Progress</button>
+    <select class="sort-sel" onchange="state.sort=this.value;render()" style="margin-left:8px">
+      <option value="recent">↓ Most Recent</option>
+      <option value="oldest">↑ Oldest First</option>
+      <option value="fit">◆ Best Fit (Circle 1→2→3)</option>
+      <option value="status">● By Status</option>
+    </select>
     <input class="srch" type="text" placeholder="Search company, sector..." oninput="state.search=this.value;render()">
   </div>
 
@@ -270,7 +297,8 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
 <script>
 // ── CONFIG — replace SCRIPT_URL after deploying Apps Script ──────────────
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec';
-const SHEET_VERSION_DATE = '2026-04-01'; // bump when new filings added to SEED
+const SHEET_VERSION_DATE = '2026-04-01';
+const WORKER_URL = 'https://angela-api.irene901230.workers.dev'; // bump when new filings added to SEED
 
 // ── WHO IS USING ──────────────────────────────────────────────────────────
 // Simple: detect by asking once, store in localStorage
@@ -335,7 +363,7 @@ const FT_CFG = {
 };
 
 // ── STATE ─────────────────────────────────────────────────────────────────
-let state = {tab:'feed', filterType:'all', filterStatus:'all', search:''};
+let state = {tab:'feed', filterType:'all', filterStatus:'all', search:'', sort:'recent'};
 let pipelineData = {}; // id -> {status, notes, lastUpdated, lastUpdatedBy}
 let clientsData = []; // array of client objects from Sheets
 let isSaving = false;
@@ -533,7 +561,10 @@ function getBy(id) {
   return pipelineData[id]?.lastUpdatedBy || '';
 }
 
-function getFiltered() {
+function getFiltered() { // sorts applied in renderPipeline
+  return getFilteredRaw();
+}
+function getFilteredRaw() {
   return SEED.filter(f => {
     if (state.tab === 'feed') return isNew(f) && getStatus(f.id) !== 'client';
     if (state.tab === 'c1') return f.circle === 1 && getStatus(f.id) !== 'client';
@@ -624,11 +655,107 @@ function updateStats() {
   ].map(x => `<div class="sstat"><div class="sstat-v" style="color:${x.c}">${x.v}</div><div class="sstat-l">${x.l}</div></div>`).join('');
 }
 
+
+// ── CONTACT FINDER ────────────────────────────────────────────────────────
+let contactCache = {}; // id -> result
+try { const c = localStorage.getItem('angela_contacts_v1'); if(c) contactCache = JSON.parse(c); } catch(e) {}
+
+function saveContactCache() {
+  try { localStorage.setItem('angela_contacts_v1', JSON.stringify(contactCache)); } catch(e) {}
+}
+
+async function findContact(id) {
+  const seed = SEED.find(s => s.id === id);
+  if (!seed) return;
+  const btn = document.getElementById('cf-btn-' + id);
+  const result = document.getElementById('cf-result-' + id);
+  if (btn) { btn.disabled = true; btn.className = 'cf-btn searching'; btn.textContent = '🔍 Searching...'; }
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        action: 'findContact',
+        company: seed.company,
+        sector: seed.sector,
+        hq: seed.hq,
+        exchange: seed.exchange,
+        ticker: seed.ticker || ''
+      })
+    });
+    const data = await resp.json();
+    contactCache[id] = data;
+    saveContactCache();
+
+    // Also save best contact back to pipelineData for Sheets
+    if (data.contacts && data.contacts.length > 0) {
+      const best = data.contacts[0];
+      if (!pipelineData[id]) pipelineData[id] = {status:'not_contacted', notes:'', lastUpdated:'', lastUpdatedBy:''};
+      pipelineData[id].foundContact = best.name || '';
+      pipelineData[id].foundTitle = best.title || '';
+      pipelineData[id].foundEmail = best.email || '';
+      pipelineData[id].foundPhone = best.phone || '';
+      saveRow(id);
+    }
+
+    if (btn) { btn.className = 'cf-btn done'; btn.textContent = '✓ Found'; btn.disabled = false; }
+    if (result) result.innerHTML = renderContactResult(data);
+  } catch(err) {
+    if (btn) { btn.className = 'cf-btn'; btn.textContent = '🔍 Find Contact'; btn.disabled = false; }
+    if (result) result.innerHTML = '<span style="color:var(--red)">Search failed — try again</span>';
+  }
+}
+
+function renderContactResult(data) {
+  if (!data || (!data.contacts?.length && !data.linkedinSearch)) {
+    return '<span style="color:var(--text3)">No contact data found</span>';
+  }
+  let html = '';
+  if (data.contacts && data.contacts.length > 0) {
+    data.contacts.forEach(c => {
+      const confClass = c.confidence === 'high' ? 'cf-conf-high' : c.confidence === 'medium' ? 'cf-conf-med' : 'cf-conf-low';
+      html += `<div style="margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--slate3)">
+        <div class="cf-name">${c.name || 'Unknown'} <span class="${confClass}">(${c.confidence || '?'})</span></div>
+        <div class="cf-title">${c.title || ''}</div>
+        ${c.email ? `<div class="cf-email">✉ ${c.email}</div>` : ''}
+        ${c.phone ? `<div class="cf-phone">📞 ${c.phone}</div>` : ''}
+        ${c.source ? `<div style="font-size:9px;color:var(--text4)">Source: ${c.source}</div>` : ''}
+      </div>`;
+    });
+  }
+  if (data.irPage) html += `<div><a href="${data.irPage}" target="_blank" style="color:var(--blue);font-size:10px">🔗 IR Page ↗</a></div>`;
+  if (data.linkedinPerson) html += `<div class="cf-linkedin">💼 LinkedIn: ${data.linkedinPerson}</div>`;
+  if (data.linkedinSearch) html += `<div style="font-size:9px;color:var(--text3)">Search: "${data.linkedinSearch}"</div>`;
+  if (data.recommendation) html += `<div class="cf-rec">💡 ${data.recommendation}</div>`;
+  return html;
+}
+
+// ── SORTING ───────────────────────────────────────────────────────────────
+const STATUS_ORDER = {email_sent:2, replied:3, call_scheduled:4, in_progress:5, proposal_sent:6, client:7, not_contacted:1, not_relevant:0};
+
+function sortRows(rows) {
+  return [...rows].sort((a, b) => {
+    if (state.sort === 'recent') return new Date(b.filed) - new Date(a.filed);
+    if (state.sort === 'oldest') return new Date(a.filed) - new Date(b.filed);
+    if (state.sort === 'fit') {
+      if (a.circle !== b.circle) return a.circle - b.circle;
+      return new Date(b.filed) - new Date(a.filed);
+    }
+    if (state.sort === 'status') {
+      const sa = STATUS_ORDER[getStatus(a.id)] || 0;
+      const sb = STATUS_ORDER[getStatus(b.id)] || 0;
+      return sb - sa;
+    }
+    return 0;
+  });
+}
+
 // ── RENDER ─────────────────────────────────────────────────────────────────
 function e(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
 
 function renderPipeline() {
-  const rows = getFiltered();
+  const rows = sortRows(getFiltered());
   if (!rows.length) return `<div style="padding:60px;text-align:center;color:var(--text3);background:#fff"><div style="font-size:28px;margin-bottom:8px">◆</div><div style="font-size:14px;font-weight:500">No results match current filters</div></div>`;
 
   const tbody = rows.map(f => {
@@ -664,6 +791,13 @@ function renderPipeline() {
         <div class="irt">${e(f.title)}</div>
         ${f.email?`<div class="ire">${e(f.email)}</div>`:''}
         ${f.phone?`<div class="irp">${e(f.phone)}</div>`:''}
+        <div style="margin-top:6px">
+          <button id="cf-btn-${f.id}" class="cf-btn ${contactCache[f.id]?'done':''}"
+            onclick="findContact('${f.id}')" ${contactCache[f.id]?'':''}>${contactCache[f.id]?'✓ Found':'🔍 Find Contact'}</button>
+        </div>
+        <div id="cf-result-${f.id}" class="cf-result" style="${contactCache[f.id]?'':'display:none'}">
+          ${contactCache[f.id] ? renderContactResult(contactCache[f.id]) : ''}
+        </div>
       </td>
       <td><span class="rbadge" style="color:${rCol};background:${rBg};border-color:${rBorder}">${isDir?'✓':f.reach.startsWith('Pre')?'◎':'→'} ${e(f.reach)}</span></td>
       <td>
