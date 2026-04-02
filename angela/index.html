@@ -495,20 +495,47 @@ async function loadData() {
 // ── TRIGGER FETCH ─────────────────────────────────────────────────
 async function triggerFetch() {
   const btn = document.getElementById('fetchNowBtn');
+  const statusEl = document.getElementById('feedStatusText');
   if(btn) { btn.disabled=true; btn.textContent='⏳ Fetching...'; }
-  showSaving('Angela is fetching latest SEC filings...');
-  try {
-    await wPost({action:'manualFetch'});
-    if(btn) btn.textContent='✓ Running...';
-    setTimeout(()=>{ hideSaving(); loadData(); if(btn){btn.disabled=false;btn.textContent='⚡ Fetch Now';} }, 45000);
-  } catch(e) {
-    if(btn){btn.disabled=false;btn.textContent='⚡ Fetch Now';}
-    showSaving('Fetch failed');
-    setTimeout(hideSaving,3000);
+
+  let totalAdded = 0;
+  let round = 0;
+
+  while (round < 30) {
+    round++;
+    showSaving(`Angela fetching SEC filings... (batch ${round})`);
+    if(statusEl) statusEl.textContent = `Fetching from SEC EDGAR — batch ${round}...`;
+
+    try {
+      const result = await wPost({action:'manualFetch'});
+      totalAdded += result.added || 0;
+
+      if(statusEl) statusEl.textContent =
+        `Batch ${round}: ${result.found||0} found · ${result.added||0} added · ${totalAdded} total new`;
+
+      // No more new filings to process
+      if (!result.remaining || result.remaining <= 0) break;
+
+      // Pause 1.5s between batches
+      await new Promise(r => setTimeout(r, 1500));
+
+    } catch(e) {
+      console.error('Fetch error:', e.message);
+      break;
+    }
+  }
+
+  // Reload to show new companies
+  showSaving(`✓ Complete — ${totalAdded} new companies added`);
+  if(btn) { btn.disabled=false; btn.textContent='⚡ Fetch Now'; }
+  await loadData();
+  hideSaving();
+
+  if(statusEl && totalAdded === 0) {
+    statusEl.textContent = `Auto-fetch daily 9am EST · ${round} batches checked · No new relevant companies today — Angela filtered all filings`;
   }
 }
 
-// ── SAVE ROW ──────────────────────────────────────────────────────
 async function saveRow(id) {
   showSaving('Saving...');
   const seed = SEED.find(s=>s.id===id)||{};
