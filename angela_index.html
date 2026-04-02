@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angela — IR Intelligence · 58th St</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0b1629;--navy2:#112240;--navy3:#1a3357;
+  --gold:#c9a84c;--gold2:#e8c97a;
+  --cream:#fdfaf4;--white:#ffffff;
+  --slate:#8fa3be;--slate2:#c2cfe0;--slate3:#e8eef6;--slate4:#f4f6fb;
+  --text:#0b1629;--text2:#3d5470;--text3:#7a93ae;--text4:#b0bace;
+  --green:#059669;--green-bg:#ecfdf5;--green-b:#6ee7b7;
+  --amber:#d97706;--amber-bg:#fffbeb;--amber-b:#fcd34d;
+  --blue:#1d4ed8;--blue-bg:#eff4ff;--blue-b:#93c5fd;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;--purple-b:#c4b5fd;
+  --red:#dc2626;--red-bg:#fef2f2;--red-b:#fca5a5;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --display:'Playfair Display',Georgia,serif;
+  --mono:'DM Mono',monospace;
+}
+html,body{background:var(--cream);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;height:100%}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--slate3)}
+::-webkit-scrollbar-thumb{background:var(--slate2);border-radius:3px}
+
+/* NAV */
+nav{background:var(--navy);padding:0 32px;height:52px;display:flex;align-items:center;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.07)}
+.nav-brand{display:flex;flex-direction:column;justify-content:center;line-height:1;margin-right:40px}
+.nav-top{font-size:9px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.12em;text-transform:uppercase;margin-bottom:2px}
+.nav-name{font-size:20px;font-weight:600;font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-style:italic}
+.nav-link{padding:0 18px;height:52px;display:flex;align-items:center;font-size:13px;color:rgba(255,255,255,.6);cursor:pointer;transition:color .15s;background:transparent;border:none;font-family:var(--sans);text-decoration:none}
+.nav-link:hover{color:#fff}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.live-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gold2)}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-badge{font-size:10px;color:rgba(255,255,255,.3);font-family:var(--mono);display:flex;align-items:center;gap:5px}
+.sync-ok{color:var(--green)}
+.sync-err{color:#f87171}
+.nav-back{font-size:12px;color:rgba(255,255,255,.4);text-decoration:none;transition:color .15s}
+.nav-back:hover{color:#fff}
+.btn-nav{padding:7px 18px;background:var(--gold);color:var(--navy);border:none;border-radius:5px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-nav:hover{background:var(--gold2)}
+
+/* HERO */
+.hero{background:var(--navy);padding:60px 40px 52px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.1) 0%,transparent 68%)}
+.hero-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:5px 14px;font-size:11px;color:rgba(255,255,255,.5);margin-bottom:22px;position:relative;z-index:1}
+.hero-pill-hi{color:var(--gold2);font-weight:500}
+.hero-h1{font-family:var(--display);font-size:52px;font-weight:600;color:#fff;line-height:1.1;margin-bottom:6px;position:relative;z-index:1}
+.hero-h1 em{color:var(--gold2);font-style:italic}
+.hero-sub{font-family:var(--display);font-size:24px;font-style:italic;color:var(--slate);margin-bottom:22px;position:relative;z-index:1}
+.hero-desc{font-size:14px;color:var(--slate2);max-width:540px;margin:0 auto 28px;line-height:1.7;font-weight:300;position:relative;z-index:1}
+.hero-desc b{color:#fff;font-weight:500}
+.hero-actions{display:flex;justify-content:center;gap:10px;position:relative;z-index:1}
+.btn-hero{padding:11px 26px;background:var(--gold);color:var(--navy);border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .18s}
+.btn-hero:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost{padding:11px 22px;background:transparent;color:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.2);border-radius:6px;font-size:13px;cursor:pointer;font-family:var(--sans);transition:all .18s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* STATS STRIP */
+.stats-strip{background:var(--navy2);border-bottom:1px solid rgba(255,255,255,.06);padding:0 32px;display:flex;align-items:stretch;overflow-x:auto}
+.sstat{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 22px;border-right:1px solid rgba(255,255,255,.06);gap:2px;min-width:90px}
+.sstat:last-child{border-right:none}
+.sstat-v{font-size:22px;font-weight:700;line-height:1;font-family:var(--display)}
+.sstat-l{font-size:9px;color:var(--slate);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
+
+/* DASHBOARD */
+#dashboard{background:var(--slate4)}
+.dash-bar{background:#fff;border-bottom:1px solid var(--slate3);padding:12px 24px;display:flex;align-items:center;gap:10px}
+.dash-title{font-size:13px;font-weight:600;color:var(--text)}
+.dash-sub{font-size:11px;color:var(--text3)}
+.dash-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn-refresh{padding:5px 12px;background:var(--navy);color:var(--gold2);border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-refresh:hover{background:var(--navy2)}
+.btn-refresh:disabled{opacity:.5;cursor:default}
+
+/* TABS */
+.tabs{background:#fff;border-bottom:1px solid var(--slate3);display:flex;padding:0 24px}
+.tab{padding:10px 16px;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--text3);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.tab:hover{color:var(--text2)}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+.tab-cnt{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:9px;font-size:9px;font-weight:600;padding:0 4px}
+.tab-new{background:#fee2e2;color:#dc2626}
+
+/* FILTERS */
+.filters{background:var(--slate3);border-bottom:1px solid #dde5f0;padding:7px 24px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.fl{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.chip{padding:3px 9px;border-radius:10px;border:1px solid #c8d4e4;background:#fff;color:var(--text2);font-size:10px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .12s}
+.chip:hover{border-color:var(--navy);color:var(--navy)}
+.chip.on{border-color:var(--gold);color:var(--amber);background:var(--amber-bg)}
+.srch{margin-left:auto;padding:5px 11px;background:#fff;border:1px solid #c8d4e4;border-radius:5px;color:var(--text);font-size:11px;font-family:var(--sans);width:190px;outline:none;transition:border-color .15s}
+.srch:focus{border-color:var(--gold)}
+
+/* TABLE */
+.tw{overflow:auto;max-height:calc(100vh - 52px - 46px - 40px - 39px - 37px)}
+table{width:100%;border-collapse:collapse;min-width:1180px}
+thead tr{background:var(--slate3);position:sticky;top:0;z-index:20}
+th{padding:7px 10px;text-align:left;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid #c8d4e4;white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--slate3);background:#fff;transition:background .1s}
+tbody tr:hover{background:#f7f9fd}
+tbody tr.is-new{background:#fffbf0}
+td{padding:9px 10px;vertical-align:top;font-size:11px}
+.new-tag{display:inline-block;padding:1px 5px;border-radius:3px;background:#fee2e2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:4px;vertical-align:middle}
+
+.co-name{font-weight:600;color:var(--navy);font-size:12px;margin-bottom:1px}
+.co-meta{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:2px}
+.co-sector{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:3px}
+.co-desc{font-size:10px;color:var(--text3);max-width:220px;line-height:1.5}
+.badge{display:inline-flex;align-items:center;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;font-family:var(--mono);border:1px solid;white-space:nowrap}
+.cr{display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.clbl{font-size:9px;font-weight:700;font-family:var(--mono)}
+.cwhy{font-size:10px;color:var(--text2);max-width:165px;line-height:1.5;margin-top:2px}
+.ind{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:600;background:var(--slate3);color:var(--text3);font-family:var(--mono);margin-bottom:2px}
+.irn{font-weight:600;color:var(--navy);margin-bottom:1px}
+.irt{font-size:10px;color:var(--text3);margin-bottom:2px}
+.ire{font-size:10px;color:var(--blue);font-family:var(--mono);word-break:break-all}
+.irp{font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:1px}
+.rbadge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid}
+.sbadge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid}
+.snote{font-size:10px;color:var(--text3);max-width:110px;line-height:1.4;margin-top:3px}
+.angela-yes{display:flex;align-items:center;gap:4px;color:var(--green);font-size:10px;font-weight:600}
+.angela-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.ssel{padding:4px 7px;border-radius:4px;border:1.5px solid #c8d4e4;font-size:10px;font-family:var(--sans);font-weight:500;cursor:pointer;outline:none;width:100%;min-width:140px;background:#fff;transition:all .15s}
+.ssel:focus{border-color:var(--gold)}
+.nta{width:100%;min-width:145px;padding:4px 7px;background:var(--slate4);border:1.5px solid #c8d4e4;border-radius:4px;color:var(--text2);font-size:10px;font-family:var(--sans);resize:vertical;min-height:34px;outline:none;transition:border-color .15s}
+.nta:focus{border-color:var(--gold);background:#fff}
+.by-line{font-size:9px;color:var(--text4);font-family:var(--mono);margin-top:3px}
+.dm{font-family:var(--mono);font-size:10px;color:var(--text);font-weight:500}
+.ds{font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:1px}
+.seclink{font-size:9px;color:var(--navy);font-family:var(--mono);text-decoration:none;border:1px solid #c8d4e4;padding:2px 5px;border-radius:3px;background:#fff;transition:all .12s;display:inline-block;white-space:nowrap}
+.seclink:hover{background:var(--navy);color:var(--gold2)}
+
+/* CLIENTS TAB */
+.clients-grid{padding:20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;background:var(--slate4);min-height:200px}
+.client-card{background:#fff;border:1px solid var(--slate3);border-radius:10px;overflow:hidden;transition:box-shadow .15s}
+.client-card:hover{box-shadow:0 4px 20px rgba(11,22,41,.08)}
+.cc-header{background:var(--navy);padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between}
+.cc-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.cc-sector{font-size:10px;color:var(--slate);}
+.cc-since{font-size:9px;color:var(--gold2);font-family:var(--mono);margin-top:4px}
+.cc-body{padding:14px 16px}
+.cc-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--slate3)}
+.cc-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.cc-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:2px}
+.cc-val{font-size:12px;color:var(--text);font-weight:500}
+.cc-val-mono{font-size:11px;color:var(--blue);font-family:var(--mono)}
+.cc-inp{width:100%;padding:4px 7px;background:var(--slate4);border:1.5px solid #c8d4e4;border-radius:4px;color:var(--text);font-size:11px;font-family:var(--sans);outline:none;transition:border-color .15s}
+.cc-inp:focus{border-color:var(--gold);background:#fff}
+.cc-ta{width:100%;padding:5px 7px;background:var(--slate4);border:1.5px solid #c8d4e4;border-radius:4px;color:var(--text);font-size:11px;font-family:var(--sans);outline:none;resize:vertical;min-height:60px;transition:border-color .15s}
+.cc-ta:focus{border-color:var(--gold);background:#fff}
+.cc-save{margin-top:10px;padding:5px 14px;background:var(--navy);color:var(--gold2);border:none;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;width:100%}
+.cc-save:hover{background:var(--navy2)}
+.retainer-tag{display:inline-block;padding:2px 8px;border-radius:4px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;border:1px solid var(--green-b)}
+.empty-clients{padding:60px;text-align:center;color:var(--text3);grid-column:1/-1}
+.empty-icon{font-size:32px;margin-bottom:10px}
+
+/* SAVING INDICATOR */
+.saving{position:fixed;bottom:20px;right:20px;background:var(--navy);color:var(--gold2);padding:8px 16px;border-radius:6px;font-size:11px;font-family:var(--mono);z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.saving.show{opacity:1}
+
+/* FOOTER */
+footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.flogo{font-family:var(--display);font-style:italic;color:var(--gold2);font-size:15px}
+.fcopy{font-size:10px;color:rgba(255,255,255,.2)}
+.flinks{display:flex;gap:18px}
+.flink{font-size:11px;color:rgba(255,255,255,.35);text-decoration:none;transition:color .15s}
+.flink:hover{color:var(--gold2)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-top">Annie the Agent</div>
+    <div class="nav-name">Angela</div>
+  </div>
+  <a class="nav-link" href="#dashboard" onclick="setTab('feed',null,event)">Feed</a>
+  <a class="nav-link" href="#dashboard" onclick="setTab('all',null,event)">Pipeline</a>
+  <a class="nav-link" href="#dashboard" onclick="setTab('clients',null,event)">Clients</a>
+  <div class="nav-right">
+    <div class="sync-badge" id="syncBadge"><span class="sync-ok">●</span> <span id="syncTime">Loading...</span></div>
+    <div class="live-pill"><div class="live-dot"></div>◆ Live</div>
+    <a href="https://annietheagent.ai/hub.html" class="nav-back">← All Agents</a>
+    <button class="btn-nav" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">Try Angela →</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-pill">
+    <span>Annie the Agent</span>
+    <span style="color:rgba(255,255,255,.2)">·</span>
+    <span class="hero-pill-hi"><div class="live-dot" style="display:inline-block;margin-right:4px"></div><em style="font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-style:italic">Angela</em> · IR Intelligence · Live</span>
+  </div>
+  <h1 class="hero-h1">Meet <em>Angela.</em></h1>
+  <div class="hero-sub">She turns filings into clients.</div>
+  <p class="hero-desc">
+    <em style="font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-style:italic">Angela</em> monitors SEC EDGAR daily — <b>S-1, F-1, and 8-K filings</b> — and surfaces every company that needs investor relations support before they even know they need it.
+  </p>
+  <div class="hero-actions">
+    <button class="btn-hero" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">Try Angela →</button>
+    <button class="btn-ghost" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">How it works</button>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip" id="statsStrip"></div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-bar">
+    <div>
+      <div class="dash-title"><em style="font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-style:italic">Angela</em> ◆ — IR Intelligence</div>
+      <div class="dash-sub" id="dashSub">SEC EDGAR · Nasdaq · NYSE · Business Wire — syncing...</div>
+    </div>
+    <div class="dash-right">
+      <span style="font-size:10px;color:var(--text3)" id="userLabel"></span>
+      <button class="btn-refresh" id="refreshBtn" onclick="loadData()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabBar">
+    <button class="tab active" id="tab-feed" onclick="setTab('feed',this)">🔴 New Filings <span class="tab-cnt tab-new" id="cnt-feed">0</span></button>
+    <button class="tab" id="tab-all" onclick="setTab('all',this)">All Pipeline <span class="tab-cnt" id="cnt-all" style="background:var(--slate3);color:var(--text3)"></span></button>
+    <button class="tab" id="tab-c1" onclick="setTab('c1',this)">◆ Circle 1 <span class="tab-cnt" id="cnt-c1" style="background:var(--amber-bg);color:var(--amber)"></span></button>
+    <button class="tab" id="tab-c2" onclick="setTab('c2',this)">◈ Circle 2 <span class="tab-cnt" id="cnt-c2" style="background:#fef9ec;color:#b45309"></span></button>
+    <button class="tab" id="tab-c3" onclick="setTab('c3',this)">Other <span class="tab-cnt" id="cnt-c3" style="background:var(--slate3);color:var(--text3)"></span></button>
+    <button class="tab" id="tab-clients" onclick="setTab('clients',this)">⭐ Clients <span class="tab-cnt" id="cnt-clients" style="background:var(--green-bg);color:var(--green)">0</span></button>
+  </div>
+
+  <div class="filters" id="filterBar">
+    <span class="fl">Filing</span>
+    <button class="chip on" onclick="setFilter('type','all',this)">All</button>
+    <button class="chip" onclick="setFilter('type','S-1',this)">S-1</button>
+    <button class="chip" onclick="setFilter('type','F-1',this)">F-1</button>
+    <button class="chip" onclick="setFilter('type','8-K',this)">8-K</button>
+    <span class="fl" style="margin-left:10px">Status</span>
+    <button class="chip on" onclick="setFilter('status','all',this)">All</button>
+    <button class="chip" onclick="setFilter('status','not_contacted',this)">Not Contacted</button>
+    <button class="chip" onclick="setFilter('status','email_sent',this)">Email Sent</button>
+    <button class="chip" onclick="setFilter('status','replied',this)">Replied</button>
+    <button class="chip" onclick="setFilter('status','in_progress',this)">In Progress</button>
+    <input class="srch" type="text" placeholder="Search company, sector..." oninput="state.search=this.value;render()">
+  </div>
+
+  <div id="mainContent"></div>
+</div>
+
+<footer>
+  <div>
+    <div class="flogo">Angela ◆</div>
+    <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:2px">by Annie the Agent · 58th St</div>
+  </div>
+  <div class="flinks">
+    <a href="https://annietheagent.ai/hub.html" class="flink">← All Agents</a>
+    <a href="https://58thst.com" class="flink">58th St</a>
+  </div>
+  <div class="fcopy">© 2026 58th Street IR · New York</div>
+</footer>
+
+<div class="saving" id="savingIndicator">Saving to Google Sheets...</div>
+
+<script>
+// ── CONFIG — replace SCRIPT_URL after deploying Apps Script ──────────────
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec';
+const SHEET_VERSION_DATE = '2026-04-01'; // bump when new filings added to SEED
+
+// ── WHO IS USING ──────────────────────────────────────────────────────────
+// Simple: detect by asking once, store in localStorage
+let CURRENT_USER = localStorage.getItem('angela_user') || '';
+if (!CURRENT_USER) {
+  const u = prompt('Who are you? (type: daniel or linwan)');
+  CURRENT_USER = u && u.toLowerCase().includes('daniel') ? 'Daniel' : 'Linwan';
+  localStorage.setItem('angela_user', CURRENT_USER);
+}
+document.getElementById('userLabel').textContent = '👤 ' + CURRENT_USER;
+
+// ── SEED DATA — master list of all companies ──────────────────────────────
+// addedDate lets us detect "new" (within 14 days of today)
+const SEED = [
+  {id:"c1-01",circle:1,ft:"S-1",filed:"2026-01-20",addedDate:"2026-04-01",company:"Clear Street Group Inc.",ticker:"Pending",exchange:"Nasdaq/NYSE",sector:"Prime Brokerage / Fintech",hq:"New York, NY — 150 Greenwich St",desc:"Tech-forward prime brokerage. S-1 filed Jan 20 2026. Goldman/BofA/Morgan Stanley underwriters. IR built from scratch post-IPO.",why:"Capital markets tech + fintech — direct match to Daniel's IPO and PIPE experience.",contact:"Edward T. Tilly",title:"CEO",email:"clearstreet.io/contact",phone:"",reach:"Pre-IPO",sender:"Daniel",sendwhy:"Founder-to-CEO. Senior Wall St figure.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001881567&type=S-1"},
+  {id:"c1-02",circle:1,ft:"S-1",filed:"2026-01-15",addedDate:"2026-04-01",company:"DMINT Inc. (OLB Group spin-off)",ticker:"Pending",exchange:"Nasdaq",sector:"Bitcoin Mining / Fintech",hq:"New York, NY — 1120 Ave of the Americas",desc:"Bitcoin mining spin-off from OLB Group. S-1 refiled Jan 15 2026. Pure-play digital asset mining IPO.",why:"Bitcoin mining + digital assets — identical profile to BIT Mining (Daniel's NYSE case study, ~$70M raised).",contact:"Ronny Yakov",title:"CEO, The OLB Group",email:"ir@olb.com",phone:"(212) 278-0900 ext 333",reach:"Direct",sender:"Linwan",sendwhy:"Small company, CEO accessible.",angela:false,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001996450&type=S-1"},
+  {id:"c1-03",circle:1,ft:"F-1",filed:"2025-05-12",addedDate:"2026-04-01",company:"DeFi Technologies Inc.",ticker:"DEFT",exchange:"Nasdaq",sector:"DeFi / Digital Assets",hq:"Toronto (Nasdaq-listed May 2025)",desc:"First company bridging TradFi and DeFi on Nasdaq. Listed May 2025. F-1 filer. Very early IR stage.",why:"F-1 filer in DeFi — Daniel's exact domain. Newly listed = zero IR infrastructure.",contact:"IR Team",title:"Investor Relations",email:"ir.defitechnologies.ca",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Newly listed, lean team. EA opens.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001888274&type=F-1"},
+  {id:"c1-04",circle:1,ft:"8-K",filed:"2025-12-09",addedDate:"2026-04-01",company:"Twenty One Capital Inc.",ticker:"XXI",exchange:"NYSE",sector:"Bitcoin Treasury / Capital Markets",hq:"Austin, TX",desc:"NYSE debut Dec 9 2025. 3rd largest public Bitcoin holder ($3.9B BTC). Only 2 employees — no IR. Stock down 40%+ from ATH.",why:"Bitcoin-native, narrative broken, IR vacuum. BIT Mining restructuring is the exact pitch.",contact:"Steven Meehan",title:"CFO",email:"xxi.money/contact",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Tiny team, CFO accessible.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001865602&type=8-K"},
+  {id:"c1-05",circle:1,ft:"8-K",filed:"2025-06-05",addedDate:"2026-04-01",company:"Circle Internet Group Inc.",ticker:"CRCL",exchange:"NYSE",sector:"Stablecoin / Fintech",hq:"New York, NY",desc:"USDC stablecoin issuer. NYSE IPO June 2025. $16B+ market cap. $770M revenue Q4 2025.",why:"Digital asset narrative + volatile market — Daniel's core skill. Angela for 24/7 investor Q&A.",contact:"IR Team",title:"Investor Relations",email:"investors@circle.com",phone:"",reach:"Direct",sender:"Daniel",sendwhy:"Large public company. Founder-level pitch.",angela:true,sec:"https://investor.circle.com"},
+  {id:"c1-06",circle:1,ft:"S-1",filed:"2026-01-08",addedDate:"2026-04-01",company:"Pershing Square Inc.",ticker:"Pending",exchange:"Pending",sector:"Investment Company",hq:"New York, NY",desc:"Bill Ackman's public investment vehicle. S-1 filed Jan 2026. Massive retail investor following needs IR.",why:"Capital markets-native. Angela handles retail investor Q&A at scale.",contact:"IR / Comms Team",title:"Communications",email:"pershingsquareholdings.com",phone:"",reach:"Web / LinkedIn",sender:"Daniel",sendwhy:"High-profile firm. Founder-level.",angela:true,sec:"https://pershingsquareholdings.com"},
+  {id:"c1-07",circle:1,ft:"S-1",filed:"2026-01-23",addedDate:"2026-04-01",company:"Grayscale Investments LLC",ticker:"Pending",exchange:"Nasdaq",sector:"Digital Asset Management",hq:"New York, NY — 1585 Broadway",desc:"Crypto asset manager filing for public listing. DCG subsidiary. Major institutional digital asset exposure.",why:"F-1/S-1 filer in digital asset management — Daniel's exact domain.",contact:"IR Team",title:"Investor Relations",email:"grayscale.com/contact",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO. EA opens door.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002073548&type=S-1"},
+  {id:"c1-08",circle:1,ft:"S-1",filed:"2025-09-02",addedDate:"2026-04-01",company:"Figure Technology Solutions Inc.",ticker:"Pending",exchange:"Nasdaq",sector:"Blockchain / Fintech",hq:"New York, NY",desc:"Blockchain-native fintech. S-1/A filed Sept 2025.",why:"Blockchain fintech S-1 — capital markets complexity Daniel has navigated directly.",contact:"IR Team",title:"Investor Relations",email:"figure.com/contact",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO lean team.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002064124&type=S-1"},
+  {id:"c1-09",circle:1,ft:"S-1",filed:"2026-03-01",addedDate:"2026-04-01",company:"Gemini Trust Company (Winklevoss)",ticker:"Pending",exchange:"Nasdaq/NYSE",sector:"Crypto Exchange",hq:"New York, NY — 600 Third Ave",desc:"Winklevoss crypto exchange. 2026 IPO planned. NYC HQ.",why:"Crypto exchange IPO in NYC — Daniel's PIPE and IPO experience.",contact:"Press / Comms",title:"Communications",email:"press@gemini.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Press email confirmed.",angela:true,sec:"https://gemini.com"},
+  {id:"c1-10",circle:1,ft:"8-K",filed:"2026-03-31",addedDate:"2026-04-01",company:"CoinShares International Ltd.",ticker:"Pending",exchange:"Nasdaq (via SPAC)",sector:"Crypto Asset Manager",hq:"London / New York",desc:"Began Nasdaq trading via SPAC March 31 2026. Brand new listing — IR is day one.",why:"Just-listed crypto company — IR vacuum. Daniel walks in day one.",contact:"IR Team",title:"Investor Relations",email:"ir@coinshares.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Brand new listing, no IR team yet.",angela:true,sec:"https://coinshares.com/investor-relations"},
+  {id:"c2-01",circle:2,ft:"8-K",filed:"2026-02-10",addedDate:"2026-04-01",company:"Outbrain Inc. (now Teads)",ticker:"OB",exchange:"Nasdaq",sector:"AdTech / Media",hq:"New York, NY",desc:"Completed merger with Teads Feb 2025. Post-merger IR rebuild needed.",why:"Post-merger narrative rebuild — Daniel's capital markets strength.",contact:"IR Team",title:"Investor Relations",email:"IR@outbrain.com",phone:"(332) 205-8999",reach:"Direct",sender:"Daniel",sendwhy:"IR-to-IR peer conversation.",angela:true,sec:"https://investors.outbrain.com"},
+  {id:"c2-02",circle:2,ft:"8-K",filed:"2026-03-03",addedDate:"2026-04-01",company:"Paysafe Limited",ticker:"PSFE",exchange:"NYSE",sector:"Payments / Fintech",hq:"London (NYSE-listed)",desc:"Global payments platform. Crypto exposure via Neteller/Skrill. Stock significantly underperformed.",why:"Fintech with crypto exposure, broken stock narrative — Daniel's specialty.",contact:"Kirsten Nielsen",title:"SVP, Investor Relations",email:"kirsten.nielsen@paysafe.com",phone:"(646) 901-3140",reach:"Direct",sender:"Daniel",sendwhy:"SVP IR — peer-to-peer only.",angela:false,sec:"https://ir.paysafe.com"},
+  {id:"c2-03",circle:2,ft:"8-K",filed:"2026-02-17",addedDate:"2026-04-01",company:"DocGo Inc.",ticker:"DCGO",exchange:"Nasdaq",sector:"Healthcare Tech / Mobile Health",hq:"New York, NY",desc:"NYC-based mobile health platform. Lean IR resources.",why:"Tech-enabled healthcare — Angela's 24/7 Q&A layer is the value proposition.",contact:"Mike Cole",title:"VP, Investor Relations",email:"mike.cole@docgo.com",phone:"(949) 444-1341",reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,sec:"https://ir.docgo.com"},
+  {id:"c2-04",circle:2,ft:"8-K",filed:"2026-02-24",addedDate:"2026-04-01",company:"Evolent Health Inc.",ticker:"EVH",exchange:"NYSE",sector:"Healthcare IT / Value-Based Care",hq:"Arlington, VA (NYSE-listed)",desc:"Healthcare IT in business model transformation. Divesting units, strong 2026 revenue pipeline.",why:"Tech-forward healthcare in transformation — Angela as investor messaging layer.",contact:"Seth R. Frank",title:"VP, Investor Relations",email:"sfrank@evolent.com",phone:"(571) 895-3919",reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,sec:"https://ir.evolent.com"},
+  {id:"c2-05",circle:2,ft:"8-K",filed:"2026-01-20",addedDate:"2026-04-01",company:"SoFi Technologies Inc.",ticker:"SOFI",exchange:"Nasdaq",sector:"Fintech / Digital Banking",hq:"San Francisco (Nasdaq-listed)",desc:"Digital bank with crypto features. Tech-forward — Angela as AI analytics supplement.",why:"Fintech that understands AI — pitch Angela as investor analytics layer.",contact:"IR Team",title:"Investor Relations",email:"ir.sofi.com/contact-us",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"EA pitches Angela.",angela:true,sec:"https://ir.sofi.com"},
+  {id:"c2-06",circle:2,ft:"8-K",filed:"2026-02-01",addedDate:"2026-04-01",company:"Taboola.com Ltd.",ticker:"TBLA",exchange:"Nasdaq",sector:"AdTech / Performance Advertising",hq:"New York, NY",desc:"NYC HQ. Pivoting to performance advertising (Realize). Lean IR. AI-forward company.",why:"AI-forward tech company — will appreciate Angela demo.",contact:"IR Team",title:"Investor Relations",email:"investors.taboola.com/investor-resources/contact-ir/",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"EA opens with Angela pitch.",angela:true,sec:"https://investors.taboola.com"},
+  {id:"c2-07",circle:2,ft:"8-K",filed:"2026-01-15",addedDate:"2026-04-01",company:"DoubleVerify Holdings Inc.",ticker:"DV",exchange:"NYSE",sector:"AdTech / Ad Measurement SaaS",hq:"New York, NY — 462 Broadway",desc:"NYC HQ. Has existing agency (Blueshirt Group). Under growth pressure.",why:"Has existing agency — pitch Daniel + Angela as AI-enabled supplement.",contact:"Samantha Anderman",title:"In-house IR Analyst",email:"IR@doubleverify.com",phone:"(212) 631-2002",reach:"Direct (bypass agency)",sender:"Daniel",sendwhy:"Bypass Blueshirt — Daniel pitches directly.",angela:true,sec:"https://ir.doubleverify.com"},
+  {id:"c2-08",circle:2,ft:"S-1",filed:"2026-03-15",addedDate:"2026-04-01",company:"VAST Data Inc.",ticker:"Pending",exchange:"Pre-IPO",sector:"AI Infrastructure / Data Storage",hq:"New York, NY — 240 37th St",desc:"AI data storage platform. $1.17B CoreWeave deal. 2026 IPO target.",why:"AI company = instant affinity for Angela.",contact:"Communications Team",title:"Communications",email:"hello@vastdata.com",phone:"(212) 658-1753",reach:"Direct",sender:"Linwan",sendwhy:"Pre-IPO. EA leads with Angela demo.",angela:true,sec:"https://vastdata.com/press-releases"},
+  {id:"c2-09",circle:2,ft:"S-1",filed:"2026-02-01",addedDate:"2026-04-01",company:"Ramp Financial",ticker:"Private",exchange:"Pre-IPO",sector:"B2B Fintech / Corporate Spend",hq:"New York, NY",desc:"$32B valuation (Nov 2025). 2026 IPO discussions ongoing.",why:"Fintech building for public markets — IPO readiness advisory.",contact:"Press Team",title:"Press / Communications",email:"press@ramp.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"EA positions as IPO IR advisory.",angela:true,sec:"https://ramp.com/press"},
+  {id:"c2-10",circle:2,ft:"S-1",filed:"2026-02-15",addedDate:"2026-04-01",company:"Brex Inc.",ticker:"Private",exchange:"Pre-IPO",sector:"Corporate Fintech / Spend Management",hq:"San Francisco / New York",desc:"$12.3B valuation. 2026 IPO candidate. Launched USDC stablecoin payments Sept 2025.",why:"Fintech with stablecoin angle — Daniel's exact domain.",contact:"Danielle Bereznak",title:"Director of External Communications",email:"press@brex.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Stablecoin angle opens the door.",angela:false,sec:"https://brex.com/about"},
+  {id:"c3-01",circle:3,ft:"S-1",filed:"2026-03-09",addedDate:"2026-04-01",company:"Madison Air LLC",ticker:"Pending",exchange:"NYSE",sector:"HVAC / Industrial",hq:"Phoenix, AZ",industry:"Industrial",desc:"$3.3B net sales FY2025. Indoor air quality leader. Traditional industrial IPO.",why:"Outside Daniel's expertise. Low priority.",contact:"IR Team",title:"Investor Relations",email:"Via company website",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Low priority only.",angela:false,sec:"https://www.sec.gov/Archives/edgar/data/2098430/000119312526098829/ck0002098430-20260309.htm"},
+  {id:"c3-02",circle:3,ft:"S-1",filed:"2025-11-01",addedDate:"2026-04-01",company:"Ethos Technologies Inc.",ticker:"LIFE",exchange:"Nasdaq",sector:"Insurtech",hq:"San Francisco, CA",industry:"Insurance",desc:"Life insurance tech. Nasdaq LIFE ticker. Insurance-primary.",why:"Insurance tech — outside core expertise.",contact:"IR Team",title:"Investor Relations",email:"ethos.com",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Low-medium priority.",angela:false,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001788451&type=S-1"},
+  {id:"c3-03",circle:3,ft:"8-K",filed:"2026-01-01",addedDate:"2026-04-01",company:"Devoted Health Inc.",ticker:"Private",exchange:"Pre-IPO",sector:"Medicare Advantage",hq:"Waltham, MA",industry:"Healthcare",desc:"$12B+ valuation. Medicare Advantage. 2026-27 IPO candidate.",why:"Health insurance — outside core expertise.",contact:"PR via Crosscut Strategies",title:"Media Relations",email:"devoted@crosscutstrategies.com",phone:"",reach:"Direct (PR)",sender:"Linwan",sendwhy:"Low priority.",angela:false,sec:"https://devoted.com/newsroom/"},
+  {id:"c3-04",circle:3,ft:"8-K",filed:"2025-12-20",addedDate:"2026-04-01",company:"American Strategic Investment Co.",ticker:"NYC",exchange:"NYSE",sector:"NYC Commercial Real Estate",hq:"New York, NY",industry:"Real Estate",desc:"NYSE compliance at risk. Limited IR resources.",why:"Real estate — outside core expertise. Compliance crisis.",contact:"IR / CFO Team",title:"Investor Relations",email:"investors.newyorkcityreit.com",phone:"(212) 415-6500",reach:"Direct (Phone)",sender:"Linwan",sendwhy:"Outside Daniel's sector.",angela:false,sec:"https://investors.newyorkcityreit.com"}
+];
+
+const STATUS_CFG = {
+  not_contacted:{label:"Not Contacted",color:"#64748b",bg:"#f8fafc",border:"#e2e8f0"},
+  email_sent:{label:"📧 Email Sent",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
+  replied:{label:"✅ Replied",color:"#059669",bg:"#ecfdf5",border:"#6ee7b7"},
+  call_scheduled:{label:"📞 Call Scheduled",color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
+  in_progress:{label:"🔄 In Progress",color:"#7c3aed",bg:"#f5f3ff",border:"#c4b5fd"},
+  proposal_sent:{label:"📋 Proposal Sent",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
+  client:{label:"⭐ CLIENT",color:"#065f46",bg:"#ecfdf5",border:"#059669"},
+  not_relevant:{label:"✗ Not Relevant",color:"#94a3b8",bg:"#f8fafc",border:"#e2e8f0"},
+};
+
+const CIRCLE_CFG = {
+  1:{color:"#d97706",bg:"#fffbeb",border:"#fcd34d",label:"Circle 1",sub:"Direct Match"},
+  2:{color:"#92400e",bg:"#fef9ec",border:"#fde68a",label:"Circle 2",sub:"Transfer Fit"},
+  3:{color:"#64748b",bg:"#f1f5f9",border:"#cbd5e1",label:"Other",sub:"All Industries"},
+};
+
+const FT_CFG = {
+  "S-1":{color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
+  "F-1":{color:"#7c3aed",bg:"#f5f3ff",border:"#c4b5fd"},
+  "8-K":{color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let state = {tab:'feed', filterType:'all', filterStatus:'all', search:''};
+let pipelineData = {}; // id -> {status, notes, lastUpdated, lastUpdatedBy}
+let clientsData = []; // array of client objects from Sheets
+let isSaving = false;
+const NEW_DAYS = 14; // filings added within 14 days shown in Feed tab
+
+// ── GOOGLE SHEETS SYNC ────────────────────────────────────────────────────
+function showSaving(msg) {
+  const el = document.getElementById('savingIndicator');
+  el.textContent = msg || 'Saving...';
+  el.classList.add('show');
+}
+function hideSaving() {
+  setTimeout(() => document.getElementById('savingIndicator').classList.remove('show'), 1500);
+}
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true; btn.textContent = '↻ Loading...';
+  setSyncStatus('loading');
+
+  // If no SCRIPT_URL configured, use localStorage fallback
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
+    loadFromLocal();
+    btn.disabled = false; btn.textContent = '↻ Refresh';
+    setSyncStatus('local');
+    return;
+  }
+
+  try {
+    const r = await fetch(SCRIPT_URL + '?action=getPipeline');
+    const rows = await r.json();
+    // rows[0] = headers, rows[1..] = data
+    if (rows.length > 1) {
+      const headers = rows[0];
+      const idIdx = headers.indexOf('id');
+      const statusIdx = headers.indexOf('status');
+      const notesIdx = headers.indexOf('notes');
+      const updIdx = headers.indexOf('lastUpdated');
+      const byIdx = headers.indexOf('lastUpdatedBy');
+      for (let i = 1; i < rows.length; i++) {
+        const id = rows[i][idIdx];
+        if (id) pipelineData[id] = {
+          status: rows[i][statusIdx] || 'not_contacted',
+          notes: rows[i][notesIdx] || '',
+          lastUpdated: rows[i][updIdx] || '',
+          lastUpdatedBy: rows[i][byIdx] || '',
+        };
+      }
+    }
+
+    // Load clients
+    const r2 = await fetch(SCRIPT_URL + '?action=getClients');
+    const crows = await r2.json();
+    if (crows.length > 1) {
+      const ch = crows[0];
+      clientsData = crows.slice(1).map(row => {
+        const obj = {};
+        ch.forEach((h, i) => obj[h] = row[i]);
+        return obj;
+      });
+    }
+
+    setSyncStatus('ok');
+  } catch(err) {
+    console.warn('Sheets sync failed, using local:', err);
+    loadFromLocal();
+    setSyncStatus('error');
+  }
+
+  btn.disabled = false; btn.textContent = '↻ Refresh';
+  render();
+}
+
+function loadFromLocal() {
+  try {
+    const s = localStorage.getItem('angela_pipeline_v3');
+    if (s) pipelineData = JSON.parse(s);
+    const c = localStorage.getItem('angela_clients_v3');
+    if (c) clientsData = JSON.parse(c);
+  } catch(e) {}
+}
+
+function saveToLocal() {
+  try {
+    localStorage.setItem('angela_pipeline_v3', JSON.stringify(pipelineData));
+    localStorage.setItem('angela_clients_v3', JSON.stringify(clientsData));
+  } catch(e) {}
+}
+
+async function saveRow(id) {
+  const d = pipelineData[id];
+  if (!d) return;
+  showSaving('Saving to Google Sheets...');
+  saveToLocal();
+
+  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
+    hideSaving(); return;
+  }
+
+  try {
+    const seed = SEED.find(s => s.id === id) || {};
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updatePipeline',
+        id, status: d.status, notes: d.notes,
+        updatedBy: CURRENT_USER,
+        company: seed.company, sector: seed.sector,
+        hq: seed.hq, exchange: seed.exchange,
+        ft: seed.ft, filed: seed.filed,
+        addedDate: seed.addedDate,
+      })
+    });
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('error');
+  }
+  hideSaving();
+}
+
+async function promoteToClient(id) {
+  const seed = SEED.find(s => s.id === id);
+  if (!seed) return;
+  // Add to clientsData if not already there
+  if (!clientsData.find(c => c.id === id)) {
+    const newClient = {
+      id, company: seed.company, sector: seed.sector,
+      hq: seed.hq, exchange: seed.exchange, ticker: seed.ticker,
+      irContact: seed.contact, irTitle: seed.title,
+      irEmail: seed.email, irPhone: seed.phone,
+      contractStart: '', retainer: '', services: '',
+      primaryContact: seed.contact, primaryEmail: seed.email, primaryPhone: seed.phone,
+      notes: pipelineData[id]?.notes || '',
+      lastUpdated: new Date().toISOString(), addedBy: CURRENT_USER,
+    };
+    clientsData.push(newClient);
+    saveToLocal();
+
+    if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
+      showSaving('Moving to Clients...');
+      try {
+        await fetch(SCRIPT_URL, {method:'POST', body: JSON.stringify({action:'promoteToClient', ...newClient, updatedBy:CURRENT_USER})});
+      } catch(e) {}
+      hideSaving();
+    }
+  }
+  updateStats();
+  setTab('clients', document.getElementById('tab-clients'));
+}
+
+async function saveClient(id) {
+  const c = clientsData.find(x => x.id === id);
+  if (!c) return;
+  c.lastUpdated = new Date().toISOString();
+  saveToLocal();
+  showSaving('Saving client...');
+  if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
+    try {
+      await fetch(SCRIPT_URL, {method:'POST', body: JSON.stringify({action:'updateClient', ...c})});
+    } catch(e) {}
+  }
+  hideSaving();
+}
+
+function setSyncStatus(s) {
+  const el = document.getElementById('syncTime');
+  const badge = document.getElementById('syncBadge');
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  if (s === 'ok') {
+    el.innerHTML = `<span class="sync-ok">●</span> Synced ${t}`;
+    document.getElementById('dashSub').textContent = `SEC EDGAR · Nasdaq · NYSE · Google Sheets — Last sync ${t}`;
+  } else if (s === 'error') {
+    el.innerHTML = `<span class="sync-err">●</span> Offline — local only`;
+  } else if (s === 'local') {
+    el.innerHTML = `<span style="color:var(--amber)">●</span> Local mode`;
+  } else {
+    el.textContent = 'Syncing...';
+  }
+}
+
+// ── FILTERING ─────────────────────────────────────────────────────────────
+function isNew(f) {
+  const added = new Date(f.addedDate);
+  const diff = (new Date() - added) / (1000*60*60*24);
+  return diff <= NEW_DAYS;
+}
+
+function getStatus(id) {
+  return pipelineData[id]?.status || 'not_contacted';
+}
+function getNotes(id) {
+  return pipelineData[id]?.notes || '';
+}
+function getBy(id) {
+  return pipelineData[id]?.lastUpdatedBy || '';
+}
+
+function getFiltered() {
+  return SEED.filter(f => {
+    if (state.tab === 'feed') return isNew(f) && getStatus(f.id) !== 'client';
+    if (state.tab === 'c1') return f.circle === 1 && getStatus(f.id) !== 'client';
+    if (state.tab === 'c2') return f.circle === 2 && getStatus(f.id) !== 'client';
+    if (state.tab === 'c3') return f.circle === 3 && getStatus(f.id) !== 'client';
+    if (state.tab === 'all') return getStatus(f.id) !== 'client';
+    return true;
+  }).filter(f => {
+    if (state.filterType !== 'all' && !f.ft.startsWith(state.filterType)) return false;
+    if (state.filterStatus !== 'all' && getStatus(f.id) !== state.filterStatus) return false;
+    if (state.search) {
+      const q = state.search.toLowerCase();
+      return [f.company, f.sector, f.hq, f.contact, f.desc].some(x => x && x.toLowerCase().includes(q));
+    }
+    return true;
+  });
+}
+
+// ── TAB & FILTER CONTROL ──────────────────────────────────────────────────
+function setTab(t, btn, e) {
+  if (e) e.preventDefault();
+  state.tab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  const tb = btn || document.getElementById('tab-' + t);
+  if (tb) tb.classList.add('active');
+  const fb = document.getElementById('filterBar');
+  if (fb) fb.style.display = t === 'clients' ? 'none' : 'flex';
+  render();
+}
+
+function setFilter(type, val, btn) {
+  if (type === 'type') { state.filterType = val; let i=0; document.querySelectorAll('.filters .chip').forEach(b=>{if(i<4)b.classList.remove('on');i++;}); }
+  else { state.filterStatus = val; let i=0; document.querySelectorAll('.filters .chip').forEach(b=>{if(i>=4)b.classList.remove('on');i++;}); }
+  btn.classList.add('on'); render();
+}
+
+// ── UPDATE HANDLERS ────────────────────────────────────────────────────────
+function updateStatus(id, val) {
+  if (!pipelineData[id]) pipelineData[id] = {status:'not_contacted', notes:'', lastUpdated:'', lastUpdatedBy:''};
+  pipelineData[id].status = val;
+  pipelineData[id].lastUpdatedBy = CURRENT_USER;
+  pipelineData[id].lastUpdated = new Date().toISOString();
+  if (val === 'client') promoteToClient(id);
+  else { saveRow(id); updateStats(); render(); }
+}
+
+function updateNotes(id, val) {
+  if (!pipelineData[id]) pipelineData[id] = {status:'not_contacted', notes:'', lastUpdated:'', lastUpdatedBy:''};
+  pipelineData[id].notes = val;
+  pipelineData[id].lastUpdatedBy = CURRENT_USER;
+  pipelineData[id].lastUpdated = new Date().toISOString();
+  saveRow(id);
+}
+
+function updateClientField(id, field, val) {
+  const c = clientsData.find(x => x.id === id);
+  if (c) c[field] = val;
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function updateStats() {
+  const newCount = SEED.filter(f => isNew(f) && getStatus(f.id) !== 'client').length;
+  const allCount = SEED.filter(f => getStatus(f.id) !== 'client').length;
+  const c1 = SEED.filter(f => f.circle===1 && getStatus(f.id) !== 'client').length;
+  const c2 = SEED.filter(f => f.circle===2 && getStatus(f.id) !== 'client').length;
+  const c3 = SEED.filter(f => f.circle===3 && getStatus(f.id) !== 'client').length;
+  const cli = clientsData.length;
+  const sent = SEED.filter(f => getStatus(f.id) === 'email_sent').length;
+  const rep = SEED.filter(f => getStatus(f.id) === 'replied').length;
+  const prog = SEED.filter(f => ['in_progress','call_scheduled'].includes(getStatus(f.id))).length;
+
+  document.getElementById('cnt-feed').textContent = newCount;
+  document.getElementById('cnt-all').textContent = allCount;
+  document.getElementById('cnt-c1').textContent = c1;
+  document.getElementById('cnt-c2').textContent = c2;
+  document.getElementById('cnt-c3').textContent = c3;
+  document.getElementById('cnt-clients').textContent = cli;
+
+  document.getElementById('statsStrip').innerHTML = [
+    {v:SEED.length, l:'Total Prospects', c:'#fff'},
+    {v:newCount, l:'New This Week', c:'#f87171'},
+    {v:c1, l:'Circle 1 — Direct', c:'var(--gold2)'},
+    {v:c2, l:'Circle 2 — Transfer', c:'#fde68a'},
+    {v:sent, l:'Emails Sent', c:'#fcd34d'},
+    {v:rep, l:'Replied', c:'#4ade80'},
+    {v:prog, l:'In Progress', c:'#c4b5fd'},
+    {v:cli > 0 ? '⭐ '+cli : '—', l:'Clients', c:'var(--gold2)'},
+  ].map(x => `<div class="sstat"><div class="sstat-v" style="color:${x.c}">${x.v}</div><div class="sstat-l">${x.l}</div></div>`).join('');
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────
+function e(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+function renderPipeline() {
+  const rows = getFiltered();
+  if (!rows.length) return `<div style="padding:60px;text-align:center;color:var(--text3);background:#fff"><div style="font-size:28px;margin-bottom:8px">◆</div><div style="font-size:14px;font-weight:500">No results match current filters</div></div>`;
+
+  const tbody = rows.map(f => {
+    const status = getStatus(f.id);
+    const notes = getNotes(f.id);
+    const by = getBy(f.id);
+    const sc = STATUS_CFG[status] || STATUS_CFG.not_contacted;
+    const fc = FT_CFG[f.ft] || FT_CFG['8-K'];
+    const cc = CIRCLE_CFG[f.circle];
+    const isDir = f.reach.startsWith('Direct');
+    const rCol = isDir ? 'var(--green)' : f.reach.startsWith('Pre') ? 'var(--purple)' : 'var(--blue)';
+    const rBg = isDir ? 'var(--green-bg)' : f.reach.startsWith('Pre') ? 'var(--purple-bg)' : 'var(--blue-bg)';
+    const rBorder = isDir ? 'var(--green-b)' : f.reach.startsWith('Pre') ? 'var(--purple-b)' : 'var(--blue-b)';
+    const sOpts = Object.entries(STATUS_CFG).map(([k,v]) => `<option value="${k}"${status===k?' selected':''}>${v.label}</option>`).join('');
+    const newTag = isNew(f) ? '<span class="new-tag">NEW</span>' : '';
+    return `<tr class="${isNew(f)?'is-new':''}">
+      <td><div class="dm">${e(f.filed)}</div><div class="ds">added ${e(f.addedDate)}</div></td>
+      <td><span class="badge" style="color:${fc.color};background:${fc.bg};border-color:${fc.border}">${e(f.ft)}</span></td>
+      <td>
+        <div class="co-name">${e(f.company)}${newTag}</div>
+        <div class="co-meta">${f.ticker&&f.ticker!=='Pending'&&f.ticker!=='Private'?e(f.ticker)+' · ':''}${e(f.exchange)}</div>
+        <div class="co-sector">${e(f.sector)}</div>
+        <div class="co-desc" style="color:var(--text3)">${e(f.hq)}</div>
+        <div class="co-desc" style="margin-top:3px">${e(f.desc)}</div>
+      </td>
+      <td>
+        <div class="cr"><div class="cdot" style="background:${cc.color}"></div><span class="clbl" style="color:${cc.color}">${cc.label}</span><span style="font-size:9px;color:var(--text3)">— ${cc.sub}</span></div>
+        ${f.industry?`<div class="ind">${e(f.industry)}</div>`:''}
+        <div class="cwhy">${e(f.why)}</div>
+      </td>
+      <td>
+        <div class="irn">${e(f.contact)}</div>
+        <div class="irt">${e(f.title)}</div>
+        ${f.email?`<div class="ire">${e(f.email)}</div>`:''}
+        ${f.phone?`<div class="irp">${e(f.phone)}</div>`:''}
+      </td>
+      <td><span class="rbadge" style="color:${rCol};background:${rBg};border-color:${rBorder}">${isDir?'✓':f.reach.startsWith('Pre')?'◎':'→'} ${e(f.reach)}</span></td>
+      <td>
+        <span class="sbadge" style="background:${f.sender==='Daniel'?'var(--blue-bg)':'var(--green-bg)'};color:${f.sender==='Daniel'?'var(--blue)':'var(--green)'};border-color:${f.sender==='Daniel'?'var(--blue-b)':'var(--green-b)'}">${e(f.sender)}</span>
+        <div class="snote">${e(f.sendwhy)}</div>
+      </td>
+      <td>${f.angela?'<div class="angela-yes"><div class="angela-dot"></div>Yes</div>':'<span style="color:var(--slate2)">—</span>'}</td>
+      <td>
+        <select class="ssel" style="background:${sc.bg};color:${sc.color};border-color:${sc.border}" onchange="updateStatus('${f.id}',this.value)">${sOpts}</select>
+        ${by?`<div class="by-line">by ${by}</div>`:''}
+      </td>
+      <td>
+        <textarea class="nta" placeholder="Add notes..." oninput="updateNotes('${f.id}',this.value)">${e(notes)}</textarea>
+        ${by?`<div class="by-line">${pipelineData[f.id]?.lastUpdated?new Date(pipelineData[f.id].lastUpdated).toLocaleDateString():''}</div>`:''}
+      </td>
+      <td><a href="${e(f.sec)}" target="_blank" rel="noreferrer" class="seclink">EDGAR ↗</a></td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="tw"><table>
+    <thead><tr>
+      <th>Filed / Added</th><th>Type</th><th>Company</th>
+      <th>Fit & Reason</th><th>IR Contact</th><th>Reach</th>
+      <th>Who Sends</th><th>Angela?</th>
+      <th style="min-width:150px">Status</th>
+      <th style="min-width:170px">Notes</th><th>SEC</th>
+    </tr></thead>
+    <tbody>${tbody}</tbody>
+  </table></div>`;
+}
+
+function renderClients() {
+  if (!clientsData.length) return `<div class="clients-grid"><div class="empty-clients"><div class="empty-icon">⭐</div><div style="font-size:14px;font-weight:500;margin-bottom:6px">No clients yet</div><div style="font-size:12px;color:var(--text3)">When a prospect becomes a client, set their status to ⭐ CLIENT in the pipeline — they'll appear here automatically.</div></div></div>`;
+
+  const cards = clientsData.map(c => `
+    <div class="client-card">
+      <div class="cc-header">
+        <div>
+          <div class="cc-name">${e(c.company)}</div>
+          <div class="cc-sector">${e(c.sector)} · ${e(c.exchange)}</div>
+          ${c.contractStart?`<div class="cc-since">Client since ${e(c.contractStart)}</div>`:''}
+        </div>
+        ${c.retainer?`<div class="retainer-tag">$${e(c.retainer)}/mo</div>`:''}
+      </div>
+      <div class="cc-body">
+        <div class="cc-row">
+          <div style="flex:1;margin-right:10px">
+            <div class="cc-label">Primary Contact</div>
+            <input class="cc-inp" value="${e(c.primaryContact||c.irContact)}" placeholder="Name" onchange="updateClientField('${c.id}','primaryContact',this.value)">
+            <input class="cc-inp" style="margin-top:5px" value="${e(c.primaryEmail||c.irEmail)}" placeholder="Email" onchange="updateClientField('${c.id}','primaryEmail',this.value)">
+            <input class="cc-inp" style="margin-top:5px" value="${e(c.primaryPhone||c.irPhone)}" placeholder="Phone" onchange="updateClientField('${c.id}','primaryPhone',this.value)">
+          </div>
+          <div style="flex:1">
+            <div class="cc-label">Contract Details</div>
+            <input class="cc-inp" value="${e(c.contractStart)}" placeholder="Start date (e.g. 2026-04-15)" onchange="updateClientField('${c.id}','contractStart',this.value)">
+            <input class="cc-inp" style="margin-top:5px" value="${e(c.retainer)}" placeholder="Monthly retainer ($)" onchange="updateClientField('${c.id}','retainer',this.value)">
+            <input class="cc-inp" style="margin-top:5px" value="${e(c.services)}" placeholder="Services (e.g. IR Advisory, Angela)" onchange="updateClientField('${c.id}','services',this.value)">
+          </div>
+        </div>
+        <div class="cc-row">
+          <div style="width:100%">
+            <div class="cc-label">Notes & Updates</div>
+            <textarea class="cc-ta" placeholder="Client notes, updates, action items..." onchange="updateClientField('${c.id}','notes',this.value)">${e(c.notes)}</textarea>
+          </div>
+        </div>
+        <div style="font-size:9px;color:var(--text4);margin-bottom:8px">HQ: ${e(c.hq)} · IR: ${e(c.irContact)} (${e(c.irTitle)})</div>
+        <button class="cc-save" onclick="saveClient('${c.id}')">Save Client Record ↗ Google Sheets</button>
+        ${c.lastUpdated?`<div style="font-size:9px;color:var(--text4);text-align:center;margin-top:4px">Last updated: ${new Date(c.lastUpdated).toLocaleDateString()} by ${e(c.addedBy)}</div>`:''}
+      </div>
+    </div>
+  `).join('');
+
+  return `<div class="clients-grid">${cards}</div>`;
+}
+
+function render() {
+  updateStats();
+  const mc = document.getElementById('mainContent');
+  if (state.tab === 'clients') {
+    mc.innerHTML = renderClients();
+  } else {
+    mc.innerHTML = renderPipeline();
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
