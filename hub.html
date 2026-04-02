@@ -20,7 +20,8 @@
   --annie2: #38BDF8;
   --amelia: #2952CC;
   --amelia2:#EDF1FB;
-  --soon:   #6B6560;
+  --angela: #0b1629;
+  --angela2:#c9a84c;
   --f-serif: 'Instrument Serif', Georgia, serif;
   --f-body:  'DM Sans', system-ui, sans-serif;
 }
@@ -220,7 +221,7 @@ h1 em {
   margin: 0 auto;
   padding: 64px 48px 100px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
 }
 
@@ -267,6 +268,25 @@ h1 em {
   box-shadow: 0 2px 0 rgba(0,0,0,.06), 0 20px 48px rgba(0,0,0,.10);
 }
 
+/* ── ANGELA CARD ── */
+.card-angela {
+  background: var(--angela);
+  box-shadow: 0 2px 0 rgba(0,0,0,.12), 0 8px 32px rgba(11,22,41,.22);
+  color: #fff;
+}
+.card-angela:hover {
+  box-shadow: 0 2px 0 rgba(0,0,0,.16), 0 20px 48px rgba(11,22,41,.32);
+}
+.card-angela::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(201,168,76,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
 /* ── COMING SOON CARD ── */
 .card-soon {
   background: var(--bg2);
@@ -287,6 +307,7 @@ h1 em {
 }
 .card-annie .card-icon { background: rgba(56,189,248,.15); }
 .card-amelia .card-icon { background: var(--amelia2); }
+.card-angela .card-icon { background: rgba(201,168,76,.15); }
 .card-soon .card-icon { background: var(--brd); opacity: .6; }
 
 .card-status {
@@ -298,6 +319,7 @@ h1 em {
 }
 .card-annie .card-status { color: var(--annie2); }
 .card-amelia .card-status { color: var(--amelia); }
+.card-angela .card-status { color: var(--angela2); }
 .card-soon .card-status { color: var(--ink4); }
 
 .card-name {
@@ -310,6 +332,7 @@ h1 em {
 }
 .card-annie .card-name { color: #fff; }
 .card-amelia .card-name { color: var(--ink); }
+.card-angela .card-name { color: var(--angela2); }
 
 .card-tagline {
   font-size: 13px;
@@ -320,6 +343,7 @@ h1 em {
 }
 .card-annie .card-tagline { color: rgba(255,255,255,.55); }
 .card-amelia .card-tagline { color: var(--ink3); }
+.card-angela .card-tagline { color: rgba(255,255,255,.5); }
 .card-soon .card-tagline { color: var(--ink4); }
 
 .card-links {
@@ -375,6 +399,22 @@ h1 em {
 }
 .card-amelia .btn-secondary:hover { background: #dce6fb; }
 
+/* Angela buttons */
+.card-angela .btn-primary {
+  background: var(--angela2);
+  color: var(--angela);
+}
+.card-angela .btn-primary:hover { background: #e8c97a; }
+.card-angela .btn-secondary {
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.12);
+}
+.card-angela .btn-secondary:hover {
+  background: rgba(255,255,255,.13);
+  color: #fff;
+}
+
 /* Soon pill */
 .soon-pill {
   display: inline-flex;
@@ -420,7 +460,8 @@ footer {
 .card { animation: fadeUp .6s ease both; }
 .card-annie  { animation-delay: .15s; }
 .card-amelia { animation-delay: .25s; }
-.card-soon   { animation-delay: .35s; }
+.card-angela { animation-delay: .35s; }
+.card-soon   { animation-delay: .45s; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 780px) {
@@ -432,7 +473,7 @@ footer {
   .hero-video-wrap { height: 360px; }
   h1 { font-size: 34px; }
   .divider { padding: 0 24px; }
-  .agents { grid-template-columns: 1fr; padding: 40px 24px 72px; gap: 16px; }
+  .agents { grid-template-columns: 1fr 1fr; padding: 40px 24px 72px; gap: 16px; }
   footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
 }
 </style>
@@ -545,6 +586,24 @@ function togglePlay() {
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
       <a class="card-btn btn-secondary" href="/amelia/demo.html">
+        Try Demo
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- ANGELA -->
+  <div class="card card-angela">
+    <div class="card-icon">📊</div>
+    <div class="card-status">● Live</div>
+    <div class="card-name">Angela</div>
+    <p class="card-tagline">IR intelligence platform for investor relations. Tracks prospects, manages pipeline, and surfaces insights across your investor network.</p>
+    <div class="card-links">
+      <a class="card-btn btn-primary" href="/angela/index.html">
+        Learn More
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="card-btn btn-secondary" href="/angela/index.html">
         Try Demo
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
       </a>
