@@ -531,8 +531,14 @@ async function triggerFetch() {
   await loadData();
   hideSaving();
 
-  if(statusEl && totalAdded === 0) {
-    statusEl.textContent = `Auto-fetch daily 9am EST · ${round} batches checked · No new relevant companies today — Angela filtered all filings`;
+  // Final status — always shows clear summary
+  const totalChecked = round * 3;
+  if(statusEl) {
+    if(totalAdded > 0) {
+      statusEl.textContent = `✓ Fetch complete · Checked ${totalChecked}+ filings · ${totalAdded} new companies added to pipeline · Next auto-fetch: tomorrow 9am EST`;
+    } else {
+      statusEl.textContent = `✓ Fetch complete · Checked ${totalChecked}+ filings · 0 relevant companies today (Angela filtered all) · Next auto-fetch: tomorrow 9am EST`;
+    }
   }
 }
 
