@@ -126,6 +126,10 @@ td{padding:9px 10px;vertical-align:top;font-size:11px}
 .angela-yes{display:flex;align-items:center;gap:4px;color:var(--green);font-size:10px;font-weight:600}
 .angela-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
 
+.ver-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;padding:1px 6px;border-radius:3px;margin-top:3px;font-family:var(--mono)}
+.ver-ok{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.ver-no{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
+.ver-src{font-size:9px;color:var(--text4);margin-top:2px;line-height:1.3;max-width:230px}
 .cf-btn{padding:3px 8px;border-radius:4px;border:1px solid var(--blue-b);background:var(--blue-bg);color:var(--blue);font-size:9px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;white-space:nowrap;margin-top:5px}
 .cf-btn:hover{background:var(--blue);color:#fff}
 .cf-btn:disabled{opacity:.5;cursor:default}
@@ -349,31 +353,249 @@ if (ul) ul.textContent = '👤 ' + CURRENT_USER;
 
 // ── SEED DATA ─────────────────────────────────────────────────────
 const SEED = [
-  {id:"c1-01",circle:1,ft:"S-1",filed:"2026-01-20",addedDate:"2026-04-01",company:"Clear Street Group Inc.",ticker:"Pending",exchange:"Nasdaq/NYSE",sector:"Prime Brokerage / Fintech",hq:"New York, NY",desc:"Tech-forward prime brokerage. S-1 filed Jan 2026. Goldman/BofA/Morgan Stanley underwriters.",why:"Capital markets tech + fintech — direct match to Daniel's IPO and PIPE experience.",contact:"Edward T. Tilly",title:"CEO",email:"clearstreet.io/contact",phone:"",reach:"Pre-IPO",sender:"Daniel",sendwhy:"Founder-to-CEO.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001881567&type=S-1"},
-  {id:"c1-02",circle:1,ft:"S-1",filed:"2026-01-15",addedDate:"2026-04-01",company:"DMINT Inc. (OLB Group spin-off)",ticker:"Pending",exchange:"Nasdaq",sector:"Bitcoin Mining / Fintech",hq:"New York, NY",desc:"Bitcoin mining spin-off from OLB Group. Pure-play digital asset mining IPO.",why:"Bitcoin mining + digital assets — identical profile to BIT Mining (Daniel's NYSE case study).",contact:"Ronny Yakov",title:"CEO, The OLB Group",email:"ir@olb.com",phone:"(212) 278-0900 ext 333",reach:"Direct",sender:"Linwan",sendwhy:"Small company, CEO accessible.",angela:false,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001996450&type=S-1"},
-  {id:"c1-03",circle:1,ft:"F-1",filed:"2025-05-12",addedDate:"2026-04-01",company:"DeFi Technologies Inc.",ticker:"DEFT",exchange:"Nasdaq",sector:"DeFi / Digital Assets",hq:"Toronto (Nasdaq-listed May 2025)",desc:"First company bridging TradFi and DeFi on Nasdaq. Listed May 2025.",why:"F-1 filer in DeFi — Daniel's exact domain. Newly listed = zero IR infrastructure.",contact:"IR Team",title:"Investor Relations",email:"ir.defitechnologies.ca",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Newly listed, lean team.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001888274&type=F-1"},
-  {id:"c1-04",circle:1,ft:"8-K",filed:"2025-12-09",addedDate:"2026-04-01",company:"Twenty One Capital Inc.",ticker:"XXI",exchange:"NYSE",sector:"Bitcoin Treasury / Capital Markets",hq:"Austin, TX",desc:"NYSE debut Dec 9 2025. 3rd largest public Bitcoin holder. Only 2 employees — no IR.",why:"Bitcoin-native, narrative broken, IR vacuum. BIT Mining restructuring is the exact pitch.",contact:"Steven Meehan",title:"CFO",email:"xxi.money/contact",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Tiny team, CFO accessible.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001865602&type=8-K"},
-  {id:"c1-05",circle:1,ft:"8-K",filed:"2025-06-05",addedDate:"2026-04-01",company:"Circle Internet Group Inc.",ticker:"CRCL",exchange:"NYSE",sector:"Stablecoin / Fintech",hq:"New York, NY",desc:"USDC stablecoin issuer. NYSE IPO June 2025. $16B+ market cap.",why:"Digital asset narrative — Daniel's core skill. Angela for 24/7 investor Q&A.",contact:"IR Team",title:"Investor Relations",email:"investors@circle.com",phone:"",reach:"Direct",sender:"Daniel",sendwhy:"Large public company. Founder-level pitch.",angela:true,sec:"https://investor.circle.com"},
-  {id:"c1-06",circle:1,ft:"S-1",filed:"2026-01-08",addedDate:"2026-04-01",company:"Pershing Square Inc.",ticker:"Pending",exchange:"Pending",sector:"Investment Company",hq:"New York, NY",desc:"Bill Ackman's public investment vehicle. S-1 filed Jan 2026.",why:"Capital markets-native. Angela handles retail investor Q&A at scale.",contact:"IR / Comms Team",title:"Communications",email:"pershingsquareholdings.com",phone:"",reach:"Web / LinkedIn",sender:"Daniel",sendwhy:"High-profile firm. Founder-level.",angela:true,sec:"https://pershingsquareholdings.com"},
-  {id:"c1-07",circle:1,ft:"S-1",filed:"2026-01-23",addedDate:"2026-04-01",company:"Grayscale Investments LLC",ticker:"Pending",exchange:"Nasdaq",sector:"Digital Asset Management",hq:"New York, NY",desc:"Crypto asset manager filing for public listing. DCG subsidiary.",why:"Digital asset management — Daniel's exact domain.",contact:"IR Team",title:"Investor Relations",email:"grayscale.com/contact",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO. EA opens door.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002073548&type=S-1"},
-  {id:"c1-08",circle:1,ft:"S-1",filed:"2025-09-02",addedDate:"2026-04-01",company:"Figure Technology Solutions Inc.",ticker:"Pending",exchange:"Nasdaq",sector:"Blockchain / Fintech",hq:"New York, NY",desc:"Blockchain-native fintech. S-1/A filed Sept 2025.",why:"Blockchain fintech S-1 — capital markets complexity Daniel has navigated.",contact:"IR Team",title:"Investor Relations",email:"figure.com/contact",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO lean team.",angela:true,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002064124&type=S-1"},
-  {id:"c1-09",circle:1,ft:"S-1",filed:"2026-03-01",addedDate:"2026-04-01",company:"Gemini Trust Company (Winklevoss)",ticker:"Pending",exchange:"Nasdaq/NYSE",sector:"Crypto Exchange",hq:"New York, NY",desc:"Winklevoss crypto exchange. 2026 IPO planned. NYC HQ.",why:"Crypto exchange IPO in NYC — Daniel's PIPE and IPO experience.",contact:"Press / Comms",title:"Communications",email:"press@gemini.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Press email confirmed.",angela:true,sec:"https://gemini.com"},
-  {id:"c1-10",circle:1,ft:"8-K",filed:"2026-03-31",addedDate:"2026-04-01",company:"CoinShares International Ltd.",ticker:"Pending",exchange:"Nasdaq (via SPAC)",sector:"Crypto Asset Manager",hq:"London / New York",desc:"Began Nasdaq trading via SPAC March 31 2026. IR is day one.",why:"Just-listed crypto — IR vacuum. Daniel walks in day one.",contact:"IR Team",title:"Investor Relations",email:"ir@coinshares.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Brand new listing.",angela:true,sec:"https://coinshares.com/investor-relations"},
-  {id:"c2-01",circle:2,ft:"8-K",filed:"2026-02-10",addedDate:"2026-04-01",company:"Outbrain Inc. (now Teads)",ticker:"OB",exchange:"Nasdaq",sector:"AdTech / Media",hq:"New York, NY",desc:"Completed merger with Teads Feb 2025. Post-merger IR rebuild.",why:"Post-merger narrative rebuild — Daniel's capital markets strength.",contact:"IR Team",title:"Investor Relations",email:"IR@outbrain.com",phone:"(332) 205-8999",reach:"Direct",sender:"Daniel",sendwhy:"IR-to-IR peer conversation.",angela:true,sec:"https://investors.outbrain.com"},
-  {id:"c2-02",circle:2,ft:"8-K",filed:"2026-03-03",addedDate:"2026-04-01",company:"Paysafe Limited",ticker:"PSFE",exchange:"NYSE",sector:"Payments / Fintech",hq:"London (NYSE-listed)",desc:"Global payments platform. Neteller/Skrill have crypto exposure. Stock underperformed.",why:"Fintech with crypto exposure, broken narrative — Daniel's specialty.",contact:"Kirsten Nielsen",title:"SVP, Investor Relations",email:"kirsten.nielsen@paysafe.com",phone:"(646) 901-3140",reach:"Direct",sender:"Daniel",sendwhy:"SVP IR — peer-to-peer only.",angela:false,sec:"https://ir.paysafe.com"},
-  {id:"c2-03",circle:2,ft:"8-K",filed:"2026-02-17",addedDate:"2026-04-01",company:"DocGo Inc.",ticker:"DCGO",exchange:"Nasdaq",sector:"Healthcare Tech / Mobile Health",hq:"New York, NY",desc:"NYC-based mobile health platform. Lean IR resources.",why:"Tech-enabled healthcare — Angela's 24/7 Q&A layer is the value proposition.",contact:"Mike Cole",title:"VP, Investor Relations",email:"mike.cole@docgo.com",phone:"(949) 444-1341",reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,sec:"https://ir.docgo.com"},
-  {id:"c2-04",circle:2,ft:"8-K",filed:"2026-02-24",addedDate:"2026-04-01",company:"Evolent Health Inc.",ticker:"EVH",exchange:"NYSE",sector:"Healthcare IT / Value-Based Care",hq:"Arlington, VA (NYSE-listed)",desc:"Healthcare IT in business model transformation.",why:"Tech-forward healthcare — Angela as investor messaging layer.",contact:"Seth R. Frank",title:"VP, Investor Relations",email:"sfrank@evolent.com",phone:"(571) 895-3919",reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,sec:"https://ir.evolent.com"},
-  {id:"c2-05",circle:2,ft:"8-K",filed:"2026-01-20",addedDate:"2026-04-01",company:"SoFi Technologies Inc.",ticker:"SOFI",exchange:"Nasdaq",sector:"Fintech / Digital Banking",hq:"San Francisco (Nasdaq-listed)",desc:"Digital bank with crypto features. Tech-forward.",why:"Fintech that understands AI — pitch Angela as investor analytics layer.",contact:"IR Team",title:"Investor Relations",email:"ir.sofi.com/contact-us",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"EA pitches Angela.",angela:true,sec:"https://ir.sofi.com"},
-  {id:"c2-06",circle:2,ft:"8-K",filed:"2026-02-01",addedDate:"2026-04-01",company:"Taboola.com Ltd.",ticker:"TBLA",exchange:"Nasdaq",sector:"AdTech / Performance Advertising",hq:"New York, NY",desc:"NYC HQ. Pivoting to performance advertising. AI-forward company.",why:"AI-forward tech company — will appreciate Angela demo.",contact:"IR Team",title:"Investor Relations",email:"investors.taboola.com/investor-resources/contact-ir/",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"EA opens with Angela pitch.",angela:true,sec:"https://investors.taboola.com"},
-  {id:"c2-07",circle:2,ft:"8-K",filed:"2026-01-15",addedDate:"2026-04-01",company:"DoubleVerify Holdings Inc.",ticker:"DV",exchange:"NYSE",sector:"AdTech / Ad Measurement SaaS",hq:"New York, NY — 462 Broadway",desc:"NYC HQ. Has existing agency (Blueshirt Group). Under growth pressure.",why:"Pitch Daniel + Angela as AI-enabled supplement Blueshirt can't offer.",contact:"Samantha Anderman",title:"In-house IR Analyst",email:"IR@doubleverify.com",phone:"(212) 631-2002",reach:"Direct (bypass agency)",sender:"Daniel",sendwhy:"Bypass Blueshirt.",angela:true,sec:"https://ir.doubleverify.com"},
-  {id:"c2-08",circle:2,ft:"S-1",filed:"2026-03-15",addedDate:"2026-04-01",company:"VAST Data Inc.",ticker:"Pending",exchange:"Pre-IPO",sector:"AI Infrastructure / Data Storage",hq:"New York, NY",desc:"AI data storage platform. $1.17B CoreWeave deal. 2026 IPO target.",why:"AI company = instant affinity for Angela.",contact:"Communications Team",title:"Communications",email:"hello@vastdata.com",phone:"(212) 658-1753",reach:"Direct",sender:"Linwan",sendwhy:"Pre-IPO. EA leads with Angela demo.",angela:true,sec:"https://vastdata.com/press-releases"},
-  {id:"c2-09",circle:2,ft:"S-1",filed:"2026-02-01",addedDate:"2026-04-01",company:"Ramp Financial",ticker:"Private",exchange:"Pre-IPO",sector:"B2B Fintech / Corporate Spend",hq:"New York, NY",desc:"$32B valuation. 2026 IPO discussions ongoing.",why:"Fintech building for public markets — IPO readiness advisory.",contact:"Press Team",title:"Press / Communications",email:"press@ramp.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"EA positions as IPO IR advisory.",angela:true,sec:"https://ramp.com/press"},
-  {id:"c2-10",circle:2,ft:"S-1",filed:"2026-02-15",addedDate:"2026-04-01",company:"Brex Inc.",ticker:"Private",exchange:"Pre-IPO",sector:"Corporate Fintech / Spend Management",hq:"San Francisco / New York",desc:"$12.3B valuation. 2026 IPO candidate. Launched USDC stablecoin payments.",why:"Fintech with stablecoin angle — Daniel's exact domain.",contact:"Danielle Bereznak",title:"Director of External Communications",email:"press@brex.com",phone:"",reach:"Direct",sender:"Linwan",sendwhy:"Stablecoin angle opens the door.",angela:false,sec:"https://brex.com/about"},
-  {id:"c3-01",circle:3,ft:"S-1",filed:"2026-03-09",addedDate:"2026-04-01",company:"Madison Air LLC",ticker:"Pending",exchange:"NYSE",sector:"HVAC / Industrial",hq:"Phoenix, AZ",industry:"Industrial",desc:"$3.3B net sales FY2025. Indoor air quality leader.",why:"Outside Daniel's expertise. Low priority.",contact:"IR Team",title:"Investor Relations",email:"Via company website",phone:"",reach:"Web Form",sender:"Linwan",sendwhy:"Low priority only.",angela:false,sec:"https://www.sec.gov/Archives/edgar/data/2098430/000119312526098829/ck0002098430-20260309.htm"},
-  {id:"c3-02",circle:3,ft:"S-1",filed:"2025-11-01",addedDate:"2026-04-01",company:"Ethos Technologies Inc.",ticker:"LIFE",exchange:"Nasdaq",sector:"Insurtech",hq:"San Francisco, CA",industry:"Insurance",desc:"Life insurance tech. Insurance-primary.",why:"Insurance tech — outside core expertise.",contact:"IR Team",title:"Investor Relations",email:"ethos.com",phone:"",reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Low-medium priority.",angela:false,sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001788451&type=S-1"},
-  {id:"c3-03",circle:3,ft:"8-K",filed:"2026-01-01",addedDate:"2026-04-01",company:"Devoted Health Inc.",ticker:"Private",exchange:"Pre-IPO",sector:"Medicare Advantage",hq:"Waltham, MA",industry:"Healthcare",desc:"$12B+ valuation. Medicare Advantage. 2026-27 IPO candidate.",why:"Health insurance — outside core expertise.",contact:"PR via Crosscut Strategies",title:"Media Relations",email:"devoted@crosscutstrategies.com",phone:"",reach:"Direct (PR)",sender:"Linwan",sendwhy:"Low priority.",angela:false,sec:"https://devoted.com/newsroom/"},
-  {id:"c3-04",circle:3,ft:"8-K",filed:"2025-12-20",addedDate:"2026-04-01",company:"American Strategic Investment Co.",ticker:"NYC",exchange:"NYSE",sector:"NYC Commercial Real Estate",hq:"New York, NY",industry:"Real Estate",desc:"NYSE compliance at risk. Limited IR resources.",why:"Real estate — outside core expertise.",contact:"IR / CFO Team",title:"Investor Relations",email:"investors.newyorkcityreit.com",phone:"(212) 415-6500",reach:"Direct (Phone)",sender:"Linwan",sendwhy:"Outside Daniel's sector.",angela:false,sec:"https://investors.newyorkcityreit.com"}
-];
+  // ── CIRCLE 1: DIRECT MATCH ─────────────────────────────────────────────
+  {id:"c1-01",circle:1,ft:"S-1",filed:"2026-01-20",addedDate:"2026-04-01",
+   company:"Clear Street Group Inc.",ticker:"Pending",exchange:"Nasdaq/NYSE",
+   sector:"Prime Brokerage / Fintech",hq:"New York, NY — 150 Greenwich St",
+   desc:"Tech-forward prime brokerage. S-1 filed Jan 2026. Goldman/BofA/Morgan Stanley underwriters.",
+   why:"Capital markets tech + fintech — direct match to Daniel's IPO and PIPE experience.",
+   contact:"Edward T. Tilly",title:"CEO",email:"clearstreet.io/contact",phone:"",
+   reach:"Pre-IPO",sender:"Daniel",sendwhy:"Founder-to-CEO.",angela:true,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001881567&type=S-1",
+   verified:false,verifiedDate:null,verifiedSource:"Pre-IPO — IR not yet established"},
+
+  {id:"c1-02",circle:1,ft:"S-1",filed:"2026-01-15",addedDate:"2026-04-01",
+   company:"DMINT Inc. (OLB Group spin-off)",ticker:"Pending",exchange:"Nasdaq",
+   sector:"Bitcoin Mining / Fintech",hq:"New York, NY — 1120 Ave of the Americas",
+   desc:"Bitcoin mining spin-off from OLB Group. Pure-play digital asset mining IPO.",
+   why:"Bitcoin mining + digital assets — identical profile to BIT Mining (Daniel's NYSE case study).",
+   contact:"Ronny Yakov",title:"CEO, The OLB Group",email:"ir@olb.com",phone:"(212) 278-0900 ext 333",
+   reach:"Direct",sender:"Linwan",sendwhy:"Small company, CEO accessible.",angela:false,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001996450&type=S-1",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"OLB Group SEC filings & IR page"},
+
+  {id:"c1-03",circle:1,ft:"F-1",filed:"2025-05-12",addedDate:"2026-04-01",
+   company:"DeFi Technologies Inc.",ticker:"DEFT",exchange:"Nasdaq",
+   sector:"DeFi / Digital Assets",hq:"Toronto (Nasdaq-listed May 2025)",
+   desc:"First company bridging TradFi and DeFi on Nasdaq. Listed May 2025.",
+   why:"F-1 filer in DeFi — Daniel's exact domain. Newly listed = zero IR infrastructure.",
+   contact:"IR Team",title:"Investor Relations",email:"ir.defitechnologies.ca",phone:"",
+   reach:"Web Form",sender:"Linwan",sendwhy:"Newly listed, lean team.",angela:true,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001888274&type=F-1",
+   verified:false,verifiedDate:null,verifiedSource:"Generic IR email — named contact unconfirmed"},
+
+  {id:"c1-04",circle:1,ft:"8-K",filed:"2025-12-09",addedDate:"2026-04-01",
+   company:"Twenty One Capital Inc.",ticker:"XXI",exchange:"NYSE",
+   sector:"Bitcoin Treasury / Capital Markets",hq:"Austin, TX",
+   desc:"NYSE debut Dec 9 2025. 3rd largest public Bitcoin holder. Only 2 employees — no IR.",
+   why:"Bitcoin-native, narrative broken, IR vacuum. BIT Mining restructuring is the exact pitch.",
+   contact:"Steven Meehan",title:"CFO",email:"xxi.money/contact",phone:"",
+   reach:"Web Form",sender:"Linwan",sendwhy:"Tiny team, CFO accessible.",angela:true,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001865602&type=8-K",
+   verified:false,verifiedDate:null,verifiedSource:"CFO from public filings — verify before outreach"},
+
+  {id:"c1-05",circle:1,ft:"8-K",filed:"2025-06-05",addedDate:"2026-04-01",
+   company:"Circle Internet Group Inc.",ticker:"CRCL",exchange:"NYSE",
+   sector:"Stablecoin / Fintech",hq:"New York, NY",
+   desc:"USDC stablecoin issuer. NYSE IPO June 2025. $16B+ market cap.",
+   why:"Digital asset narrative — Daniel's core skill. Angela for 24/7 investor Q&A.",
+   contact:"IR Team",title:"Investor Relations",email:"investors@circle.com",phone:"",
+   reach:"Direct",sender:"Daniel",sendwhy:"Large public company. Founder-level pitch.",angela:true,
+   sec:"https://investor.circle.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"Circle IR page: investor.circle.com"},
+
+  {id:"c1-06",circle:1,ft:"S-1",filed:"2026-01-08",addedDate:"2026-04-01",
+   company:"Pershing Square Inc.",ticker:"Pending",exchange:"Pending",
+   sector:"Investment Company",hq:"New York, NY",
+   desc:"Bill Ackman's public investment vehicle. S-1 filed Jan 2026.",
+   why:"Capital markets-native. Angela handles retail investor Q&A at scale.",
+   contact:"IR / Comms Team",title:"Communications",email:"pershingsquareholdings.com",phone:"",
+   reach:"Web / LinkedIn",sender:"Daniel",sendwhy:"High-profile firm. Founder-level.",angela:true,
+   sec:"https://pershingsquareholdings.com",
+   verified:false,verifiedDate:null,verifiedSource:"Pre-IPO — named IR contact not yet public"},
+
+  {id:"c1-07",circle:1,ft:"S-1",filed:"2026-01-23",addedDate:"2026-04-01",
+   company:"Grayscale Investments LLC",ticker:"Pending",exchange:"Nasdaq",
+   sector:"Digital Asset Management",hq:"New York, NY — 1585 Broadway",
+   desc:"Crypto asset manager filing for public listing. DCG subsidiary.",
+   why:"Digital asset management — Daniel's exact domain.",
+   contact:"IR Team",title:"Investor Relations",email:"grayscale.com/contact",phone:"",
+   reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO. EA opens door.",angela:true,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002073548&type=S-1",
+   verified:false,verifiedDate:null,verifiedSource:"Pre-IPO — named IR contact not yet public"},
+
+  {id:"c1-08",circle:1,ft:"S-1",filed:"2025-09-02",addedDate:"2026-04-01",
+   company:"Figure Technology Solutions Inc.",ticker:"Pending",exchange:"Nasdaq",
+   sector:"Blockchain / Fintech",hq:"New York, NY",
+   desc:"Blockchain-native fintech. S-1/A filed Sept 2025.",
+   why:"Blockchain fintech S-1 — capital markets complexity Daniel has navigated.",
+   contact:"IR Team",title:"Investor Relations",email:"figure.com/contact",phone:"",
+   reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Pre-IPO lean team.",angela:true,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002064124&type=S-1",
+   verified:false,verifiedDate:null,verifiedSource:"Pre-IPO — named IR contact not yet public"},
+
+  {id:"c1-09",circle:1,ft:"S-1",filed:"2026-03-01",addedDate:"2026-04-01",
+   company:"Gemini Trust Company (Winklevoss)",ticker:"Pending",exchange:"Nasdaq/NYSE",
+   sector:"Crypto Exchange",hq:"New York, NY — 600 Third Ave",
+   desc:"Winklevoss crypto exchange. 2026 IPO planned. NYC HQ.",
+   why:"Crypto exchange IPO in NYC — Daniel's PIPE and IPO experience.",
+   contact:"Press / Comms",title:"Communications",email:"press@gemini.com",phone:"",
+   reach:"Direct",sender:"Linwan",sendwhy:"Press email confirmed.",angela:true,
+   sec:"https://gemini.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"Gemini official website press contact"},
+
+  {id:"c1-10",circle:1,ft:"8-K",filed:"2026-03-31",addedDate:"2026-04-01",
+   company:"CoinShares International Ltd.",ticker:"CSHR",exchange:"Nasdaq",
+   sector:"Crypto Asset Manager",hq:"Jersey / New York",
+   desc:"Began Nasdaq trading (CSHR) via SPAC April 1 2026. $6B+ AUM. IR is day one.",
+   why:"Just-listed crypto company — IR vacuum. Daniel walks in day one.",
+   contact:"Corporate IR",title:"Investor Relations",email:"corporateir@coinshares.com",phone:"+44 (0)1534 513 100",
+   reach:"Direct",sender:"Linwan",sendwhy:"Brand new US listing. IR email confirmed from press release.",angela:true,
+   sec:"https://investor.coinshares.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"CoinShares press release April 1 2026 — Nasdaq listing announcement"},
+
+  // ── CIRCLE 2: TRANSFER FIT ──────────────────────────────────────────────
+  {id:"c2-01",circle:2,ft:"8-K",filed:"2026-02-10",addedDate:"2026-04-01",
+   company:"Outbrain Inc. (now Teads)",ticker:"OB",exchange:"Nasdaq",
+   sector:"AdTech / Media",hq:"New York, NY",
+   desc:"Completed merger with Teads Feb 2025. Post-merger IR rebuild.",
+   why:"Post-merger narrative rebuild — Daniel's capital markets strength.",
+   contact:"IR Team",title:"Investor Relations",email:"IR@outbrain.com",phone:"(332) 205-8999",
+   reach:"Direct",sender:"Daniel",sendwhy:"IR-to-IR peer conversation.",angela:true,
+   sec:"https://investors.outbrain.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"Outbrain IR page: investors.outbrain.com"},
+
+  {id:"c2-02",circle:2,ft:"8-K",filed:"2026-03-03",addedDate:"2026-04-01",
+   company:"Paysafe Limited",ticker:"PSFE",exchange:"NYSE",
+   sector:"Payments / Fintech",hq:"London (NYSE-listed)",
+   desc:"Global payments platform. Neteller/Skrill have crypto exposure. Stock underperformed.",
+   why:"Fintech with crypto exposure, broken narrative — Daniel's specialty.",
+   contact:"Kirsten Nielsen",title:"SVP, Investor Relations",email:"kirsten.nielsen@paysafe.com",phone:"(646) 901-3140",
+   reach:"Direct",sender:"Daniel",sendwhy:"SVP IR — peer-to-peer only.",angela:false,
+   sec:"https://ir.paysafe.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"Paysafe Q4 2025 earnings press release, March 3 2026"},
+
+  {id:"c2-03",circle:2,ft:"8-K",filed:"2026-02-17",addedDate:"2026-04-01",
+   company:"DocGo Inc.",ticker:"DCGO",exchange:"Nasdaq",
+   sector:"Healthcare Tech / Mobile Health",hq:"New York, NY",
+   desc:"NYC-based mobile health platform. Lean IR resources.",
+   why:"Tech-enabled healthcare — Angela's 24/7 Q&A layer is the value proposition.",
+   contact:"Mike Cole",title:"VP, Investor Relations",email:"mike.cole@docgo.com",phone:"(949) 444-1341",
+   reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,
+   sec:"https://ir.docgo.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"DocGo Q4 2025 earnings call March 16 2026 — Mike Cole confirmed VP IR"},
+
+  {id:"c2-04",circle:2,ft:"8-K",filed:"2026-02-24",addedDate:"2026-04-01",
+   company:"Evolent Health Inc.",ticker:"EVH",exchange:"NYSE",
+   sector:"Healthcare IT / Value-Based Care",hq:"Arlington, VA (NYSE-listed)",
+   desc:"Healthcare IT in business model transformation.",
+   why:"Tech-forward healthcare — Angela as investor messaging layer.",
+   contact:"Seth R. Frank",title:"VP, Investor Relations",email:"sfrank@evolent.com",phone:"(571) 895-3919",
+   reach:"Direct",sender:"Daniel",sendwhy:"VP IR — peer-to-peer.",angela:true,
+   sec:"https://ir.evolent.com",
+   verified:true,verifiedDate:"2026-04",verifiedSource:"Evolent Health official press release Dec 2021, confirmed active Q4 2024 earnings call"},
+
+  {id:"c2-05",circle:2,ft:"8-K",filed:"2026-01-20",addedDate:"2026-04-01",
+   company:"SoFi Technologies Inc.",ticker:"SOFI",exchange:"Nasdaq",
+   sector:"Fintech / Digital Banking",hq:"San Francisco (Nasdaq-listed)",
+   desc:"Digital bank with crypto features. Tech-forward.",
+   why:"Fintech that understands AI — pitch Angela as investor analytics layer.",
+   contact:"IR Team",title:"Investor Relations",email:"ir.sofi.com/contact-us",phone:"",
+   reach:"Web Form",sender:"Linwan",sendwhy:"EA pitches Angela.",angela:true,
+   sec:"https://ir.sofi.com",
+   verified:false,verifiedDate:null,verifiedSource:"Generic IR page — named contact unconfirmed"},
+
+  {id:"c2-06",circle:2,ft:"8-K",filed:"2026-02-01",addedDate:"2026-04-01",
+   company:"Taboola.com Ltd.",ticker:"TBLA",exchange:"Nasdaq",
+   sector:"AdTech / Performance Advertising",hq:"New York, NY",
+   desc:"NYC HQ. Pivoting to performance advertising. AI-forward company.",
+   why:"AI-forward tech company — will appreciate Angela demo.",
+   contact:"IR Team",title:"Investor Relations",email:"investors.taboola.com/investor-resources/contact-ir/",phone:"",
+   reach:"Web Form",sender:"Linwan",sendwhy:"EA opens with Angela pitch.",angela:true,
+   sec:"https://investors.taboola.com",
+   verified:false,verifiedDate:null,verifiedSource:"Generic IR page — named contact unconfirmed"},
+
+  {id:"c2-07",circle:2,ft:"8-K",filed:"2026-01-15",addedDate:"2026-04-01",
+   company:"DoubleVerify Holdings Inc.",ticker:"DV",exchange:"NYSE",
+   sector:"AdTech / Ad Measurement SaaS",hq:"New York, NY — 462 Broadway",
+   desc:"NYC HQ. Has existing agency (Blueshirt Group). Under growth pressure.",
+   why:"Pitch Daniel + Angela as AI-enabled supplement Blueshirt can't offer.",
+   contact:"IR Team",title:"Investor Relations",email:"IR@doubleverify.com",phone:"(212) 631-2002",
+   reach:"Direct (bypass agency)",sender:"Daniel",sendwhy:"Bypass Blueshirt.",angela:true,
+   sec:"https://ir.doubleverify.com",
+   verified:false,verifiedDate:null,verifiedSource:"IR email from DV website — named contact unconfirmed"},
+
+  {id:"c2-08",circle:2,ft:"S-1",filed:"2026-03-15",addedDate:"2026-04-01",
+   company:"VAST Data Inc.",ticker:"Pending",exchange:"Pre-IPO",
+   sector:"AI Infrastructure / Data Storage",hq:"New York, NY — 240 37th St",
+   desc:"AI data storage platform. $1.17B CoreWeave deal. 2026 IPO target.",
+   why:"AI company = instant affinity for Angela.",
+   contact:"Communications Team",title:"Communications",email:"hello@vastdata.com",phone:"(212) 658-1753",
+   reach:"Direct",sender:"Linwan",sendwhy:"Pre-IPO. EA leads with Angela demo.",angela:true,
+   sec:"https://vastdata.com/press-releases",
+   verified:false,verifiedDate:null,verifiedSource:"VAST Data website — named contact unconfirmed"},
+
+  {id:"c2-09",circle:2,ft:"S-1",filed:"2026-02-01",addedDate:"2026-04-01",
+   company:"Ramp Financial",ticker:"Private",exchange:"Pre-IPO",
+   sector:"B2B Fintech / Corporate Spend",hq:"New York, NY",
+   desc:"$32B valuation. 2026 IPO discussions ongoing.",
+   why:"Fintech building for public markets — IPO readiness advisory.",
+   contact:"Press Team",title:"Press / Communications",email:"press@ramp.com",phone:"",
+   reach:"Direct",sender:"Linwan",sendwhy:"EA positions as IPO IR advisory.",angela:true,
+   sec:"https://ramp.com/press",
+   verified:false,verifiedDate:null,verifiedSource:"Ramp press page — named contact unconfirmed"},
+
+  {id:"c2-10",circle:2,ft:"S-1",filed:"2026-02-15",addedDate:"2026-04-01",
+   company:"Brex Inc.",ticker:"Private",exchange:"Pre-IPO",
+   sector:"Corporate Fintech / Spend Management",hq:"San Francisco / New York",
+   desc:"$12.3B valuation. 2026 IPO candidate. Launched USDC stablecoin payments.",
+   why:"Fintech with stablecoin angle — Daniel's exact domain.",
+   contact:"Danielle Bereznak",title:"Director of External Communications",email:"press@brex.com",phone:"",
+   reach:"Direct",sender:"Linwan",sendwhy:"Stablecoin angle opens the door.",angela:false,
+   sec:"https://brex.com/about",
+   verified:false,verifiedDate:null,verifiedSource:"Brex press page — verify title before outreach"},
+
+  // ── CIRCLE 3: OTHER ─────────────────────────────────────────────────────
+  {id:"c3-01",circle:3,ft:"S-1",filed:"2026-03-09",addedDate:"2026-04-01",
+   company:"Madison Air LLC",ticker:"Pending",exchange:"NYSE",
+   sector:"HVAC / Industrial",hq:"Phoenix, AZ",industry:"Industrial",
+   desc:"$3.3B net sales FY2025. Indoor air quality leader.",
+   why:"Outside Daniel's expertise. Low priority.",
+   contact:"IR Team",title:"Investor Relations",email:"Via company website",phone:"",
+   reach:"Web Form",sender:"Linwan",sendwhy:"Low priority only.",angela:false,
+   sec:"https://www.sec.gov/Archives/edgar/data/2098430/000119312526098829/ck0002098430-20260309.htm",
+   verified:false,verifiedDate:null,verifiedSource:"Low priority — not yet researched"},
+
+  {id:"c3-02",circle:3,ft:"S-1",filed:"2025-11-01",addedDate:"2026-04-01",
+   company:"Ethos Technologies Inc.",ticker:"LIFE",exchange:"Nasdaq",
+   sector:"Insurtech",hq:"San Francisco, CA",industry:"Insurance",
+   desc:"Life insurance tech. Insurance-primary.",
+   why:"Insurance tech — outside core expertise.",
+   contact:"IR Team",title:"Investor Relations",email:"ethos.com",phone:"",
+   reach:"Web / LinkedIn",sender:"Linwan",sendwhy:"Low-medium priority.",angela:false,
+   sec:"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001788451&type=S-1",
+   verified:false,verifiedDate:null,verifiedSource:"Low priority — not yet researched"},
+
+  {id:"c3-03",circle:3,ft:"8-K",filed:"2026-01-01",addedDate:"2026-04-01",
+   company:"Devoted Health Inc.",ticker:"Private",exchange:"Pre-IPO",
+   sector:"Medicare Advantage",hq:"Waltham, MA",industry:"Healthcare",
+   desc:"$12B+ valuation. Medicare Advantage. 2026-27 IPO candidate.",
+   why:"Health insurance — outside core expertise.",
+   contact:"PR via Crosscut Strategies",title:"Media Relations",email:"devoted@crosscutstrategies.com",phone:"",
+   reach:"Direct (PR)",sender:"Linwan",sendwhy:"Low priority.",angela:false,
+   sec:"https://devoted.com/newsroom/",
+   verified:false,verifiedDate:null,verifiedSource:"PR firm contact from Devoted Health website"},
+
+  {id:"c3-04",circle:3,ft:"8-K",filed:"2025-12-20",addedDate:"2026-04-01",
+   company:"American Strategic Investment Co.",ticker:"NYC",exchange:"NYSE",
+   sector:"NYC Commercial Real Estate",hq:"New York, NY",industry:"Real Estate",
+   desc:"NYSE compliance at risk. Limited IR resources.",
+   why:"Real estate — outside core expertise.",
+   contact:"IR / CFO Team",title:"Investor Relations",email:"investors.newyorkcityreit.com",phone:"(212) 415-6500",
+   reach:"Direct (Phone)",sender:"Linwan",sendwhy:"Outside Daniel's sector.",angela:false,
+   sec:"https://investors.newyorkcityreit.com",
+   verified:false,verifiedDate:null,verifiedSource:"NYC REIT IR page — named contact unconfirmed"}
+];];
 
 // ── STATUS CONFIG ─────────────────────────────────────────────────
 const SC = {
@@ -599,6 +821,9 @@ async function findContact(id) {
   if(res){res.style.display='block';res.innerHTML='<span style="color:var(--amber)">⏳ Searching...</span>';}
   try {
     const data = await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||''});
+    // Add verification timestamp to result
+    data._verifiedDate = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    data._verifiedBy = CURRENT_USER;
     contactCache[id]=data;
     try{localStorage.setItem('angela_contacts',JSON.stringify(contactCache));}catch(e){}
     if(data.contacts?.length>0) {
@@ -745,7 +970,17 @@ function renderPipeline() {
         <div class="irt">${e(f.title)}</div>
         ${f.email?`<div class="ire">${e(f.email)}</div>`:''}
         ${f.phone?`<div class="irp">${e(f.phone)}</div>`:''}
-        <button id="cf-btn-${f.id}" class="cf-btn${cf?' done':''}" onclick="findContact('${f.id}')">${cf?'✓ Found':'🔍 Find Contact'}</button>
+        ${f.verified===true
+          ? `<div class="ver-badge ver-ok">✓ Verified ${e(f.verifiedDate||'')}</div><div class="ver-src">${e(f.verifiedSource||'')}</div>`
+          : `<div class="ver-badge ver-no">⚠ Unverified</div><div class="ver-src">${e(f.verifiedSource||'Not yet researched')}</div>`
+        }
+        ${cf && cf._verifiedDate
+          ? `<div class="ver-badge ver-ok" style="margin-top:4px">✓ Re-verified ${e(cf._verifiedDate)}</div>`
+          : ''
+        }
+        <button id="cf-btn-${f.id}" class="cf-btn${cf?' done':''}" onclick="findContact('${f.id}')" style="margin-top:5px">
+          ${cf?'↻ Re-verify':'🔍 Verify Contact'}
+        </button>
         <div id="cf-res-${f.id}" class="cf-result" style="${cf?'':'display:none'}">${cf?renderCF(cf):''}</div>
       </td>
       <td><span class="rbadge" style="color:${rCol};background:${rBg};border-color:${rBor}">${isDir?'✓':isPre?'◎':'→'} ${e(f.reach)}</span></td>
