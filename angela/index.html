@@ -962,20 +962,20 @@ function renderPipeline() {
       </td>
       <td>
         <div class="cr"><div class="cdot" style="background:${cc.color}"></div><span class="clbl" style="color:${cc.color}">${cc.label}</span><span style="font-size:9px;color:var(--text3)"> — ${cc.sub}</span></div>
-        ${f.industry?`<div class="ind">${e(f.industry)}</div>`:''}
+        ${f.industry ? '<div class="ind">' + e(f.industry) + '</div>' : ''}
         <div class="cwhy">${e(f.why)}</div>
       </td>
       <td>
         <div class="irn">${e(f.contact)}</div>
         <div class="irt">${e(f.title)}</div>
-        ${f.email?`<div class="ire">${e(f.email)}</div>`:''}
-        ${f.phone?`<div class="irp">${e(f.phone)}</div>`:''}
+        ${f.email ? '<div class="ire">' + e(f.email) + '</div>' : ''}
+        ${f.phone ? '<div class="irp">' + e(f.phone) + '</div>' : ''}
         ${f.verified===true
-          ? `<div class="ver-badge ver-ok">✓ Verified ${e(f.verifiedDate||'')}</div><div class="ver-src">${e(f.verifiedSource||'')}</div>`
-          : `<div class="ver-badge ver-no">⚠ Unverified</div><div class="ver-src">${e(f.verifiedSource||'Not yet researched')}</div>`
+          ? '<div class="ver-badge ver-ok">✓ Verified ' + e(f.verifiedDate||'') + '</div><div class="ver-src">' + e(f.verifiedSource||'') + '</div>'
+          : '<div class="ver-badge ver-no">⚠ Unverified</div><div class="ver-src">' + e(f.verifiedSource||'Not yet researched') + '</div>'
         }
         ${cf && cf._verifiedDate
-          ? `<div class="ver-badge ver-ok" style="margin-top:4px">✓ Re-verified ${e(cf._verifiedDate)}</div>`
+          ? '<div class="ver-badge ver-ok" style="margin-top:4px">✓ Re-verified ' + e(cf._verifiedDate) + '</div>'
           : ''
         }
         <button id="cf-btn-${f.id}" class="cf-btn${cf?' done':''}" onclick="findContact('${f.id}')" style="margin-top:5px">
@@ -991,7 +991,7 @@ function renderPipeline() {
       <td>${f.angela?'<div class="angela-yes"><div class="angela-dot"></div>Yes</div>':'<span style="color:#c8d4e4">—</span>'}</td>
       <td>
         <select class="ssel" style="background:${sc.bg};color:${sc.color};border-color:${sc.border}" onchange="updateStatus('${f.id}',this.value)">${sOpts}</select>
-        ${getBy(f.id)?`<div class="by-line">by ${getBy(f.id)}</div>`:''}
+        ${getBy(f.id) ? '<div class="by-line">by ' + getBy(f.id) + '</div>' : ''}
       </td>
       <td><textarea class="nta" placeholder="Add notes..." oninput="updateNotes('${f.id}',this.value)">${e(getNotes(f.id))}</textarea></td>
       <td><a href="${e(f.sec)}" target="_blank" rel="noreferrer" class="seclink">EDGAR ↗</a></td>
