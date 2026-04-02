@@ -342,14 +342,18 @@ const WORKER_URL = 'https://angela-api.irene901230.workers.dev';
 const NEW_DAYS = 14;
 
 // ── USER ──────────────────────────────────────────────────────────
-let CURRENT_USER = localStorage.getItem('angela_user') || '';
-if (!CURRENT_USER) {
-  const u = prompt('Who are you? (daniel or linwan)') || '';
-  CURRENT_USER = u.toLowerCase().includes('daniel') ? 'Daniel' : 'Linwan';
-  localStorage.setItem('angela_user', CURRENT_USER);
-}
+let CURRENT_USER = localStorage.getItem('angela_user') || 'Linwan';
 const ul = document.getElementById('userLabel');
-if (ul) ul.textContent = '👤 ' + CURRENT_USER;
+if (ul) {
+  ul.textContent = '👤 ' + CURRENT_USER;
+  ul.style.cursor = 'pointer';
+  ul.title = 'Click to switch user';
+  ul.onclick = () => {
+    CURRENT_USER = CURRENT_USER === 'Linwan' ? 'Daniel' : 'Linwan';
+    localStorage.setItem('angela_user', CURRENT_USER);
+    ul.textContent = '👤 ' + CURRENT_USER;
+  };
+}
 
 // ── SEED DATA ─────────────────────────────────────────────────────
 const SEED = [
