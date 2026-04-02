@@ -192,6 +192,30 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
 .cf-conf-high{color:var(--green);font-weight:600}
 .cf-conf-med{color:var(--amber);font-weight:600}
 .cf-conf-low{color:var(--text3);font-weight:600}
+
+/* ADD FILING MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(11,22,41,.7);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal{background:#fff;border-radius:12px;width:540px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal-header{background:var(--navy);padding:20px 24px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:600;color:#fff}
+.modal-close{background:transparent;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;padding:0 4px;line-height:1}
+.modal-close:hover{color:#fff}
+.modal-body{padding:24px}
+.modal-field{margin-bottom:16px}
+.modal-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:block}
+.modal-input{width:100%;padding:8px 11px;border:1.5px solid #c8d4e4;border-radius:5px;font-size:13px;font-family:var(--sans);color:var(--text);outline:none;transition:border-color .15s;background:#fff}
+.modal-input:focus{border-color:var(--gold)}
+.modal-select{width:100%;padding:8px 11px;border:1.5px solid #c8d4e4;border-radius:5px;font-size:13px;font-family:var(--sans);color:var(--text);outline:none;background:#fff;cursor:pointer}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--slate3);display:flex;justify-content:flex-end;gap:10px}
+.btn-cancel{padding:8px 20px;background:transparent;border:1px solid #c8d4e4;border-radius:5px;font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--text2)}
+.btn-add{padding:8px 24px;background:var(--navy);border:none;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);color:var(--gold2);transition:all .15s}
+.btn-add:hover{background:var(--navy2)}
+.feed-status{font-size:10px;color:var(--text3);padding:5px 24px;background:var(--slate3);border-bottom:1px solid #dde5f0;display:flex;align-items:center;gap:8px}
+.feed-status-dot{width:5px;height:5px;border-radius:50%;background:var(--amber)}
+.btn-add-filing{padding:3px 10px;border-radius:4px;border:1px solid var(--amber-b);background:var(--amber-bg);color:var(--amber);font-size:10px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;margin-left:auto}
+.btn-add-filing:hover{background:var(--amber);color:#fff}
+
 </style>
 </head>
 <body>
@@ -256,6 +280,16 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
     <button class="tab" id="tab-clients" onclick="setTab('clients',this)">⭐ Clients <span class="tab-cnt" id="cnt-clients" style="background:var(--green-bg);color:var(--green)">0</span></button>
   </div>
 
+  <!-- Feed status bar -->
+  <div class="feed-status" id="feedStatusBar">
+    <div class="feed-status-dot" style="background:var(--green);animation:pulse 2s ease-in-out infinite"></div>
+    <span id="feedStatusText">Auto-fetch runs daily 8am EST · Loading last run time...</span>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <button id="fetchNowBtn" class="btn-add-filing" style="background:var(--blue-bg);border-color:var(--blue-b);color:var(--blue)" onclick="triggerFetch()">⚡ Fetch Now</button>
+      <button class="btn-add-filing" onclick="openAddFiling()">+ Add Manual</button>
+    </div>
+  </div>
+
   <div class="filters" id="filterBar">
     <span class="fl">Filing</span>
     <button class="chip on" onclick="setFilter('type','all',this)">All</button>
@@ -278,6 +312,99 @@ footer{background:var(--navy);padding:20px 32px;display:flex;align-items:center;
   </div>
 
   <div id="mainContent"></div>
+</div>
+
+
+<!-- ADD FILING MODAL -->
+<div class="modal-overlay" id="addFilingModal" style="display:none" onclick="if(event.target===this)closeAddFiling()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">+ Add New Filing</span>
+      <button class="modal-close" onclick="closeAddFiling()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Filing Type *</label>
+          <select class="modal-select" id="nf-type">
+            <option value="S-1">S-1 (US IPO)</option>
+            <option value="F-1">F-1 (Foreign IPO)</option>
+            <option value="8-K">8-K (Event / Transaction)</option>
+            <option value="S-1/A">S-1/A (Amendment)</option>
+            <option value="F-1/A">F-1/A (Amendment)</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Filed Date *</label>
+          <input class="modal-input" type="date" id="nf-filed">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Company Name *</label>
+        <input class="modal-input" type="text" id="nf-company" placeholder="e.g. Acme Corp Inc.">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Sector</label>
+          <input class="modal-input" type="text" id="nf-sector" placeholder="e.g. Fintech / Digital Assets">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Circle (Fit)</label>
+          <select class="modal-select" id="nf-circle">
+            <option value="1">Circle 1 — Direct Match</option>
+            <option value="2">Circle 2 — Transfer Fit</option>
+            <option value="3">Other Industry</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Exchange / Status</label>
+          <input class="modal-input" type="text" id="nf-exchange" placeholder="e.g. Nasdaq, NYSE, Pre-IPO">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Ticker (if any)</label>
+          <input class="modal-input" type="text" id="nf-ticker" placeholder="e.g. ACME or Pending">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">HQ Location</label>
+        <input class="modal-input" type="text" id="nf-hq" placeholder="e.g. New York, NY">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Brief Description</label>
+        <input class="modal-input" type="text" id="nf-desc" placeholder="One sentence about the company and filing">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Why it fits (Circle reason)</label>
+        <input class="modal-input" type="text" id="nf-why" placeholder="Why is this a good prospect for 58th St IR?">
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Who Sends</label>
+          <select class="modal-select" id="nf-sender">
+            <option value="Daniel">Daniel</option>
+            <option value="Linwan">Linwan (EA)</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Angela AI relevant?</label>
+          <select class="modal-select" id="nf-angela">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">SEC EDGAR Link</label>
+        <input class="modal-input" type="url" id="nf-sec" placeholder="https://www.sec.gov/...">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddFiling()">Cancel</button>
+      <button class="btn-add" onclick="submitNewFiling()">Add to Pipeline →</button>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -384,46 +511,85 @@ async function loadData() {
   btn.disabled = true; btn.textContent = '↻ Loading...';
   setSyncStatus('loading');
 
-  // If no SCRIPT_URL configured, use localStorage fallback
-  if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
-    loadFromLocal();
-    btn.disabled = false; btn.textContent = '↻ Refresh';
-    setSyncStatus('local');
-    return;
-  }
-
   try {
     const r = await fetch(SCRIPT_URL + '?action=getPipeline');
     const rows = await r.json();
-    // rows[0] = headers, rows[1..] = data
-    if (rows.length > 1) {
+
+    if (Array.isArray(rows) && rows.length > 1) {
       const headers = rows[0];
       const idIdx = headers.indexOf('id');
-      const statusIdx = headers.indexOf('status');
-      const notesIdx = headers.indexOf('notes');
-      const updIdx = headers.indexOf('lastUpdated');
-      const byIdx = headers.indexOf('lastUpdatedBy');
+
       for (let i = 1; i < rows.length; i++) {
-        const id = rows[i][idIdx];
-        if (id) pipelineData[id] = {
-          status: rows[i][statusIdx] || 'not_contacted',
-          notes: rows[i][notesIdx] || '',
-          lastUpdated: rows[i][updIdx] || '',
-          lastUpdatedBy: rows[i][byIdx] || '',
+        const row = rows[i];
+        const id = row[idIdx];
+        if (!id) continue;
+
+        const obj = {};
+        headers.forEach((h, j) => obj[h] = row[j] || '');
+
+        // If Angela auto-fetched this company (not in SEED), add it
+        const inSeed = SEED.find(s => s.id === id);
+        if (!inSeed && obj.company) {
+          SEED.unshift({
+            id: obj.id,
+            circle: parseInt(obj.circle) || 3,
+            ft: obj.ft || '8-K',
+            filed: obj.filed || obj.addedDate || '',
+            addedDate: obj.addedDate || '',
+            company: obj.company || '',
+            ticker: obj.ticker || 'Pending',
+            exchange: obj.exchange || 'Unknown',
+            sector: obj.sector || '',
+            hq: obj.hq || '',
+            desc: obj.desc || '',
+            why: obj.why || '',
+            contact: obj.contact || 'IR Team',
+            title: obj.title || 'Investor Relations',
+            email: obj.email || '',
+            phone: obj.phone || '',
+            reach: obj.reach || 'Web Form',
+            sender: obj.sender || 'Linwan',
+            sendwhy: obj.sendwhy || '',
+            angela: obj.angela === 'true' || obj.angela === true,
+            sec: obj.sec || obj.secUrl || '',
+            addedBy: obj.addedBy || 'Angela Auto',
+            autoFetched: true,
+          });
+        }
+
+        // Always update status/notes from Sheets
+        pipelineData[id] = {
+          status: obj.status || 'not_contacted',
+          notes: obj.notes || '',
+          lastUpdated: obj.lastUpdated || '',
+          lastUpdatedBy: obj.lastUpdatedBy || '',
+          foundContact: obj.foundContact || '',
+          foundEmail: obj.foundEmail || '',
         };
       }
     }
 
     // Load clients
-    const r2 = await fetch(SCRIPT_URL + '?action=getClients');
-    const crows = await r2.json();
-    if (crows.length > 1) {
-      const ch = crows[0];
-      clientsData = crows.slice(1).map(row => {
-        const obj = {};
-        ch.forEach((h, i) => obj[h] = row[i]);
-        return obj;
-      });
+    try {
+      const r2 = await fetch(SCRIPT_URL + '?action=getClients');
+      const crows = await r2.json();
+      if (Array.isArray(crows) && crows.length > 1) {
+        const ch = crows[0];
+        clientsData = crows.slice(1).map(row => {
+          const obj = {};
+          ch.forEach((h, j) => obj[h] = row[j] || '');
+          return obj;
+        });
+      }
+    } catch(e2) {}
+
+    // Update feed status line
+    const autoCount = SEED.filter(s => s.autoFetched).length;
+    const statusEl = document.getElementById('feedStatusText');
+    if (statusEl) {
+      statusEl.textContent = 'Auto-fetch runs daily 8am EST · ' +
+        (autoCount ? autoCount + ' companies auto-added · ' : '') +
+        'Refresh to sync latest · Next: tomorrow 8am EST';
     }
 
     setSyncStatus('ok');
@@ -434,8 +600,38 @@ async function loadData() {
   }
 
   btn.disabled = false; btn.textContent = '↻ Refresh';
+  loadManualFilings();
   render();
 }
+
+// ⚡ Trigger manual fetch from Worker (runs the full cron job on demand)
+async function triggerFetch() {
+  const btn = document.getElementById('fetchNowBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Fetching SEC...'; }
+  showSaving('Angela is fetching latest SEC filings...');
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'manualFetch' })
+    });
+    const data = await resp.json();
+    if (btn) { btn.textContent = '✓ Running in background'; }
+    showSaving('✓ Fetch started — Angela is analyzing new filings...');
+    // Auto-reload after 45s to pick up new companies
+    setTimeout(() => {
+      hideSaving();
+      loadData();
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Fetch Now'; }
+    }, 45000);
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Fetch Now'; }
+    showSaving('Fetch failed — check connection');
+    setTimeout(hideSaving, 3000);
+  }
+}
+
 
 function loadFromLocal() {
   try {
@@ -668,8 +864,11 @@ async function findContact(id) {
   const seed = SEED.find(s => s.id === id);
   if (!seed) return;
   const btn = document.getElementById('cf-btn-' + id);
-  const result = document.getElementById('cf-result-' + id);
+  const resultEl = document.getElementById('cf-result-' + id);
+
+  // Update button immediately — no page refresh needed
   if (btn) { btn.disabled = true; btn.className = 'cf-btn searching'; btn.textContent = '🔍 Searching...'; }
+  if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<span style="color:var(--amber)">⏳ Searching for best contact...</span>'; }
 
   try {
     const resp = await fetch(WORKER_URL, {
@@ -688,7 +887,7 @@ async function findContact(id) {
     contactCache[id] = data;
     saveContactCache();
 
-    // Also save best contact back to pipelineData for Sheets
+    // Save best contact to pipelineData + Sheets
     if (data.contacts && data.contacts.length > 0) {
       const best = data.contacts[0];
       if (!pipelineData[id]) pipelineData[id] = {status:'not_contacted', notes:'', lastUpdated:'', lastUpdatedBy:''};
@@ -699,11 +898,13 @@ async function findContact(id) {
       saveRow(id);
     }
 
+    // Update DOM directly — no page refresh
     if (btn) { btn.className = 'cf-btn done'; btn.textContent = '✓ Found'; btn.disabled = false; }
-    if (result) result.innerHTML = renderContactResult(data);
+    if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = renderContactResult(data); }
+
   } catch(err) {
     if (btn) { btn.className = 'cf-btn'; btn.textContent = '🔍 Find Contact'; btn.disabled = false; }
-    if (result) result.innerHTML = '<span style="color:var(--red)">Search failed — try again</span>';
+    if (resultEl) { resultEl.style.display = 'block'; resultEl.innerHTML = '<span style="color:var(--red-b)">⚠ Search failed — check connection and try again</span>'; }
   }
 }
 
@@ -771,11 +972,13 @@ function renderPipeline() {
     const rBorder = isDir ? 'var(--green-b)' : f.reach.startsWith('Pre') ? 'var(--purple-b)' : 'var(--blue-b)';
     const sOpts = Object.entries(STATUS_CFG).map(([k,v]) => `<option value="${k}"${status===k?' selected':''}>${v.label}</option>`).join('');
     const newTag = isNew(f) ? '<span class="new-tag">NEW</span>' : '';
+    const autoTag = f.autoFetched ? '<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#e0f2fe;color:#0369a1;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:4px;vertical-align:middle">AUTO</span>' : '';
+    const autoTag = f.autoFetched ? '<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#f0f9ff;color:#0369a1;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:4px;vertical-align:middle">AUTO</span>' : '';
     return `<tr class="${isNew(f)?'is-new':''}">
       <td><div class="dm">${e(f.filed)}</div><div class="ds">added ${e(f.addedDate)}</div></td>
       <td><span class="badge" style="color:${fc.color};background:${fc.bg};border-color:${fc.border}">${e(f.ft)}</span></td>
       <td>
-        <div class="co-name">${e(f.company)}${newTag}</div>
+        <div class="co-name">${e(f.company)}${newTag}${autoTag}</div>
         <div class="co-meta">${f.ticker&&f.ticker!=='Pending'&&f.ticker!=='Private'?e(f.ticker)+' · ':''}${e(f.exchange)}</div>
         <div class="co-sector">${e(f.sector)}</div>
         <div class="co-desc" style="color:var(--text3)">${e(f.hq)}</div>
@@ -881,6 +1084,106 @@ function render() {
   } else {
     mc.innerHTML = renderPipeline();
   }
+}
+
+
+// ── ADD FILING MODAL ──────────────────────────────────────────────────────
+function openAddFiling() {
+  // Set today's date as default
+  document.getElementById('nf-filed').value = new Date().toISOString().split('T')[0];
+  document.getElementById('addFilingModal').style.display = 'flex';
+}
+
+function closeAddFiling() {
+  document.getElementById('addFilingModal').style.display = 'none';
+  // Clear form
+  ['nf-company','nf-sector','nf-exchange','nf-ticker','nf-hq','nf-desc','nf-why','nf-sec'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+async function submitNewFiling() {
+  const company = document.getElementById('nf-company').value.trim();
+  const filed = document.getElementById('nf-filed').value;
+  if (!company || !filed) {
+    alert('Company name and filed date are required.');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const newFiling = {
+    id: 'manual-' + Date.now(),
+    circle: parseInt(document.getElementById('nf-circle').value),
+    ft: document.getElementById('nf-type').value,
+    filed: filed,
+    addedDate: today,
+    company: company,
+    ticker: document.getElementById('nf-ticker').value.trim() || 'Pending',
+    exchange: document.getElementById('nf-exchange').value.trim() || 'Pending',
+    sector: document.getElementById('nf-sector').value.trim() || '',
+    hq: document.getElementById('nf-hq').value.trim() || '',
+    desc: document.getElementById('nf-desc').value.trim() || '',
+    why: document.getElementById('nf-why').value.trim() || '',
+    contact: 'TBD', title: '', email: '', phone: '',
+    reach: 'TBD',
+    sender: document.getElementById('nf-sender').value,
+    sendwhy: 'Manually added',
+    angela: document.getElementById('nf-angela').value === 'true',
+    sec: document.getElementById('nf-sec').value.trim() || 'https://www.sec.gov/cgi-bin/browse-edgar',
+    manual: true,
+  };
+
+  // Add to SEED array (local session)
+  SEED.unshift(newFiling);
+
+  // Save to localStorage for persistence
+  try {
+    const manualFilings = JSON.parse(localStorage.getItem('angela_manual_filings') || '[]');
+    manualFilings.unshift(newFiling);
+    localStorage.setItem('angela_manual_filings', JSON.stringify(manualFilings));
+  } catch(e) {}
+
+  // Save to Google Sheets Feed Log
+  if (SCRIPT_URL !== 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({action: 'updatePipeline', ...newFiling, updatedBy: CURRENT_USER})
+      });
+    } catch(e) {}
+  }
+
+  // Update feed status
+  updateFeedStatus();
+  closeAddFiling();
+  setTab('feed', document.getElementById('tab-feed'));
+  showSaving('✓ New filing added to pipeline');
+  setTimeout(() => hideSaving(), 2000);
+}
+
+function updateFeedStatus() {
+  const manualCount = SEED.filter(f => f.manual).length;
+  const lastAdded = SEED.filter(f => f.manual).sort((a,b) => new Date(b.addedDate)-new Date(a.addedDate))[0];
+  const baseDate = 'April 1, 2026';
+  const statusEl = document.getElementById('feedStatusText');
+  if (statusEl) {
+    if (lastAdded) {
+      statusEl.textContent = `Manual feed · Last updated ${lastAdded.addedDate} by ${lastAdded.addedBy||CURRENT_USER} · ${manualCount} filing${manualCount>1?'s':''} added manually`;
+    } else {
+      statusEl.textContent = `Manual feed — seed data as of ${baseDate} · Add new filings as you find them on SEC EDGAR`;
+    }
+  }
+}
+
+// Load manually added filings from localStorage on startup
+function loadManualFilings() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('angela_manual_filings') || '[]');
+    saved.forEach(f => {
+      if (!SEED.find(s => s.id === f.id)) SEED.unshift(f);
+    });
+  } catch(e) {}
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
