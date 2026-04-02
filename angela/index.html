@@ -511,8 +511,13 @@ async function loadData() {
   btn.disabled = true; btn.textContent = '↻ Loading...';
   setSyncStatus('loading');
 
+  // Always render SEED data immediately so page is never blank
+  loadManualFilings();
+  render();
+
+  // Then try to overlay Sheets data on top
   try {
-    const r = await fetch(SCRIPT_URL + '?action=getPipeline');
+    const r = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'readPipeline'})});
     const rows = await r.json();
 
     if (Array.isArray(rows) && rows.length > 1) {
@@ -571,7 +576,7 @@ async function loadData() {
 
     // Load clients
     try {
-      const r2 = await fetch(SCRIPT_URL + '?action=getClients');
+      const r2 = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'readClients'})});
       const crows = await r2.json();
       if (Array.isArray(crows) && crows.length > 1) {
         const ch = crows[0];
@@ -583,28 +588,29 @@ async function loadData() {
       }
     } catch(e2) {}
 
-    // Update feed status line
+    // Update feed status
     const autoCount = SEED.filter(s => s.autoFetched).length;
     const statusEl = document.getElementById('feedStatusText');
     if (statusEl) {
       statusEl.textContent = 'Auto-fetch runs daily 8am EST · ' +
         (autoCount ? autoCount + ' companies auto-added · ' : '') +
-        'Refresh to sync latest · Next: tomorrow 8am EST';
+        'Next run: tomorrow 9am EST';
     }
 
     setSyncStatus('ok');
+    saveToLocal(); // cache Sheets data locally
   } catch(err) {
-    console.warn('Sheets sync failed, using local:', err);
+    console.warn('Sheets sync failed, using local cache:', err);
     loadFromLocal();
     setSyncStatus('error');
+    const statusEl = document.getElementById('feedStatusText');
+    if (statusEl) statusEl.textContent = 'Auto-fetch runs daily 8am EST · Offline — showing cached data';
   }
 
   btn.disabled = false; btn.textContent = '↻ Refresh';
-  loadManualFilings();
-  render();
+  render(); // re-render with Sheets data overlaid
 }
 
-// ⚡ Trigger manual fetch from Worker (runs the full cron job on demand)
 async function triggerFetch() {
   const btn = document.getElementById('fetchNowBtn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Fetching SEC...'; }
@@ -661,10 +667,11 @@ async function saveRow(id) {
 
   try {
     const seed = SEED.find(s => s.id === id) || {};
-    await fetch(SCRIPT_URL, {
+    await fetch(WORKER_URL, {
       method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        action: 'updatePipeline',
+        action: 'writePipeline',
         id, status: d.status, notes: d.notes,
         updatedBy: CURRENT_USER,
         company: seed.company, sector: seed.sector,
@@ -701,7 +708,7 @@ async function promoteToClient(id) {
     if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
       showSaving('Moving to Clients...');
       try {
-        await fetch(SCRIPT_URL, {method:'POST', body: JSON.stringify({action:'promoteToClient', ...newClient, updatedBy:CURRENT_USER})});
+        await fetch(WORKER_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'promoteClient', ...newClient, updatedBy:CURRENT_USER})});
       } catch(e) {}
       hideSaving();
     }
@@ -718,7 +725,7 @@ async function saveClient(id) {
   showSaving('Saving client...');
   if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbx-7oVz_5JwspAk7DbHA1coC6rYTy9ikLHVjuOYR3IQOLCaTsRl_P9UyvHDCpV_mXts/exec') {
     try {
-      await fetch(SCRIPT_URL, {method:'POST', body: JSON.stringify({action:'updateClient', ...c})});
+      await fetch(WORKER_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'writeClient', ...c})});
     } catch(e) {}
   }
   hideSaving();
@@ -1147,10 +1154,7 @@ async function submitNewFiling() {
   // Save to Google Sheets Feed Log
   if (SCRIPT_URL !== 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
     try {
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({action: 'updatePipeline', ...newFiling, updatedBy: CURRENT_USER})
-      });
+      await fetch(WORKER_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({action:'writePipeline', ...newFiling, updatedBy:CURRENT_USER})});
     } catch(e) {}
   }
 
