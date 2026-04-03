@@ -876,16 +876,27 @@ async function findContact(id) {
   if(btn){btn.disabled=true;btn.className='cf-btn searching';btn.textContent='🔍 Searching web...';}
   if(res){res.style.display='block';res.innerHTML='<span style="color:var(--amber)">⏳ Searching web for verified contact...</span>';}
   try {
-    const data = await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||''});
+    const data = await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||'',cik:seed.cik||''});
     // Add verification timestamp to result
     data._verifiedDate = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
     data._verifiedBy = CURRENT_USER;
     contactCache[id]=data;
     try{localStorage.setItem('angela_contacts',JSON.stringify(contactCache));}catch(e){}
+    // If company name was CIK-based and now resolved, update it
+    if(data.companyNameResolved && seed.company && seed.company.startsWith('[CIK')) {
+      seed.company = data.companyNameResolved;
+      seed.companyResolved = true;
+    }
+    // Update IR firm type if discovered
+    if(data.irFirmType && data.irFirmType !== 'unknown') {
+      seed.irFirmType = data.irFirmType;
+      seed.irFirm = data.irFirm || '';
+    }
     if(data.contacts?.length>0) {
       const best=data.contacts[0];
       if(!pd[id]) pd[id]={status:'not_contacted',notes:'',lastUpdated:'',lastUpdatedBy:''};
       pd[id].foundContact=best.name||''; pd[id].foundEmail=best.email||'';
+      pd[id].irFirmType=data.irFirmType||''; pd[id].irFirm=data.irFirm||'';
       saveRow(id);
     }
     if(btn){btn.className='cf-btn done';btn.textContent='✓ Found';btn.disabled=false;}
@@ -964,9 +975,9 @@ function renderContactCell(f, cf) {
   h += '<a href="' + liUrl + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f0f9ff;border:1px solid #7dd3fc;color:#0369a1;font-size:9px;font-weight:600;text-decoration:none">💼 LinkedIn</a>';
 
   // 5. SEC EDGAR — always there as fallback
-  if(f.sec) {
-    h += '<a href="' + e(f.sec) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#fafafa;border:1px solid #d4d4d4;color:#525252;font-size:9px;font-weight:600;text-decoration:none">📄 EDGAR</a>';
-  }
+  // Always show EDGAR link — either filing link or company page
+  const edgarLink = f.edgarPage || f.sec || ('https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=' + (f.cik||''));
+  h += '<a href="' + e(edgarLink) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#fafafa;border:1px solid #d4d4d4;color:#525252;font-size:9px;font-weight:600;text-decoration:none">📄 EDGAR</a>';
 
   h += '</div>';
 
@@ -1136,7 +1147,7 @@ function renderPipeline() {
       <td><div class="dm">${e(f.filed)}</div><div class="ds">added ${e(f.addedDate)}</div></td>
       <td><span class="badge" style="color:${fc.color};background:${fc.bg};border-color:${fc.border}">${e(f.ft)}</span></td>
       <td>
-        <div class="co-name">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}${f.urgency==='high'?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:3px;vertical-align:middle">⚡ URGENT</span>':''}</div>
+        <div class="co-name" style="${f.company.startsWith('[CIK')?'color:var(--text3);font-style:italic':''}">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}${f.urgency==='high'?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:3px;vertical-align:middle">⚡ URGENT</span>':''}${f.company.startsWith('[CIK')?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#f0f9ff;color:#0369a1;font-size:8px;font-weight:600;font-family:var(--mono);margin-left:3px">🔍 Verify to resolve name</span>':''}</div>
         <div class="co-meta">${f.ticker&&f.ticker!=='Pending'&&f.ticker!=='Private'?e(f.ticker)+' · ':''}${e(f.exchange)}</div>
         <div class="co-sector">${e(f.sector)}</div>
         <div class="co-desc" style="color:var(--text3)">${e(f.hq)}</div>
