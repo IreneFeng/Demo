@@ -793,8 +793,22 @@ async function saveRow(id) {
 function updateStatus(id, val) {
   if(!pd[id]) pd[id]={status:'not_contacted',notes:'',lastUpdated:'',lastUpdatedBy:''};
   pd[id].status=val; pd[id].lastUpdatedBy=CURRENT_USER; pd[id].lastUpdated=new Date().toISOString();
-  if(val==='client') promoteToClient(id);
-  else { saveRow(id); render(); updateStats(); }
+  if(val==='client') {
+    promoteToClient(id);
+  } else {
+    saveRow(id);
+    // Update just the status cell visually, no full re-render
+    const sc = (typeof SC !== 'undefined' && SC[val]) || SC.not_contacted;
+    const sel = document.getElementById('ssel-'+id);
+    if(sel) {
+      sel.style.background = sc.bg;
+      sel.style.color = sc.color;
+      sel.style.borderColor = sc.border;
+    }
+    const byEl = document.getElementById('byline-'+id);
+    if(byEl) byEl.textContent = 'by ' + CURRENT_USER;
+    updateStats(); // just update counts
+  }
 }
 
 function updateNotes(id, val) {
@@ -1111,8 +1125,8 @@ function renderPipeline() {
       </td>
       <td>${f.angela?'<div class="angela-yes"><div class="angela-dot"></div>Yes</div>':'<span style="color:#c8d4e4">—</span>'}</td>
       <td>
-        <select class="ssel" style="background:${sc.bg};color:${sc.color};border-color:${sc.border}" onchange="updateStatus('${f.id}',this.value)">${sOpts}</select>
-        ${getBy(f.id) ? '<div class="by-line">by ' + getBy(f.id) + '</div>' : ''}
+        <select id="ssel-${f.id}" class="ssel" style="background:${sc.bg};color:${sc.color};border-color:${sc.border}" onchange="updateStatus('${f.id}',this.value)">${sOpts}</select>
+        <div id="byline-${f.id}" class="by-line" style="${getBy(f.id)?'':'display:none'}">${getBy(f.id)?'by '+getBy(f.id):''}</div>
       </td>
       <td><textarea class="nta" placeholder="Add notes..." oninput="updateNotes('${f.id}',this.value)">${e(getNotes(f.id))}</textarea></td>
       <td><a href="${e(f.sec)}" target="_blank" rel="noreferrer" class="seclink">EDGAR ↗</a></td>
@@ -1159,7 +1173,15 @@ function render() {
   updateStats();
   const mc=document.getElementById('mainContent');
   if(!mc) return;
+  // Preserve scroll position
+  const tw = mc.querySelector('.tw');
+  const scrollTop = tw ? tw.scrollTop : 0;
+  const winScroll = window.scrollY;
   mc.innerHTML = state.tab==='clients' ? renderClients() : renderPipeline();
+  // Restore scroll position
+  const newTw = mc.querySelector('.tw');
+  if(newTw && scrollTop) newTw.scrollTop = scrollTop;
+  if(winScroll) window.scrollTo(0, winScroll);
 }
 
 // ── MANUAL ADD FILING ─────────────────────────────────────────────
