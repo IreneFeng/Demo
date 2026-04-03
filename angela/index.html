@@ -936,7 +936,7 @@ function renderContactCell(f, cf) {
   // ── VERIFY BUTTON ────────────────────────────────────────────────
   const btnLabel = cfSearched ? '↻ Re-verify' : (f.verified ? '↻ Re-verify' : '🔍 Verify Contact');
   const btnClass = cfSearched || f.verified ? 'cf-btn done' : 'cf-btn';
-  h += '<button id="cf-btn-' + f.id + '" class="' + btnClass + '" onclick="findContact('' + f.id + '')" style="margin-top:5px">' + btnLabel + '</button>';
+  h += '<button id="cf-btn-' + f.id + '" class="' + btnClass + '" onclick="findContact(\'' + f.id + '\')" style="margin-top:5px">' + btnLabel + '</button>';
 
   // Result area (for web search results)
   const cfRes = cf ? renderCFExtra(cf) : '';
