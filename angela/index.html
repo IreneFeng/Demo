@@ -252,8 +252,8 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
   <div class="tabs">
     <button class="tab active" id="tab-feed" onclick="setTab('feed',this)">🔴 New Filings <span class="tcnt" id="cnt-feed" style="background:#fee2e2;color:#dc2626">0</span></button>
     <button class="tab" id="tab-all" onclick="setTab('all',this)">All Pipeline <span class="tcnt" id="cnt-all" style="background:var(--slate3);color:var(--text3)">0</span></button>
-    <button class="tab" id="tab-c1" onclick="setTab('c1',this)">◆ Circle 1 <span class="tcnt" id="cnt-c1" style="background:var(--amber-bg);color:var(--amber)">0</span></button>
-    <button class="tab" id="tab-c2" onclick="setTab('c2',this)">◈ Circle 2 <span class="tcnt" id="cnt-c2" style="background:#fef9ec;color:#b45309">0</span></button>
+    <button class="tab" id="tab-c1" onclick="setTab('c1',this)">🔴 Act Now <span class="tcnt" id="cnt-c1" style="background:var(--amber-bg);color:var(--amber)">0</span></button>
+    <button class="tab" id="tab-c2" onclick="setTab('c2',this)">🟡 Build <span class="tcnt" id="cnt-c2" style="background:#fef9ec;color:#b45309">0</span></button>
     <button class="tab" id="tab-c3" onclick="setTab('c3',this)">Other <span class="tcnt" id="cnt-c3" style="background:var(--slate3);color:var(--text3)">0</span></button>
     <button class="tab" id="tab-clients" onclick="setTab('clients',this)">⭐ Clients <span class="tcnt" id="cnt-clients" style="background:var(--green-bg);color:var(--green)">0</span></button>
   </div>
@@ -264,6 +264,7 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
     <div style="margin-left:auto;display:flex;gap:6px">
       <button class="btn-fetch" id="fetchNowBtn" onclick="triggerFetch()">⚡ Fetch Now</button>
       <button class="btn-manual" onclick="openAddFiling()">+ Add Manual</button>
+      <button class="btn-manual" style="background:#fef2f2;border-color:#fecaca;color:#dc2626" onclick="clearAndRestart()" title="Clear auto-fetched companies and fetch fresh batch">🔄 Reset & Refetch</button>
     </div>
   </div>
 
@@ -619,9 +620,9 @@ const SC = {
   not_relevant:{label:"✗ Not Relevant",color:"#94a3b8",bg:"#f8fafc",border:"#e2e8f0"},
 };
 const CC = {
-  1:{color:"#d97706",bg:"#fffbeb",border:"#fcd34d",label:"Circle 1",sub:"Direct Match"},
-  2:{color:"#92400e",bg:"#fef9ec",border:"#fde68a",label:"Circle 2",sub:"Transfer Fit"},
-  3:{color:"#64748b",bg:"#f1f5f9",border:"#cbd5e1",label:"Other",sub:"All Industries"},
+  1:{color:"#dc2626",bg:"#fef2f2",border:"#fecaca",label:"Circle 1",sub:"Act Now — Pre/New IPO"},
+  2:{color:"#d97706",bg:"#fffbeb",border:"#fcd34d",label:"Circle 2",sub:"Small Cap IR Need"},
+  3:{color:"#64748b",bg:"#f1f5f9",border:"#cbd5e1",label:"Other",sub:"Track"},
 };
 const FC = {
   "S-1":{color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
@@ -725,6 +726,37 @@ async function loadData() {
 }
 
 // ── TRIGGER FETCH ─────────────────────────────────────────────────
+async function clearAndRestart() {
+  if(!confirm('Clear all auto-fetched companies and start fresh with new criteria? Your manually-added companies and status updates will be preserved.')) return;
+  
+  const btn = document.getElementById('fetchNowBtn');
+  const statusEl = document.getElementById('feedStatusText');
+  showSaving('Clearing and restarting...');
+  
+  try {
+    // Clear KV pipeline (keeps clients)
+    await wPost({action: 'clearPipeline'});
+    
+    // Remove auto-fetched from local SEED array
+    for(let i = SEED.length - 1; i >= 0; i--) {
+      if(SEED[i].autoFetched) SEED.splice(i, 1);
+    }
+    // Clear contact cache for auto-fetched
+    contactCache = {};
+    try { localStorage.removeItem('angela_contacts'); } catch(e) {}
+    
+    render();
+    showSaving('✓ Cleared — starting fresh fetch...');
+    if(statusEl) statusEl.textContent = 'Cleared — fetching fresh batch with new criteria...';
+    
+    // Now run fetch with new criteria
+    await triggerFetch();
+  } catch(e) {
+    showSaving('Clear failed: ' + e.message);
+    setTimeout(hideSaving, 3000);
+  }
+}
+
 async function triggerFetch() {
   const btn = document.getElementById('fetchNowBtn');
   const statusEl = document.getElementById('feedStatusText');
@@ -1074,8 +1106,8 @@ function updateStats() {
   document.getElementById('sstrip').innerHTML=[
     {v:SEED.length,l:'Total Prospects',c:'#fff'},
     {v:newC,l:'New This Week',c:'#f87171'},
-    {v:c1,l:'Circle 1 — Direct',c:'var(--gold2)'},
-    {v:c2,l:'Circle 2 — Transfer',c:'#fde68a'},
+    {v:c1,l:'Act Now',c:'#f87171'},
+    {v:c2,l:'Build',c:'#fcd34d'},
     {v:sent,l:'Emails Sent',c:'#fcd34d'},
     {v:rep,l:'Replied',c:'#4ade80'},
     {v:prog,l:'In Progress',c:'#c4b5fd'},
@@ -1104,7 +1136,7 @@ function renderPipeline() {
       <td><div class="dm">${e(f.filed)}</div><div class="ds">added ${e(f.addedDate)}</div></td>
       <td><span class="badge" style="color:${fc.color};background:${fc.bg};border-color:${fc.border}">${e(f.ft)}</span></td>
       <td>
-        <div class="co-name">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}</div>
+        <div class="co-name">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}${f.urgency==='high'?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:3px;vertical-align:middle">⚡ URGENT</span>':''}</div>
         <div class="co-meta">${f.ticker&&f.ticker!=='Pending'&&f.ticker!=='Private'?e(f.ticker)+' · ':''}${e(f.exchange)}</div>
         <div class="co-sector">${e(f.sector)}</div>
         <div class="co-desc" style="color:var(--text3)">${e(f.hq)}</div>
