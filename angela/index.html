@@ -889,12 +889,15 @@ function renderContactCell(f, cf) {
   // ── CLICKABLE CHANNELS ──────────────────────────────────────────
   h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:5px 0">';
 
-  // 1. Email — mailto link
+  // 1. Email — show as copyable text, NOT mailto (avoids triggering personal email client)
   if(email && email.includes('@')) {
-    h += '<a href="mailto:' + e(email) + '" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#eff4ff;border:1px solid #93c5fd;color:#1d4ed8;font-size:9px;font-weight:600;font-family:var(--mono);text-decoration:none" title="' + e(email) + '">✉ Email</a>';
+    h += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">';
+    h += '<span style="font-family:var(--mono);font-size:10px;color:#1d4ed8;background:#eff4ff;border:1px solid #93c5fd;padding:2px 7px;border-radius:4px">✉ ' + e(email) + '</span>';
+    h += '<button onclick="navigator.clipboard.writeText('' + e(email) + '');this.textContent=\'✓\';setTimeout(()=>this.textContent=\'Copy\',1500)" style="padding:2px 6px;border-radius:3px;border:1px solid #c8d4e4;background:#fff;color:var(--text3);font-size:9px;cursor:pointer;font-family:var(--sans)">Copy</button>';
+    h += '</div>';
   } else if(email && !email.includes('@')) {
     // It's a URL to contact page
-    h += '<a href="https://' + e(email.replace('https://','')) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#eff4ff;border:1px solid #93c5fd;color:#1d4ed8;font-size:9px;font-weight:600;text-decoration:none">✉ Contact</a>';
+    h += '<a href="https://' + e(email.replace('https://','')) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#eff4ff;border:1px solid #93c5fd;color:#1d4ed8;font-size:9px;font-weight:600;text-decoration:none;margin-bottom:3px">✉ Contact Page ↗</a>';
   }
 
   // 2. Phone
