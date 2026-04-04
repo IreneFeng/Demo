@@ -281,7 +281,7 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
     <button class="chip" onclick="setFStatus('email_sent',this)">Email Sent</button>
     <button class="chip" onclick="setFStatus('replied',this)">Replied</button>
     <button class="chip" onclick="setFStatus('in_progress',this)">In Progress</button>
-    <select class="sort-sel" onchange="state.sort=this.value;render()" style="margin-left:6px">
+    <select class="sort-sel" id="sortSel" onchange="state.sort=this.value;render()">
       <option value="recent">↓ Most Recent</option>
       <option value="oldest">↑ Oldest First</option>
       <option value="fit">◆ Best Fit</option>
@@ -362,334 +362,284 @@ if (ul) {
   };
 }
 
-// ── SEED DATA ─────────────────────────────────────────────────────
-const SEED = [
-  // SEED is intentionally empty — all companies come from Angela's daily SEC fetch (KV)
-  // Use ⚡ Fetch Now to populate, or + Add Manual to add specific companies
-];
+// ── SEED (empty — all data comes from KV) ─────────────────────────
+const SEED = [];
 
 // ── STATUS CONFIG ─────────────────────────────────────────────────
 const SC = {
-  not_contacted:{label:"Not Contacted",color:"#64748b",bg:"#f8fafc",border:"#e2e8f0"},
-  email_sent:{label:"📧 Email Sent",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
-  replied:{label:"✅ Replied",color:"#059669",bg:"#ecfdf5",border:"#6ee7b7"},
-  call_scheduled:{label:"📞 Call Scheduled",color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
-  in_progress:{label:"🔄 In Progress",color:"#7c3aed",bg:"#f5f3ff",border:"#c4b5fd"},
-  proposal_sent:{label:"📋 Proposal Sent",color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
-  client:{label:"⭐ CLIENT",color:"#065f46",bg:"#ecfdf5",border:"#059669"},
-  not_relevant:{label:"✗ Not Relevant",color:"#94a3b8",bg:"#f8fafc",border:"#e2e8f0"},
+  not_contacted:  {label:'Not Contacted',   color:'#64748b',bg:'#f8fafc',border:'#e2e8f0'},
+  email_sent:     {label:'📧 Email Sent',    color:'#d97706',bg:'#fffbeb',border:'#fcd34d'},
+  replied:        {label:'✅ Replied',        color:'#059669',bg:'#ecfdf5',border:'#6ee7b7'},
+  call_scheduled: {label:'📞 Call Scheduled',color:'#1d4ed8',bg:'#eff4ff',border:'#93c5fd'},
+  in_progress:    {label:'🔄 In Progress',   color:'#7c3aed',bg:'#f5f3ff',border:'#c4b5fd'},
+  proposal_sent:  {label:'📋 Proposal Sent', color:'#d97706',bg:'#fffbeb',border:'#fcd34d'},
+  client:         {label:'⭐ CLIENT',         color:'#065f46',bg:'#ecfdf5',border:'#059669'},
+  not_relevant:   {label:'✗ Not Relevant',   color:'#94a3b8',bg:'#f8fafc',border:'#e2e8f0'},
 };
 const CC = {
-  1:{color:"#dc2626",bg:"#fef2f2",border:"#fecaca",label:"Circle 1",sub:"Act Now — Pre/New IPO"},
-  2:{color:"#d97706",bg:"#fffbeb",border:"#fcd34d",label:"Circle 2",sub:"Small Cap IR Need"},
-  3:{color:"#64748b",bg:"#f1f5f9",border:"#cbd5e1",label:"Other",sub:"Track"},
+  1:{color:'#dc2626',bg:'#fef2f2',border:'#fecaca',label:'Circle 1',sub:'Act Now — Pre/New IPO'},
+  2:{color:'#d97706',bg:'#fffbeb',border:'#fcd34d',label:'Circle 2',sub:'Small Cap IR Need'},
+  3:{color:'#64748b',bg:'#f1f5f9',border:'#cbd5e1',label:'Other',   sub:'Track'},
 };
 const FC = {
-  "S-1":{color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
-  "S-1/A":{color:"#1d4ed8",bg:"#eff4ff",border:"#93c5fd"},
-  "F-1":{color:"#7c3aed",bg:"#f5f3ff",border:"#c4b5fd"},
-  "F-1/A":{color:"#7c3aed",bg:"#f5f3ff",border:"#c4b5fd"},
-  "8-K":{color:"#d97706",bg:"#fffbeb",border:"#fcd34d"},
+  'S-1':  {color:'#1d4ed8',bg:'#eff4ff',border:'#93c5fd'},
+  'S-1/A':{color:'#1d4ed8',bg:'#eff4ff',border:'#93c5fd'},
+  'F-1':  {color:'#7c3aed',bg:'#f5f3ff',border:'#c4b5fd'},
+  'F-1/A':{color:'#7c3aed',bg:'#f5f3ff',border:'#c4b5fd'},
+  '8-K':  {color:'#d97706',bg:'#fffbeb',border:'#fcd34d'},
+  '424B4':{color:'#059669',bg:'#ecfdf5',border:'#6ee7b7'},
 };
 const SO = {email_sent:2,replied:3,call_scheduled:4,in_progress:5,proposal_sent:6,client:7,not_contacted:1,not_relevant:0};
 
 // ── STATE ─────────────────────────────────────────────────────────
 let state = {tab:'feed',filterType:'all',filterStatus:'all',search:'',sort:'recent'};
-let pd = {}; // pipelineData: id -> {status,notes,...}
+let pd = {};
 let clients = [];
 let contactCache = {};
 try { const c = localStorage.getItem('angela_contacts'); if(c) contactCache=JSON.parse(c); } catch(e) {}
 
 // ── HELPERS ───────────────────────────────────────────────────────
-function e(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
-function getSt(id) { return pd[id]?.status || 'not_contacted'; }
-function getNotes(id) { return pd[id]?.notes || ''; }
-function getBy(id) { return pd[id]?.lastUpdatedBy || ''; }
-function isNew(f) { return (new Date()-new Date(f.addedDate))/(1000*60*60*24) <= NEW_DAYS && getSt(f.id) !== 'client'; }
+function e(s){ return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+function getSt(id){ return pd[id]?.status || 'not_contacted'; }
+function getNotes(id){ return pd[id]?.notes || ''; }
+function getBy(id){ return pd[id]?.lastUpdatedBy || ''; }
+function isNew(f){ return (new Date()-new Date(f.addedDate))/(1000*60*60*24) <= NEW_DAYS && getSt(f.id) !== 'client'; }
+function safeDate(s){ if(!s) return new Date(0); const d = new Date(s); return isNaN(d) ? new Date(0) : d; }
 
-function showSaving(msg) {
-  const el = document.getElementById('savingEl');
-  el.textContent = msg || 'Saving...';
+function showSaving(msg){
+  const el=document.getElementById('savingEl');
+  el.textContent=msg||'Saving...';
   el.classList.add('show');
 }
-function hideSaving() { setTimeout(()=>document.getElementById('savingEl').classList.remove('show'),1800); }
+function hideSaving(){ setTimeout(()=>document.getElementById('savingEl').classList.remove('show'),1800); }
 
 // ── WORKER CALLS ──────────────────────────────────────────────────
-async function wPost(body) {
-  const r = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+async function wPost(body){
+  const r=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   return r.json();
 }
 
-// ── LOAD DATA FROM KV ─────────────────────────────────────────────
-async function loadData() {
-  const btn = document.getElementById('refreshBtn');
-  if(btn) { btn.disabled=true; btn.textContent='↻ Loading...'; }
-  document.getElementById('syncInfo').textContent = 'Syncing...';
+// ── LOAD DATA ─────────────────────────────────────────────────────
+async function loadData(){
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.disabled=true;btn.textContent='↻ Loading...';}
+  document.getElementById('syncInfo').textContent='Syncing...';
 
   try {
-    // Read pipeline from KV
     const pipeline = await wPost({action:'readPipeline'});
-    if(Array.isArray(pipeline) && pipeline.length > 0) {
-      pipeline.forEach(f => {
-        // Add auto-fetched companies to SEED if not already there
-        if(!SEED.find(s=>s.id===f.id) && f.company) {
-          SEED.unshift({...f, autoFetched:true});
+    if(Array.isArray(pipeline) && pipeline.length>0){
+      pipeline.forEach(f=>{
+        if(!SEED.find(s=>s.id===f.id) && f.company){
+          SEED.unshift({...f,autoFetched:true});
         }
-        // Always sync status/notes
-        if(f.id) pd[f.id] = {
-          status: f.status||'not_contacted',
-          notes: f.notes||'',
-          lastUpdated: f.lastUpdated||'',
-          lastUpdatedBy: f.lastUpdatedBy||'',
+        if(f.id) pd[f.id]={
+          status:f.status||'not_contacted',
+          notes:f.notes||'',
+          lastUpdated:f.lastUpdated||'',
+          lastUpdatedBy:f.lastUpdatedBy||'',
         };
       });
     }
 
-    // Read clients
     const cl = await wPost({action:'readClients'});
-    if(Array.isArray(cl)) clients = cl;
+    if(Array.isArray(cl)) clients=cl;
 
-    // Read meta
     const meta = await wPost({action:'readMeta'});
-    if(meta && meta.lastFetch) {
-      const d = new Date(meta.lastFetch);
-      const autoCount = SEED.filter(s=>s.autoFetched).length;
-      const st = document.getElementById('feedStatusText');
-      if(st) st.textContent = 'Auto-fetch daily 9am EST · Last: ' +
-        d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
-        d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) +
-        (meta.lastAdded>0 ? ' · +'+meta.lastAdded+' new' : '') +
-        (autoCount>0 ? ' · '+autoCount+' auto total' : '');
+    if(meta && meta.lastFetch){
+      const d=new Date(meta.lastFetch);
+      const autoCount=SEED.filter(s=>s.autoFetched).length;
+      const st=document.getElementById('feedStatusText');
+      if(st) st.textContent='Auto-fetch daily 9am EST · Last: '+
+        d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+
+        d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+
+        (meta.lastAdded>0?' · +'+meta.lastAdded+' new':'')+
+        (autoCount>0?' · '+autoCount+' auto total':'');
     } else {
-      const st = document.getElementById('feedStatusText');
-      if(st) st.textContent = 'Auto-fetch daily 9am EST · Click ⚡ Fetch Now to run immediately';
+      const st=document.getElementById('feedStatusText');
+      if(st) st.textContent='Auto-fetch daily 9am EST · Click ⚡ Fetch Now to run immediately';
     }
 
-    const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    document.getElementById('syncInfo').textContent = '● Synced '+t;
-    document.getElementById('dashSub').textContent = 'SEC EDGAR · Nasdaq · NYSE · Synced '+t;
-  } catch(err) {
-    console.warn('KV load failed:', err.message);
-    document.getElementById('syncInfo').textContent = '⚠ Offline';
-    const st = document.getElementById('feedStatusText');
-    if(st) st.textContent = 'Auto-fetch daily 9am EST · Offline — showing seed data';
+    const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('syncInfo').textContent='● Synced '+t;
+    document.getElementById('dashSub').textContent='SEC EDGAR · Nasdaq · NYSE · Synced '+t;
+  } catch(err){
+    console.warn('KV load failed:',err.message);
+    document.getElementById('syncInfo').textContent='⚠ Offline';
+    const st=document.getElementById('feedStatusText');
+    if(st) st.textContent='Auto-fetch daily 9am EST · Offline — showing seed data';
   }
 
-  // Load manual filings from localStorage
   try {
-    const saved = JSON.parse(localStorage.getItem('angela_manual')||'[]');
+    const saved=JSON.parse(localStorage.getItem('angela_manual')||'[]');
     saved.forEach(f=>{ if(!SEED.find(s=>s.id===f.id)) SEED.unshift(f); });
-  } catch(e) {}
+  } catch(e){}
 
-  if(btn) { btn.disabled=false; btn.textContent='↻ Refresh'; }
+  if(btn){btn.disabled=false;btn.textContent='↻ Refresh';}
   render();
 }
 
 // ── TRIGGER FETCH ─────────────────────────────────────────────────
-async function clearAndRestart() {
-  if(!confirm('Clear all auto-fetched companies and start fresh with new criteria? Your manually-added companies and status updates will be preserved.')) return;
-  
-  const btn = document.getElementById('fetchNowBtn');
-  const statusEl = document.getElementById('feedStatusText');
-  showSaving('Clearing and restarting...');
-  
+async function clearAndRestart(){
+  if(!confirm('Clear all auto-fetched companies and start fresh? Manually-added companies and status updates will be preserved.')) return;
+  showSaving('Clearing...');
   try {
-    // Clear KV pipeline (keeps clients)
-    await wPost({action: 'clearPipeline'});
-    
-    // Remove auto-fetched from local SEED array
-    for(let i = SEED.length - 1; i >= 0; i--) {
-      if(SEED[i].autoFetched) SEED.splice(i, 1);
-    }
-    // Clear contact cache for auto-fetched
-    contactCache = {};
-    try { localStorage.removeItem('angela_contacts'); } catch(e) {}
-    
+    await wPost({action:'clearPipeline'});
+    for(let i=SEED.length-1;i>=0;i--){ if(SEED[i].autoFetched) SEED.splice(i,1); }
+    contactCache={};
+    try{ localStorage.removeItem('angela_contacts'); }catch(e){}
     render();
     showSaving('✓ Cleared — starting fresh fetch...');
-    if(statusEl) statusEl.textContent = 'Cleared — fetching fresh batch with new criteria...';
-    
-    // Now run fetch with new criteria
+    const st=document.getElementById('feedStatusText');
+    if(st) st.textContent='Cleared — fetching fresh batch...';
     await triggerFetch();
-  } catch(e) {
-    showSaving('Clear failed: ' + e.message);
-    setTimeout(hideSaving, 3000);
-  }
+  } catch(e){ showSaving('Clear failed: '+e.message); setTimeout(hideSaving,3000); }
 }
 
-async function triggerFetch() {
-  const btn = document.getElementById('fetchNowBtn');
-  const statusEl = document.getElementById('feedStatusText');
-  if(btn) { btn.disabled=true; btn.textContent='⏳ Fetching...'; }
+async function triggerFetch(){
+  const btn=document.getElementById('fetchNowBtn');
+  const statusEl=document.getElementById('feedStatusText');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Fetching...';}
 
-  let totalAdded = 0;
-  let round = 0;
-
-  while (round < 30) {
+  let totalAdded=0, round=0;
+  while(round<30){
     round++;
     showSaving(`Angela fetching SEC filings... (batch ${round})`);
-    if(statusEl) statusEl.textContent = `Fetching from SEC EDGAR — batch ${round}...`;
-
+    if(statusEl) statusEl.textContent=`Fetching from SEC EDGAR — batch ${round}...`;
     try {
-      const result = await wPost({action:'manualFetch'});
-      totalAdded += result.added || 0;
-
-      if(statusEl) statusEl.textContent =
-        `Batch ${round}: ${result.found||0} found · ${result.added||0} added · ${totalAdded} total new`;
-
-      // No more new filings to process
-      if (!result.remaining || result.remaining <= 0) break;
-
-      // Pause 1.5s between batches
-      await new Promise(r => setTimeout(r, 1500));
-
-    } catch(e) {
-      console.error('Fetch error:', e.message);
-      break;
-    }
+      const result=await wPost({action:'manualFetch'});
+      totalAdded+=result.added||0;
+      if(statusEl) statusEl.textContent=`Batch ${round}: ${result.found||0} found · ${result.added||0} added · ${totalAdded} total new`;
+      if(!result.remaining||result.remaining<=0) break;
+      await new Promise(r=>setTimeout(r,1500));
+    } catch(e){ console.error('Fetch error:',e.message); break; }
   }
 
-  // Reload to show new companies
   showSaving(`✓ Complete — ${totalAdded} new companies added`);
-  if(btn) { btn.disabled=false; btn.textContent='⚡ Fetch Now'; }
+  if(btn){btn.disabled=false;btn.textContent='⚡ Fetch Now';}
   await loadData();
   hideSaving();
-
-  // Final status — always shows clear summary
-  const totalChecked = round * 3;
-  if(statusEl) {
-    if(totalAdded > 0) {
-      statusEl.textContent = `✓ Fetch complete · Checked ${totalChecked}+ filings · ${totalAdded} new companies added to pipeline · Next auto-fetch: tomorrow 9am EST`;
+  const st=document.getElementById('feedStatusText');
+  if(st){
+    if(totalAdded>0){
+      st.textContent=`✓ Fetch complete · ${totalAdded} new companies added · Next auto-fetch: tomorrow 9am EST`;
     } else {
-      statusEl.textContent = `✓ Fetch complete · Checked ${totalChecked}+ filings · 0 relevant companies today (Angela filtered all) · Next auto-fetch: tomorrow 9am EST`;
+      st.textContent=`✓ Fetch complete · 0 relevant companies (all filtered) · Next auto-fetch: tomorrow 9am EST`;
     }
   }
 }
 
-async function triggerHistorical() {
-  const btn = document.getElementById('histFetchBtn');
-  const statusEl = document.getElementById('feedStatusText');
-  if(btn) { btn.disabled=true; btn.textContent='📅 Searching...'; }
+async function triggerHistorical(){
+  const btn=document.getElementById('histFetchBtn');
+  const statusEl=document.getElementById('feedStatusText');
+  if(btn){btn.disabled=true;btn.textContent='📅 Searching...';}
   showSaving('Angela searching past 6 months of IPO filings...');
 
-  let totalAdded = 0;
-  let round = 0;
-
-  while(round < 50) {
+  let totalAdded=0, round=0;
+  while(round<50){
     round++;
-    if(statusEl) statusEl.textContent = `Searching historical filings — batch ${round}...`;
+    if(statusEl) statusEl.textContent=`Searching historical filings — batch ${round}...`;
     try {
-      const result = await wPost({action:'historicalFetch', months:6});
-      totalAdded += result.added || 0;
-      if(statusEl) statusEl.textContent = `Batch ${round}: found ${result.found||0} · added ${result.added||0} · total ${totalAdded}`;
-      if(!result.remaining || result.remaining <= 0) break;
-      await new Promise(r => setTimeout(r, 1000));
-    } catch(e) {
-      console.error('Historical fetch error:', e.message);
-      break;
-    }
+      const result=await wPost({action:'historicalFetch',months:6});
+      totalAdded+=result.added||0;
+      if(statusEl) statusEl.textContent=`Batch ${round}: found ${result.found||0} · added ${result.added||0} · total ${totalAdded}`;
+      if(!result.remaining||result.remaining<=0) break;
+      await new Promise(r=>setTimeout(r,1000));
+    } catch(e){ console.error('Historical fetch error:',e.message); break; }
   }
 
-  if(btn) { btn.disabled=false; btn.textContent='📅 Past 6 Months'; }
-  showSaving('✓ Historical search complete · ' + totalAdded + ' companies added');
+  if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
+  showSaving('✓ Historical search complete · '+totalAdded+' companies added');
   await loadData();
   hideSaving();
-
-  const statusEl2 = document.getElementById('feedStatusText');
-  if(statusEl2) {
-    statusEl2.textContent = totalAdded > 0
-      ? '✓ Found ' + totalAdded + ' companies from past 6 months · Next auto-fetch: tomorrow 9am EST'
-      : '✓ Historical search complete · 0 new relevant companies found';
-  }
+  const st=document.getElementById('feedStatusText');
+  if(st) st.textContent=totalAdded>0
+    ?'✓ Found '+totalAdded+' companies from past 6 months · Next auto-fetch: tomorrow 9am EST'
+    :'✓ Historical search complete · 0 new relevant companies found';
 }
 
-async function saveRow(id) {
+async function saveRow(id){
   showSaving('Saving...');
-  const seed = SEED.find(s=>s.id===id)||{};
-  const d = pd[id]||{};
+  const seed=SEED.find(s=>s.id===id)||{};
+  const d=pd[id]||{};
   try {
-    await wPost({action:'writePipeline', id,
-      status:d.status, notes:d.notes,
+    await wPost({action:'writePipeline',id,
+      status:d.status,notes:d.notes,
       updatedBy:CURRENT_USER,
-      company:seed.company, sector:seed.sector,
-      hq:seed.hq, exchange:seed.exchange,
-      ft:seed.ft, filed:seed.filed, addedDate:seed.addedDate,
+      company:seed.company,sector:seed.sector,
+      hq:seed.hq,exchange:seed.exchange,
+      ft:seed.ft,filed:seed.filed,addedDate:seed.addedDate,
     });
-  } catch(e) {}
+  } catch(e){}
   hideSaving();
 }
 
-function updateStatus(id, val) {
+function updateStatus(id,val){
   if(!pd[id]) pd[id]={status:'not_contacted',notes:'',lastUpdated:'',lastUpdatedBy:''};
   pd[id].status=val; pd[id].lastUpdatedBy=CURRENT_USER; pd[id].lastUpdated=new Date().toISOString();
-  if(val==='client') {
+  if(val==='client'){
     promoteToClient(id);
   } else {
     saveRow(id);
-    // Update just the status cell visually, no full re-render
-    const sc = (typeof SC !== 'undefined' && SC[val]) || SC.not_contacted;
-    const sel = document.getElementById('ssel-'+id);
-    if(sel) {
-      sel.style.background = sc.bg;
-      sel.style.color = sc.color;
-      sel.style.borderColor = sc.border;
-    }
-    const byEl = document.getElementById('byline-'+id);
-    if(byEl) byEl.textContent = 'by ' + CURRENT_USER;
-    updateStats(); // just update counts
+    const sc=(SC[val])||SC.not_contacted;
+    const sel=document.getElementById('ssel-'+id);
+    if(sel){sel.style.background=sc.bg;sel.style.color=sc.color;sel.style.borderColor=sc.border;}
+    const byEl=document.getElementById('byline-'+id);
+    if(byEl) byEl.textContent='by '+CURRENT_USER;
+    updateStats();
   }
 }
 
-function updateNotes(id, val) {
+function updateNotes(id,val){
   if(!pd[id]) pd[id]={status:'not_contacted',notes:'',lastUpdated:'',lastUpdatedBy:''};
   pd[id].notes=val; pd[id].lastUpdatedBy=CURRENT_USER;
   saveRow(id);
 }
 
-async function promoteToClient(id) {
-  const seed = SEED.find(s=>s.id===id);
+async function promoteToClient(id){
+  const seed=SEED.find(s=>s.id===id);
   if(!seed) return;
-  if(!clients.find(c=>c.id===id)) {
-    const nc={id,company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker,irContact:seed.contact,irTitle:seed.title,irEmail:seed.email,irPhone:seed.phone,primaryContact:seed.contact,primaryEmail:seed.email,primaryPhone:seed.phone,contractStart:'',retainer:'',services:'',notes:pd[id]?.notes||'',lastUpdated:new Date().toISOString(),addedBy:CURRENT_USER};
+  if(!clients.find(c=>c.id===id)){
+    const nc={id,company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker,
+      irContact:seed.contact,irTitle:seed.title,irEmail:seed.email,irPhone:seed.phone,
+      primaryContact:seed.contact,primaryEmail:seed.email,primaryPhone:seed.phone,
+      contractStart:'',retainer:'',services:'',notes:pd[id]?.notes||'',
+      lastUpdated:new Date().toISOString(),addedBy:CURRENT_USER};
     clients.push(nc);
-    try { await wPost({action:'promoteClient',...nc,updatedBy:CURRENT_USER}); } catch(e) {}
+    try{ await wPost({action:'promoteClient',...nc,updatedBy:CURRENT_USER}); }catch(e){}
   }
   updateStats(); setTab('clients',document.getElementById('tab-clients'));
 }
 
-async function saveClient(id) {
+async function saveClient(id){
   const c=clients.find(x=>x.id===id); if(!c) return;
   c.lastUpdated=new Date().toISOString();
   showSaving('Saving client...');
-  try { await wPost({action:'writeClient',...c}); } catch(e) {}
+  try{ await wPost({action:'writeClient',...c}); }catch(e){}
   hideSaving();
 }
 
 // ── CONTACT FINDER ────────────────────────────────────────────────
-async function findContact(id) {
+async function findContact(id){
   const seed=SEED.find(s=>s.id===id); if(!seed) return;
   const btn=document.getElementById('cf-btn-'+id);
   const res=document.getElementById('cf-res-'+id);
   if(btn){btn.disabled=true;btn.className='cf-btn searching';btn.textContent='🔍 Searching web...';}
   if(res){res.style.display='block';res.innerHTML='<span style="color:var(--amber)">⏳ Searching web for verified contact...</span>';}
   try {
-    const data = await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||'',cik:seed.cik||''});
-    // Add verification timestamp to result
-    data._verifiedDate = new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
-    data._verifiedBy = CURRENT_USER;
+    const data=await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||'',cik:seed.cik||''});
+    data._verifiedDate=new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
+    data._verifiedBy=CURRENT_USER;
     contactCache[id]=data;
     try{localStorage.setItem('angela_contacts',JSON.stringify(contactCache));}catch(e){}
-    // If company name was CIK-based and now resolved, update it
-    if(data.companyNameResolved && seed.company && seed.company.startsWith('[CIK')) {
-      seed.company = data.companyNameResolved;
-      seed.companyResolved = true;
+    if(data.companyNameResolved && seed.company && seed.company.startsWith('[CIK')){
+      seed.company=data.companyNameResolved;
+      seed.companyResolved=true;
     }
-    // Update IR firm type if discovered
-    if(data.irFirmType && data.irFirmType !== 'unknown') {
-      seed.irFirmType = data.irFirmType;
-      seed.irFirm = data.irFirm || '';
+    if(data.irFirmType && data.irFirmType!=='unknown'){
+      seed.irFirmType=data.irFirmType;
+      seed.irFirm=data.irFirm||'';
     }
-    if(data.contacts?.length>0) {
+    if(data.contacts?.length>0){
       const best=data.contacts[0];
       if(!pd[id]) pd[id]={status:'not_contacted',notes:'',lastUpdated:'',lastUpdatedBy:''};
       pd[id].foundContact=best.name||''; pd[id].foundEmail=best.email||'';
@@ -698,180 +648,144 @@ async function findContact(id) {
     }
     if(btn){btn.className='cf-btn done';btn.textContent='✓ Found';btn.disabled=false;}
     if(res){res.style.display='block';res.innerHTML=renderCFExtra(data)||'<span style="color:var(--text3);font-size:10px">No additional info found</span>';}
-  } catch(err) {
+  } catch(err){
     if(btn){btn.className='cf-btn';btn.textContent='🔍 Find Contact';btn.disabled=false;}
     if(res){res.innerHTML='<span style="color:var(--red)">Search failed</span>';}
   }
 }
 
+// ── CONTACT CELL ──────────────────────────────────────────────────
+function renderContactCell(f,cf){
+  const name   =(cf&&cf.contacts&&cf.contacts[0]&&cf.contacts[0].name) ||f.contact||'IR Team';
+  const title  =(cf&&cf.contacts&&cf.contacts[0]&&cf.contacts[0].title)||f.title  ||'Investor Relations';
+  const email  =(cf&&cf.contacts&&cf.contacts[0]&&cf.contacts[0].email)||f.email  ||'';
+  const phone  =(cf&&cf.contacts&&cf.contacts[0]&&cf.contacts[0].phone)||f.phone  ||'';
+  const irPage =(cf&&cf.irPage)||'';
+  const liPerson=(cf&&cf.linkedinPerson)||'';
+  const liSearch=(cf&&cf.linkedinSearch)||(name!=='IR Team'?name+' '+(f.company||'')+' investor relations':f.company+' investor relations');
+  const rec    =(cf&&cf.recommendation)||'';
+  const src    =(cf&&cf._verifiedSource)||f.verifiedSource||'';
+  const srcDate=(cf&&cf._verifiedDate)  ||f.verifiedDate  ||'';
+  const isVer  =(cf&&cf.contacts&&cf.contacts.length>0)||f.verified===true;
+  const cfSearched=!!cf;
 
-// ── RENDER CONTACT CELL ──────────────────────────────────────────────────
-// Always shows at least one clickable channel. Never "no data found".
-function renderContactCell(f, cf) {
-  // Merge: web search result overrides seed if found
-  const name    = (cf && cf.contacts && cf.contacts[0] && cf.contacts[0].name)  || f.contact  || 'IR Team';
-  const title   = (cf && cf.contacts && cf.contacts[0] && cf.contacts[0].title) || f.title    || 'Investor Relations';
-  const email   = (cf && cf.contacts && cf.contacts[0] && cf.contacts[0].email) || f.email    || '';
-  const phone   = (cf && cf.contacts && cf.contacts[0] && cf.contacts[0].phone) || f.phone    || '';
-  const irPage  = (cf && cf.irPage)   || '';
-  const liPerson= (cf && cf.linkedinPerson) || '';
-  const liSearch= (cf && cf.linkedinSearch) || (name !== 'IR Team' ? name + ' ' + (f.company||'') + ' investor relations' : f.company + ' investor relations');
-  const rec     = (cf && cf.recommendation) || '';
-  const src     = (cf && cf._verifiedSource) || f.verifiedSource || '';
-  const srcDate = (cf && cf._verifiedDate)   || f.verifiedDate   || '';
-  const isVer   = (cf && cf.contacts && cf.contacts.length > 0) || f.verified === true;
-  const cfSearched = !!cf;
-
-  let h = '';
-
-  // IR Firm status badge — shown FIRST, most important for strategy
-  const irFirmType = f.irFirmType || 'unknown';
-  const irFirm = f.irFirm || '';
-  if(irFirmType === 'agency') {
-    h += '<div class="ir-firm-badge ir-agency">⚠ Agency IR: ' + e(irFirm) + '</div>';
-    h += '<div class="bypass-note">⚡ <strong>Bypass the agency.</strong> Contact the CFO or CEO directly. Pitch: Angela provides AI investor intelligence that ' + e(irFirm) + ' cannot match — at a fraction of the cost.</div>';
-  } else if(irFirmType === 'internal') {
-    h += '<div class="ir-firm-badge ir-internal">✓ In-House IR Team</div>';
-  } else {
-    h += '<div class="ir-firm-badge ir-unknown">? IR Structure Unknown</div>';
-  }
-
-  // Name & title
-  h += '<div class="irn">' + e(name) + '</div>';
-  h += '<div class="irt">' + e(title) + '</div>';
-
-  // ── CLICKABLE CHANNELS ──────────────────────────────────────────
-  h += '<div style="display:flex;flex-wrap:wrap;gap:4px;margin:5px 0">';
-
-  // 1. Email — show as copyable text, NOT mailto (avoids triggering personal email client)
-  if(email && email.includes('@')) {
-    h += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">';
-    h += '<span style="font-family:var(--mono);font-size:10px;color:#1d4ed8;background:#eff4ff;border:1px solid #93c5fd;padding:2px 7px;border-radius:4px">✉ ' + e(email) + '</span>';
-    h += '<button onclick="navigator.clipboard.writeText(\'' + e(email) + '\');this.textContent=\'✓\';setTimeout(()=>this.textContent=\'Copy\',1500)" style="padding:2px 6px;border-radius:3px;border:1px solid #c8d4e4;background:#fff;color:var(--text3);font-size:9px;cursor:pointer;font-family:var(--sans)">Copy</button>';
-    h += '</div>';
-  } else if(email && !email.includes('@')) {
-    // It's a URL to contact page
-    h += '<a href="https://' + e(email.replace('https://','')) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#eff4ff;border:1px solid #93c5fd;color:#1d4ed8;font-size:9px;font-weight:600;text-decoration:none;margin-bottom:3px">✉ Contact Page ↗</a>';
-  }
-
-  // 2. Phone
-  if(phone) {
-    h += '<a href="tel:' + e(phone.replace(/[^0-9+]/g,'')) + '" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-size:9px;font-weight:600;font-family:var(--mono);text-decoration:none">📞 ' + e(phone) + '</a>';
-  }
-
-  // 3. IR Page
-  const irUrl = irPage || (f.sec && !f.sec.includes('sec.gov') ? f.sec : '');
-  if(irUrl) {
-    h += '<a href="' + e(irUrl) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f5f3ff;border:1px solid #c4b5fd;color:#7c3aed;font-size:9px;font-weight:600;text-decoration:none">🌐 IR Page</a>';
-  }
-
-  // 4. LinkedIn search
-  const liUrl = liPerson
-    ? 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(liPerson)
-    : 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(liSearch);
-  h += '<a href="' + liUrl + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f0f9ff;border:1px solid #7dd3fc;color:#0369a1;font-size:9px;font-weight:600;text-decoration:none">💼 LinkedIn</a>';
-
-  // 5. SEC EDGAR — always there as fallback
-  // Always show EDGAR link — either filing link or company page
-  const edgarLink = f.edgarPage || f.sec || ('https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=' + (f.cik||''));
-  h += '<a href="' + e(edgarLink) + '" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#fafafa;border:1px solid #d4d4d4;color:#525252;font-size:9px;font-weight:600;text-decoration:none">📄 EDGAR</a>';
-
-  h += '</div>';
-
-  // ── VERIFICATION STATUS ──────────────────────────────────────────
-  if(isVer) {
-    h += '<div class="ver-badge ver-ok">✓ Verified ' + e(srcDate) + '</div>';
-    if(src) h += '<div class="ver-src">' + e(src) + '</div>';
-  } else {
-    h += '<div class="ver-badge ver-no">⚠ Unverified</div>';
-    if(src) h += '<div class="ver-src">' + e(src) + '</div>';
-  }
-
-  // Recommendation from web search
-  if(rec) h += '<div style="font-size:10px;color:var(--text2);font-style:italic;margin-top:4px;border-top:1px solid var(--slate3);padding-top:4px">💡 ' + e(rec) + '</div>';
-
-  // ── VERIFY BUTTON ────────────────────────────────────────────────
-  const btnLabel = cfSearched ? '↻ Re-verify' : (f.verified ? '↻ Re-verify' : '🔍 Verify Contact');
-  const btnClass = cfSearched || f.verified ? 'cf-btn done' : 'cf-btn';
-  h += '<button id="cf-btn-' + f.id + '" class="' + btnClass + '" onclick="findContact(\'' + f.id + '\')" style="margin-top:5px">' + btnLabel + '</button>';
-
-  // Result area (for web search results)
-  const cfRes = cf ? renderCFExtra(cf) : '';
-  if(cfRes) h += '<div id="cf-res-' + f.id + '" class="cf-result">' + cfRes + '</div>';
-  else h += '<div id="cf-res-' + f.id + '" class="cf-result" style="display:none"></div>';
-
-  return h;
-}
-
-// Renders only the EXTRA info from web search (beyond what's already shown above)
-function renderCFExtra(cf) {
-  let h = '';
-  const contacts = cf.contacts || [];
-  // Show additional contacts beyond the first
-  contacts.slice(1).forEach(c => {
-    h += '<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--slate3)">';
-    h += '<div style="font-size:10px;font-weight:600">' + e(c.name||'') + '</div>';
-    h += '<div style="font-size:9px;color:var(--text3)">' + e(c.title||'') + '</div>';
-    if(c.email) h += '<div style="font-size:9px;color:var(--blue);font-family:var(--mono)">✉ ' + e(c.email) + '</div>';
-    if(c.source) h += '<div style="font-size:8px;color:var(--text4);font-style:italic">Source: ' + e(c.source) + '</div>';
-    h += '</div>';
-  });
-  if(cf.note) h += '<div style="font-size:9px;color:var(--text3);margin-top:3px">' + e(cf.note) + '</div>';
-  return h;
-}
-
-function renderCF(data) {
-  if(!data) return '<span style="color:var(--text3)">No data</span>';
   let h='';
-  const contacts = data.contacts||[];
-  contacts.forEach(c=>{
-    const cc=c.confidence==='high'?'cf-conf-high':c.confidence==='medium'?'cf-conf-med':'cf-conf-low';
-    h+='<div style="margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid var(--slate3)">';
-    h+='<div class="cf-name">'+e(c.name||'Unknown')+' <span class="'+cc+'">('+( c.confidence||'?')+')</span></div>';
-    h+='<div style="font-size:10px;color:var(--text3)">'+e(c.title||'')+'</div>';
-    if(c.email) h+='<div style="color:var(--blue);font-family:var(--mono);font-size:10px">✉ '+e(c.email)+'</div>';
-    if(c.phone) h+='<div style="color:var(--text3);font-family:var(--mono);font-size:10px">📞 '+e(c.phone)+'</div>';
-    if(c.source) h+='<div style="font-size:9px;color:var(--text4);font-style:italic">Source: '+e(c.source)+'</div>';
+
+  const irFirmType=f.irFirmType||'unknown';
+  const irFirm=f.irFirm||'';
+  if(irFirmType==='agency'){
+    h+='<div class="ir-firm-badge ir-agency">⚠ Agency IR: '+e(irFirm)+'</div>';
+    h+='<div class="bypass-note">⚡ <strong>Bypass the agency.</strong> Contact the CFO or CEO directly. Pitch: Angela provides AI investor intelligence that '+e(irFirm)+' cannot match — at a fraction of the cost.</div>';
+  } else if(irFirmType==='internal'){
+    h+='<div class="ir-firm-badge ir-internal">✓ In-House IR Team</div>';
+  } else {
+    h+='<div class="ir-firm-badge ir-unknown">? IR Structure Unknown</div>';
+  }
+
+  h+='<div class="irn">'+e(name)+'</div>';
+  h+='<div class="irt">'+e(title)+'</div>';
+
+  h+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin:5px 0">';
+
+  if(email && email.includes('@')){
+    h+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">';
+    h+='<span style="font-family:var(--mono);font-size:10px;color:#1d4ed8;background:#eff4ff;border:1px solid #93c5fd;padding:2px 7px;border-radius:4px">✉ '+e(email)+'</span>';
+    h+='<button onclick="navigator.clipboard.writeText(\''+e(email)+'\');this.textContent=\'✓\';setTimeout(()=>this.textContent=\'Copy\',1500)" style="padding:2px 6px;border-radius:3px;border:1px solid #c8d4e4;background:#fff;color:var(--text3);font-size:9px;cursor:pointer;font-family:var(--sans)">Copy</button>';
+    h+='</div>';
+  } else if(email && !email.includes('@')){
+    h+='<a href="https://'+e(email.replace('https://',''))+'" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#eff4ff;border:1px solid #93c5fd;color:#1d4ed8;font-size:9px;font-weight:600;text-decoration:none;margin-bottom:3px">✉ Contact Page ↗</a>';
+  }
+
+  if(phone){
+    h+='<a href="tel:'+e(phone.replace(/[^0-9+]/g,''))+'" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f0fdf4;border:1px solid #86efac;color:#15803d;font-size:9px;font-weight:600;font-family:var(--mono);text-decoration:none">📞 '+e(phone)+'</a>';
+  }
+
+  const irUrl=irPage||(f.sec&&!f.sec.includes('sec.gov')?f.sec:'');
+  if(irUrl){
+    h+='<a href="'+e(irUrl)+'" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f5f3ff;border:1px solid #c4b5fd;color:#7c3aed;font-size:9px;font-weight:600;text-decoration:none">🌐 IR Page</a>';
+  }
+
+  const liUrl=liPerson
+    ?'https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(liPerson)
+    :'https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(liSearch);
+  h+='<a href="'+liUrl+'" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#f0f9ff;border:1px solid #7dd3fc;color:#0369a1;font-size:9px;font-weight:600;text-decoration:none">💼 LinkedIn</a>';
+
+  const edgarLink=f.edgarPage||f.sec||('https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK='+(f.cik||''));
+  h+='<a href="'+e(edgarLink)+'" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;background:#fafafa;border:1px solid #d4d4d4;color:#525252;font-size:9px;font-weight:600;text-decoration:none">📄 EDGAR</a>';
+
+  h+='</div>';
+
+  if(isVer){
+    h+='<div class="ver-badge ver-ok">✓ Verified '+e(srcDate)+'</div>';
+    if(src) h+='<div class="ver-src">'+e(src)+'</div>';
+  } else {
+    h+='<div class="ver-badge ver-no">⚠ Unverified</div>';
+    if(src) h+='<div class="ver-src">'+e(src)+'</div>';
+  }
+
+  if(rec) h+='<div style="font-size:10px;color:var(--text2);font-style:italic;margin-top:4px;border-top:1px solid var(--slate3);padding-top:4px">💡 '+e(rec)+'</div>';
+
+  const btnLabel=cfSearched?'↻ Re-verify':(f.verified?'↻ Re-verify':'🔍 Verify Contact');
+  const btnClass=cfSearched||f.verified?'cf-btn done':'cf-btn';
+  h+='<button id="cf-btn-'+f.id+'" class="'+btnClass+'" onclick="findContact(\''+f.id+'\')" style="margin-top:5px">'+btnLabel+'</button>';
+
+  const cfRes=cf?renderCFExtra(cf):'';
+  if(cfRes) h+='<div id="cf-res-'+f.id+'" class="cf-result">'+cfRes+'</div>';
+  else h+='<div id="cf-res-'+f.id+'" class="cf-result" style="display:none"></div>';
+
+  return h;
+}
+
+function renderCFExtra(cf){
+  let h='';
+  const contacts=cf.contacts||[];
+  contacts.slice(1).forEach(c=>{
+    h+='<div style="margin-top:4px;padding-top:4px;border-top:1px solid var(--slate3)">';
+    h+='<div style="font-size:10px;font-weight:600">'+e(c.name||'')+'</div>';
+    h+='<div style="font-size:9px;color:var(--text3)">'+e(c.title||'')+'</div>';
+    if(c.email) h+='<div style="font-size:9px;color:var(--blue);font-family:var(--mono)">✉ '+e(c.email)+'</div>';
+    if(c.source) h+='<div style="font-size:8px;color:var(--text4);font-style:italic">Source: '+e(c.source)+'</div>';
     h+='</div>';
   });
-  if(data.irPage) h+='<div><a href="'+e(data.irPage)+'" target="_blank" style="color:var(--blue);font-size:10px">🔗 IR Page ↗</a></div>';
-  if(data.linkedinPerson) h+='<div style="color:var(--purple);font-size:10px;font-weight:500;margin-top:3px">💼 '+e(data.linkedinPerson)+'</div>';
-  if(data.linkedinSearch) h+='<div><a href="https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent(data.linkedinSearch)+'" target="_blank" style="color:var(--purple);font-size:10px">🔍 Search LinkedIn ↗</a></div>';
-  if(data.recommendation) h+='<div style="color:var(--text2);font-style:italic;font-size:10px;margin-top:4px;border-top:1px solid var(--slate3);padding-top:4px">💡 '+e(data.recommendation)+'</div>';
-  if(data.note) h+='<div style="font-size:9px;color:var(--text3);margin-top:2px">'+e(data.note)+'</div>';
-  if(!h) h='<span style="color:var(--text3);font-size:10px">No public contact found — check IR page directly</span>';
+  if(cf.note) h+='<div style="font-size:9px;color:var(--text3);margin-top:3px">'+e(cf.note)+'</div>';
   return h;
 }
 
-// ── FILTERING & SORTING ───────────────────────────────────────────
-function getFiltered() {
+// ── FILTERING ─────────────────────────────────────────────────────
+function getFiltered(){
   return SEED.filter(f=>{
-    if(state.tab==='feed') return isNew(f);
-    if(state.tab==='c1') return f.circle===1 && getSt(f.id)!=='client';
-    if(state.tab==='c2') return f.circle===2 && getSt(f.id)!=='client';
-    if(state.tab==='c3') return f.circle===3 && getSt(f.id)!=='client';
-    if(state.tab==='all') return getSt(f.id)!=='client';
+    if(state.tab==='feed')    return isNew(f);
+    if(state.tab==='c1')      return f.circle===1 && getSt(f.id)!=='client';
+    if(state.tab==='c2')      return f.circle===2 && getSt(f.id)!=='client';
+    if(state.tab==='c3')      return f.circle===3 && getSt(f.id)!=='client';
+    if(state.tab==='all')     return getSt(f.id)!=='client';
     return true;
   }).filter(f=>{
-    if(state.filterType!=='all'&&!f.ft.startsWith(state.filterType)) return false;
-    if(state.filterStatus!=='all'&&getSt(f.id)!==state.filterStatus) return false;
-    if(state.search){ const q=state.search.toLowerCase(); return [f.company,f.sector,f.hq,f.contact,f.desc].some(x=>x&&x.toLowerCase().includes(q)); }
+    if(state.filterType!=='all' && !f.ft.startsWith(state.filterType)) return false;
+    if(state.filterStatus!=='all' && getSt(f.id)!==state.filterStatus) return false;
+    if(state.search){
+      const q=state.search.toLowerCase();
+      return [f.company,f.sector,f.hq,f.contact,f.desc].some(x=>x&&x.toLowerCase().includes(q));
+    }
     return true;
   });
 }
 
-function sortRows(rows) {
+// ── SORTING (fixed) ───────────────────────────────────────────────
+function sortRows(rows){
   return [...rows].sort((a,b)=>{
-    if(state.sort==='recent') return new Date(b.filed)-new Date(a.filed);
-    if(state.sort==='oldest') return new Date(a.filed)-new Date(b.filed);
-    if(state.sort==='fit') return a.circle!==b.circle ? a.circle-b.circle : new Date(b.filed)-new Date(a.filed);
-    if(state.sort==='status') return (SO[getSt(b.id)]||0)-(SO[getSt(a.id)]||0);
+    if(state.sort==='recent')  return safeDate(b.filed) - safeDate(a.filed);
+    if(state.sort==='oldest')  return safeDate(a.filed) - safeDate(b.filed);
+    if(state.sort==='fit')     return a.circle!==b.circle
+      ? a.circle-b.circle
+      : safeDate(b.filed)-safeDate(a.filed);
+    if(state.sort==='status')  return (SO[getSt(b.id)]||0)-(SO[getSt(a.id)]||0);
     return 0;
   });
 }
 
 // ── TAB & FILTER ──────────────────────────────────────────────────
-function setTab(t,btn) {
+function setTab(t,btn){
   state.tab=t;
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -880,20 +794,20 @@ function setTab(t,btn) {
   render();
 }
 
-function setFType(v,btn) {
+function setFType(v,btn){
   state.filterType=v;
   let i=0; document.querySelectorAll('.fbar .chip').forEach(b=>{if(i<4)b.classList.remove('on');i++;});
   btn.classList.add('on'); render();
 }
 
-function setFStatus(v,btn) {
+function setFStatus(v,btn){
   state.filterStatus=v;
   let i=0; document.querySelectorAll('.fbar .chip').forEach(b=>{if(i>=4)b.classList.remove('on');i++;});
   btn.classList.add('on'); render();
 }
 
 // ── STATS ─────────────────────────────────────────────────────────
-function updateStats() {
+function updateStats(){
   const newC=SEED.filter(f=>isNew(f)).length;
   const allC=SEED.filter(f=>getSt(f.id)!=='client').length;
   const c1=SEED.filter(f=>f.circle===1&&getSt(f.id)!=='client').length;
@@ -912,39 +826,45 @@ function updateStats() {
   document.getElementById('cnt-clients').textContent=cli;
 
   document.getElementById('sstrip').innerHTML=[
-    {v:SEED.length,l:'Total Prospects',c:'#fff'},
-    {v:newC,l:'New This Week',c:'#f87171'},
-    {v:c1,l:'Act Now',c:'#f87171'},
-    {v:c2,l:'Build',c:'#fcd34d'},
-    {v:sent,l:'Emails Sent',c:'#fcd34d'},
-    {v:rep,l:'Replied',c:'#4ade80'},
-    {v:prog,l:'In Progress',c:'#c4b5fd'},
-    {v:cli>0?'⭐ '+cli:'—',l:'Clients',c:'var(--gold2)'},
+    {v:SEED.length,    l:'Total Prospects',c:'#fff'},
+    {v:newC,           l:'New This Week',  c:'#f87171'},
+    {v:c1,             l:'Act Now',        c:'#f87171'},
+    {v:c2,             l:'Build',          c:'#fcd34d'},
+    {v:sent,           l:'Emails Sent',    c:'#fcd34d'},
+    {v:rep,            l:'Replied',        c:'#4ade80'},
+    {v:prog,           l:'In Progress',    c:'#c4b5fd'},
+    {v:cli>0?'⭐ '+cli:'—',l:'Clients',   c:'var(--gold2)'},
   ].map(x=>`<div class="ss"><div class="ss-v" style="color:${x.c}">${x.v}</div><div class="ss-l">${x.l}</div></div>`).join('');
 }
 
 // ── RENDER ────────────────────────────────────────────────────────
-function renderPipeline() {
+function renderPipeline(){
   const rows=sortRows(getFiltered());
   if(!rows.length) return `<div style="padding:60px;text-align:center;color:var(--text3);background:#fff"><div style="font-size:26px;margin-bottom:8px">◆</div><div style="font-size:13px;font-weight:500">No results match current filters</div></div>`;
   return `<div class="tw"><table>
-    <thead><tr><th>Filed / Added</th><th>Type</th><th>Company</th><th>Fit & Reason</th><th>IR Contact & Strategy</th><th>Reach</th><th>Who Sends</th><th>Angela?</th><th style="min-width:145px">Status</th><th style="min-width:160px">Notes</th><th>SEC</th></tr></thead>
-    <tbody>` + rows.map(f=>{
+    <thead><tr>
+      <th>Filed / Added</th><th>Type</th><th>Company</th>
+      <th>Fit & Reason</th><th>IR Contact & Strategy</th>
+      <th>Reach</th><th>Who Sends</th><th>Angela?</th>
+      <th style="min-width:145px">Status</th>
+      <th style="min-width:160px">Notes</th><th>SEC</th>
+    </tr></thead>
+    <tbody>`+rows.map(f=>{
     const sc=SC[getSt(f.id)]||SC.not_contacted;
     const fc=FC[f.ft]||FC['8-K'];
     const cc=CC[f.circle]||CC[3];
     const isDir=f.reach?.startsWith('Direct');
     const isPre=f.reach?.startsWith('Pre');
     const rCol=isDir?'var(--green)':isPre?'var(--purple)':'var(--blue)';
-    const rBg=isDir?'var(--green-bg)':isPre?'var(--purple-bg)':'var(--blue-bg)';
+    const rBg =isDir?'var(--green-bg)':isPre?'var(--purple-bg)':'var(--blue-bg)';
     const rBor=isDir?'var(--green-b)':isPre?'var(--purple-b)':'var(--blue-b)';
     const sOpts=Object.entries(SC).map(([k,v])=>`<option value="${k}"${getSt(f.id)===k?' selected':''}>${v.label}</option>`).join('');
-    const cf=contactCache[f.id];
+    const isCIK=f.company&&f.company.startsWith('[CIK');
     return `<tr class="${isNew(f)?'is-new':''}">
       <td><div class="dm">${e(f.filed)}</div><div class="ds">added ${e(f.addedDate)}</div></td>
       <td><span class="badge" style="color:${fc.color};background:${fc.bg};border-color:${fc.border}">${e(f.ft)}</span></td>
       <td>
-        <div class="co-name" style="${f.company.startsWith('[CIK')?'color:var(--text3);font-style:italic':''}">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}${f.urgency==='high'?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:3px;vertical-align:middle">⚡ URGENT</span>':''}${f.company.startsWith('[CIK')?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#f0f9ff;color:#0369a1;font-size:8px;font-weight:600;font-family:var(--mono);margin-left:3px">🔍 Verify to resolve name</span>':''}</div>
+        <div class="co-name" style="${isCIK?'color:var(--text3);font-style:italic':''}">${e(f.company)}${isNew(f)?'<span class="ntag">NEW</span>':''}${f.autoFetched?'<span class="atag">AUTO</span>':''}${f.urgency==='high'?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#dc2626;font-size:8px;font-weight:700;font-family:var(--mono);margin-left:3px;vertical-align:middle">⚡ URGENT</span>':''}${isCIK?'<span style="display:inline-block;padding:1px 5px;border-radius:3px;background:#f0f9ff;color:#0369a1;font-size:8px;font-weight:600;font-family:var(--mono);margin-left:3px">🔍 Verify to resolve name</span>':''}</div>
         <div class="co-meta">${f.ticker&&f.ticker!=='Pending'&&f.ticker!=='Private'?e(f.ticker)+' · ':''}${e(f.exchange)}</div>
         <div class="co-sector">${e(f.sector)}</div>
         <div class="co-desc" style="color:var(--text3)">${e(f.hq)}</div>
@@ -952,12 +872,10 @@ function renderPipeline() {
       </td>
       <td>
         <div class="cr"><div class="cdot" style="background:${cc.color}"></div><span class="clbl" style="color:${cc.color}">${cc.label}</span><span style="font-size:9px;color:var(--text3)"> — ${cc.sub}</span></div>
-        ${f.industry ? '<div class="ind">' + e(f.industry) + '</div>' : ''}
+        ${f.industry?'<div class="ind">'+e(f.industry)+'</div>':''}
         <div class="cwhy">${e(f.why)}</div>
       </td>
-      <td>
-        ${renderContactCell(f, contactCache[f.id])}
-      </td>
+      <td>${renderContactCell(f,contactCache[f.id])}</td>
       <td><span class="rbadge" style="color:${rCol};background:${rBg};border-color:${rBor}">${isDir?'✓':isPre?'◎':'→'} ${e(f.reach)}</span></td>
       <td>
         <span class="sbadge" style="background:${f.sender==='Daniel'?'var(--blue-bg)':'var(--green-bg)'};color:${f.sender==='Daniel'?'var(--blue)':'var(--green)'};border-color:${f.sender==='Daniel'?'var(--blue-b)':'var(--green-b)'}">${e(f.sender)}</span>
@@ -971,12 +889,12 @@ function renderPipeline() {
       <td><textarea class="nta" placeholder="Add notes..." oninput="updateNotes('${f.id}',this.value)">${e(getNotes(f.id))}</textarea></td>
       <td><a href="${e(f.sec)}" target="_blank" rel="noreferrer" class="seclink">EDGAR ↗</a></td>
     </tr>`;
-  }).join('') + `</tbody></table></div>`;
+  }).join('')+`</tbody></table></div>`;
 }
 
-function renderClients() {
+function renderClients(){
   if(!clients.length) return `<div class="clients-grid"><div class="empty-cc"><div style="font-size:28px;margin-bottom:8px">⭐</div><div style="font-size:13px;font-weight:500;margin-bottom:5px">No clients yet</div><div style="font-size:11px">Set a prospect's status to ⭐ CLIENT — they'll appear here automatically.</div></div></div>`;
-  return `<div class="clients-grid">` + clients.map(c=>`
+  return `<div class="clients-grid">`+clients.map(c=>`
     <div class="cc">
       <div class="cc-head">
         <div><div class="cc-name">${e(c.company)}</div><div class="cc-sector">${e(c.sector)} · ${e(c.exchange)}</div>${c.contractStart?`<div class="cc-since">Client since ${e(c.contractStart)}</div>`:''}</div>
@@ -1002,38 +920,41 @@ function renderClients() {
         <button class="cc-save" onclick="saveClient('${c.id}')">Save → Google Sheets</button>
         ${c.lastUpdated?`<div style="font-size:9px;color:var(--text4);text-align:center;margin-top:4px">Updated ${new Date(c.lastUpdated).toLocaleDateString()} by ${e(c.addedBy)}</div>`:''}
       </div>
-    </div>`).join('') + `</div>`;
+    </div>`).join('')+`</div>`;
 }
 
-function updateCF(id,field,val) {
+function updateCF(id,field,val){
   const c=clients.find(x=>x.id===id); if(c) c[field]=val;
 }
 
-function render() {
+function render(){
   updateStats();
   const mc=document.getElementById('mainContent');
   if(!mc) return;
-  // Preserve scroll position
-  const tw = mc.querySelector('.tw');
-  const scrollTop = tw ? tw.scrollTop : 0;
-  const winScroll = window.scrollY;
-  mc.innerHTML = state.tab==='clients' ? renderClients() : renderPipeline();
-  // Restore scroll position
-  const newTw = mc.querySelector('.tw');
-  if(newTw && scrollTop) newTw.scrollTop = scrollTop;
-  if(winScroll) window.scrollTo(0, winScroll);
+  const tw=mc.querySelector('.tw');
+  const scrollTop=tw?tw.scrollTop:0;
+  const winScroll=window.scrollY;
+  mc.innerHTML=state.tab==='clients'?renderClients():renderPipeline();
+  const newTw=mc.querySelector('.tw');
+  if(newTw&&scrollTop) newTw.scrollTop=scrollTop;
+  if(winScroll) window.scrollTo(0,winScroll);
+  // Restore sort selector state after re-render
+  const sel=document.getElementById('sortSel');
+  if(sel) sel.value=state.sort;
 }
 
 // ── MANUAL ADD FILING ─────────────────────────────────────────────
-function openAddFiling() {
-  document.getElementById('nf-filed').value = new Date().toISOString().split('T')[0];
+function openAddFiling(){
+  document.getElementById('nf-filed').value=new Date().toISOString().split('T')[0];
   document.getElementById('addModal').style.display='flex';
 }
-function closeAddFiling() {
+function closeAddFiling(){
   document.getElementById('addModal').style.display='none';
-  ['nf-company','nf-sector','nf-exchange','nf-ticker','nf-hq','nf-desc','nf-why','nf-sec'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['nf-company','nf-sector','nf-exchange','nf-ticker','nf-hq','nf-desc','nf-why','nf-sec'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
 }
-async function submitNewFiling() {
+async function submitNewFiling(){
   const company=document.getElementById('nf-company').value.trim();
   const filed=document.getElementById('nf-filed').value;
   if(!company||!filed){alert('Company name and filed date are required.');return;}
@@ -1057,8 +978,8 @@ async function submitNewFiling() {
     manual:true,
   };
   SEED.unshift(nf);
-  try {const m=JSON.parse(localStorage.getItem('angela_manual')||'[]');m.unshift(nf);localStorage.setItem('angela_manual',JSON.stringify(m));} catch(e) {}
-  try { await wPost({action:'writePipeline',...nf,updatedBy:CURRENT_USER}); } catch(e) {}
+  try{const m=JSON.parse(localStorage.getItem('angela_manual')||'[]');m.unshift(nf);localStorage.setItem('angela_manual',JSON.stringify(m));}catch(e){}
+  try{ await wPost({action:'writePipeline',...nf,updatedBy:CURRENT_USER}); }catch(e){}
   closeAddFiling();
   setTab('feed',document.getElementById('tab-feed'));
   showSaving('✓ Filing added');
@@ -1066,9 +987,7 @@ async function submitNewFiling() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-// 1. Render SEED immediately — page never blank
 render();
-// 2. Load KV data in background — overlays on top
 loadData();
 </script>
 </body>
