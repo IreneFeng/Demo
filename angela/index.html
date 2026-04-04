@@ -263,6 +263,7 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
     <span id="feedStatusText">Auto-fetch runs daily 9am EST · Loading...</span>
     <div style="margin-left:auto;display:flex;gap:6px">
       <button class="btn-fetch" id="fetchNowBtn" onclick="triggerFetch()">⚡ Fetch Now</button>
+      <button class="btn-fetch" id="histFetchBtn" onclick="triggerHistorical()" style="background:#f5f3ff;border-color:#c4b5fd;color:#7c3aed" title="Search past 6 months of IPO filings">📅 Past 6 Months</button>
       <button class="btn-manual" onclick="openAddFiling()">+ Add Manual</button>
       <button class="btn-manual" style="background:#fef2f2;border-color:#fecaca;color:#dc2626" onclick="clearAndRestart()" title="Clear auto-fetched companies and fetch fresh batch">🔄 Reset & Refetch</button>
     </div>
@@ -562,6 +563,43 @@ async function triggerFetch() {
     } else {
       statusEl.textContent = `✓ Fetch complete · Checked ${totalChecked}+ filings · 0 relevant companies today (Angela filtered all) · Next auto-fetch: tomorrow 9am EST`;
     }
+  }
+}
+
+async function triggerHistorical() {
+  const btn = document.getElementById('histFetchBtn');
+  const statusEl = document.getElementById('feedStatusText');
+  if(btn) { btn.disabled=true; btn.textContent='📅 Searching...'; }
+  showSaving('Angela searching past 6 months of IPO filings...');
+
+  let totalAdded = 0;
+  let round = 0;
+
+  while(round < 50) {
+    round++;
+    if(statusEl) statusEl.textContent = `Searching historical filings — batch ${round}...`;
+    try {
+      const result = await wPost({action:'historicalFetch', months:6});
+      totalAdded += result.added || 0;
+      if(statusEl) statusEl.textContent = `Batch ${round}: found ${result.found||0} · added ${result.added||0} · total ${totalAdded}`;
+      if(!result.remaining || result.remaining <= 0) break;
+      await new Promise(r => setTimeout(r, 1000));
+    } catch(e) {
+      console.error('Historical fetch error:', e.message);
+      break;
+    }
+  }
+
+  if(btn) { btn.disabled=false; btn.textContent='📅 Past 6 Months'; }
+  showSaving('✓ Historical search complete · ' + totalAdded + ' companies added');
+  await loadData();
+  hideSaving();
+
+  const statusEl2 = document.getElementById('feedStatusText');
+  if(statusEl2) {
+    statusEl2.textContent = totalAdded > 0
+      ? '✓ Found ' + totalAdded + ' companies from past 6 months · Next auto-fetch: tomorrow 9am EST'
+      : '✓ Historical search complete · 0 new relevant companies found';
   }
 }
 
