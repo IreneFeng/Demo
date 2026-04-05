@@ -583,6 +583,163 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
 .add-row-wrap{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--brd);}
 .detect-hint{display:none;padding:6px 16px;background:var(--surf);font-size:11.5px;color:var(--ink3);border-bottom:1px solid var(--brd);}
 .detect-hint.on{display:flex;align-items:center;gap:6px;}
+
+/* ════ MEETINGS CALENDAR ════ */
+.mtg-cal-wrap{background:var(--white);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;}
+.mtg-cal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--brd);gap:8px;}
+.mtg-cal-nav{display:flex;align-items:center;gap:6px;}
+.mtg-cal-nav-btn{background:none;border:1px solid var(--brd);border-radius:5px;width:26px;height:26px;cursor:pointer;color:var(--ink2);font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.mtg-cal-nav-btn:hover{background:var(--surf);border-color:var(--brd2);}
+.mtg-cal-title{font-size:13px;font-weight:600;color:var(--ink);min-width:120px;text-align:center;}
+.mtg-cal-views{display:flex;gap:3px;}
+.mtg-cal-view-btn{font-size:11px;font-weight:500;padding:4px 10px;border-radius:4px;border:1px solid var(--brd);background:none;cursor:pointer;color:var(--ink3);transition:all .12s;font-family:var(--f-body);}
+.mtg-cal-view-btn.active{background:var(--ink);color:white;border-color:var(--ink);}
+
+/* Week view */
+.mcal-week{overflow-x:auto;}
+.mcal-week-grid{display:grid;grid-template-columns:44px repeat(7,1fr);min-width:560px;}
+.mcal-week-header{display:grid;grid-template-columns:44px repeat(7,1fr);min-width:560px;border-bottom:1px solid var(--brd);}
+.mcal-week-day-hd{padding:8px 4px;text-align:center;font-size:10.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;border-right:1px solid var(--brd);}
+.mcal-week-day-hd.today-col{color:var(--blue);}
+.mcal-week-day-num{font-size:18px;font-weight:400;font-family:var(--f-display);color:var(--ink);display:block;margin-top:2px;}
+.mcal-week-day-hd.today-col .mcal-week-day-num{background:var(--ink);color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;}
+.mcal-time-col{font-size:9.5px;color:var(--ink4);text-align:right;padding-right:8px;height:40px;display:flex;align-items:flex-start;justify-content:flex-end;padding-top:2px;border-right:1px solid var(--brd);}
+.mcal-week-cell{border-right:1px solid var(--brd);border-bottom:1px solid rgba(0,0,0,.04);height:40px;position:relative;cursor:pointer;transition:background .1s;}
+.mcal-week-cell:hover{background:var(--surf);}
+.mcal-week-cell.today-col{background:rgba(41,82,204,.02);}
+.mcal-now-line{position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:5;pointer-events:none;}
+.mcal-now-line::before{content:'';position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.mcal-event{position:absolute;left:2px;right:2px;border-radius:4px;padding:2px 5px;font-size:9.5px;font-weight:600;z-index:3;overflow:hidden;cursor:pointer;transition:opacity .12s;line-height:1.3;}
+.mcal-event:hover{opacity:.85;}
+.mcal-event.meeting{background:var(--blue-s);color:var(--blue);border-left:2px solid var(--blue);}
+.mcal-event.conflict{background:var(--red-s);color:var(--red);border-left:2px solid var(--red);}
+.mcal-event.done{background:var(--green-s);color:var(--green);border-left:2px solid var(--green);}
+.mcal-event.task{background:var(--gold-s);color:var(--gold);border-left:2px solid var(--gold);}
+
+/* Month view */
+.mcal-month{padding:8px;}
+.mcal-month-header{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;}
+.mcal-month-dh{text-align:center;font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;padding:4px 0;}
+.mcal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.mcal-month-day{min-height:72px;border:1px solid var(--brd);border-radius:6px;padding:4px 5px;cursor:pointer;transition:all .12s;position:relative;}
+.mcal-month-day:hover{border-color:var(--brd2);background:var(--surf);}
+.mcal-month-day.today{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);}
+.mcal-month-day.other-month{opacity:.35;}
+.mcal-month-day-num{font-size:11.5px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.mcal-month-day.today .mcal-month-day-num{background:var(--ink);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.mcal-month-event{font-size:9px;font-weight:500;padding:1px 4px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
+.mcal-month-event.meeting{background:var(--blue-s);color:var(--blue);}
+.mcal-month-event.task{background:var(--gold-s);color:var(--gold);}
+.mcal-month-event.more{color:var(--ink3);background:none;font-style:italic;}
+
+/* Year view */
+.mcal-year{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:12px;}
+@media(max-width:600px){.mcal-year{grid-template-columns:repeat(2,1fr);}}
+.mcal-year-month{border:1px solid var(--brd);border-radius:8px;padding:10px;}
+.mcal-year-month-title{font-size:11px;font-weight:700;color:var(--ink2);margin-bottom:6px;text-align:center;}
+.mcal-year-mini{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.mcal-year-dh{font-size:8px;color:var(--ink4);text-align:center;font-weight:600;}
+.mcal-year-day{font-size:8.5px;text-align:center;padding:1px;border-radius:3px;cursor:pointer;color:var(--ink2);transition:all .1s;position:relative;}
+.mcal-year-day:hover{background:var(--surf);}
+.mcal-year-day.today{background:var(--ink);color:white;border-radius:3px;}
+.mcal-year-day.has-events::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:3px;height:3px;border-radius:50%;background:var(--blue);}
+.mcal-year-day.today.has-events::after{background:white;}
+.mcal-overflow-row{background:var(--surf);border-bottom:1px solid var(--brd);}
+.mcal-year-day.other-month{color:var(--ink4);}
+
+/* ════════════════ TRAVEL PAGE ════════════════ */
+/* World Clock */
+/* ── World Clock ── */
+.wc-wrap{background:var(--ink);border-radius:var(--r) var(--r) 0 0;overflow:hidden;}
+.wc-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 0;}
+.wc-header-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;}
+.wc-add-btn{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:4px 10px;cursor:pointer;font-family:var(--f-body);transition:all .13s;}
+.wc-add-btn:hover{background:rgba(255,255,255,.14);color:white;}
+/* City cards scroll */
+.wc-cards{display:flex;gap:8px;overflow-x:auto;padding:10px 16px 14px;scrollbar-width:none;}
+.wc-cards::-webkit-scrollbar{display:none;}
+.wc-item{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;padding:10px 14px;border-radius:9px;background:rgba(255,255,255,.07);min-width:88px;position:relative;cursor:default;transition:background .13s;}
+.wc-item.home{background:rgba(255,255,255,.16);}
+.wc-item.sleeping{opacity:.55;}
+.wc-remove{position:absolute;top:4px;right:5px;background:none;border:none;color:rgba(255,255,255,.25);font-size:11px;cursor:pointer;padding:0;line-height:1;display:none;}
+.wc-item:hover .wc-remove{display:block;}
+.wc-city{font-size:9px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.7px;text-align:center;}
+.wc-time{font-family:var(--f-display);font-size:24px;font-weight:400;color:white;line-height:1.1;text-align:center;}
+.wc-ampm{font-size:11px;color:rgba(255,255,255,.5);}
+.wc-date{font-size:9px;color:rgba(255,255,255,.35);text-align:center;margin-top:1px;}
+.wc-status{font-size:8.5px;font-weight:600;padding:1px 5px;border-radius:3px;margin-top:3px;text-align:center;}
+.wc-status.work{background:rgba(39,192,122,.2);color:#7DDFB1;}
+.wc-status.sleep{background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);}
+.wc-status.evening{background:rgba(255,180,50,.15);color:#FFCC77;}
+/* Timeline viz */
+.wc-timeline{padding:0 16px 12px;position:relative;}
+.wc-tl-axis{height:24px;background:rgba(255,255,255,.04);border-radius:6px;position:relative;overflow:hidden;margin-bottom:6px;}
+.wc-tl-work{position:absolute;top:0;bottom:0;background:rgba(39,192,122,.15);border-radius:3px;}
+.wc-tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--red);border-radius:2px;z-index:3;}
+.wc-tl-now::after{content:'';position:absolute;top:-2px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.wc-tl-labels{display:flex;justify-content:space-between;padding:0 2px;}
+.wc-tl-label{font-size:8px;color:rgba(255,255,255,.25);}
+.wc-tl-rows{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
+.wc-tl-row{display:flex;align-items:center;gap:8px;}
+.wc-tl-city{font-size:9px;font-weight:600;color:rgba(255,255,255,.4);width:64px;text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wc-tl-bar{flex:1;height:14px;background:rgba(255,255,255,.04);border-radius:4px;position:relative;overflow:hidden;}
+.wc-tl-work-seg{position:absolute;top:0;bottom:0;background:rgba(39,192,122,.25);border-radius:3px;}
+.wc-tl-cur{position:absolute;top:0;bottom:0;width:2px;background:var(--red);z-index:2;}
+.wc-tl-time-label{position:absolute;top:50%;transform:translateY(-50%);font-size:8px;font-weight:700;color:white;padding:0 3px;white-space:nowrap;z-index:3;}
+/* Add city modal */
+.wc-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;align-items:flex-end;justify-content:center;}
+.wc-modal.on{display:flex;}
+.wc-modal-box{background:var(--white);border-radius:16px 16px 0 0;width:100%;max-width:480px;padding:20px;max-height:70vh;overflow-y:auto;}
+.wc-modal-title{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:14px;}
+.wc-search-inp{width:100%;padding:10px 14px;border:1px solid var(--brd);border-radius:8px;font-size:14px;font-family:var(--f-body);color:var(--ink);margin-bottom:10px;}
+.wc-search-inp:focus{outline:none;border-color:var(--blue);}
+.wc-city-list{display:flex;flex-direction:column;gap:2px;max-height:320px;overflow-y:auto;}
+.wc-city-opt{padding:10px 14px;border-radius:7px;cursor:pointer;font-size:13px;color:var(--ink2);display:flex;align-items:center;justify-content:space-between;transition:background .1s;}
+.wc-city-opt:hover{background:var(--surf);}
+.wc-city-opt-tz{font-size:11px;color:var(--ink4);}
+.wc-city-opt.added{color:var(--ink4);pointer-events:none;}
+/* Travel calendar */
+.travel-cal-wrap{background:var(--white);border:1px solid var(--brd);border-radius:0 0 var(--r) var(--r);border-top:none;}
+.travel-cal-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--brd);}
+/* Trip cards */
+.trip-card{background:var(--white);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;transition:box-shadow .15s;}
+.trip-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.07);}
+.trip-card-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;}
+.trip-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.trip-status.planning{background:var(--gold);}
+.trip-status.booked{background:var(--green);}
+.trip-status.inprogress{background:var(--blue);}
+.trip-meta{flex:1;}
+.trip-dest{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
+.trip-dates{font-size:11.5px;color:var(--ink3);margin-top:2px;}
+.trip-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;}
+.trip-badge.planning{background:var(--gold-s);color:var(--gold);}
+.trip-badge.booked{background:var(--green-s);color:var(--green);}
+.trip-badge.inprogress{background:var(--blue-s);color:var(--blue);}
+.trip-body{border-top:1px solid var(--brd);padding:16px 20px;display:none;}
+.trip-body.open{display:block;}
+/* Traveler rows */
+.traveler-row{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:12px 16px;margin-bottom:10px;}
+.traveler-name{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.traveler-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+@media(max-width:600px){.traveler-fields{grid-template-columns:1fr;}}
+.tf-label{font-size:10px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.tf-input{width:100%;font-size:12.5px;padding:7px 10px;border:1px solid var(--brd);border-radius:6px;background:var(--white);color:var(--ink);font-family:var(--f-body);transition:border .12s;}
+.tf-input:focus{outline:none;border-color:var(--blue);}
+/* Flight block */
+.flight-block{background:var(--blue-s);border:1px solid var(--blue-m);border-radius:8px;padding:12px 16px;margin-bottom:10px;}
+.flight-block.confirmed{background:var(--green-s);border-color:#B3DFC8;}
+.flight-route{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.flight-route-arrow{color:var(--ink3);font-size:16px;}
+.flight-details-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+@media(max-width:500px){.flight-details-grid{grid-template-columns:1fr 1fr;}}
+/* Entry requirements */
+.entry-result{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px;font-size:13px;color:var(--ink2);line-height:1.7;max-height:280px;overflow-y:auto;}
+.entry-disclaimer{font-size:10.5px;color:var(--ink4);margin-top:8px;padding:6px 10px;background:var(--gold-s);border-radius:5px;border-left:2px solid var(--gold);}
+/* News */
+.travel-news-item{padding:10px 0;border-bottom:1px solid var(--brd);font-size:12.5px;color:var(--ink2);line-height:1.6;}
+.travel-news-item:last-child{border-bottom:none;}
+.travel-news-tag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink4);margin-bottom:3px;}
 </style>
 </head>
 <body>
@@ -601,6 +758,7 @@ body{font-family:var(--f-body);background:var(--bg);color:var(--ink);min-height:
     <button class="ntab" onclick="go('email',this)">📧 Email</button>
     <button class="ntab" onclick="go('meetings',this)">📅 Meetings</button>
     <button class="ntab" onclick="go('projects',this)">📁 Projects</button>
+    <button class="ntab" onclick="go('travel',this)">✈️ Travel</button>
     <button class="ntab" onclick="go('notes',this)">🎙️ Notes</button>
     <button class="ntab" onclick="go('archive',this)">🗂 Archive</button>
   </div>
@@ -1505,6 +1663,24 @@ Best,
           <div class="brief-item"><span class="bic">💡</span><span>Free window <strong>12–1:30 PM</strong> — ideal for focused admin.</span></div>
         </div>
       </div>
+
+      <!-- ── Meetings Calendar ── -->
+      <div class="mtg-cal-wrap">
+        <div class="mtg-cal-header">
+          <div class="mtg-cal-nav">
+            <button class="mtg-cal-nav-btn" onclick="mcalNav(-1)">‹</button>
+            <div class="mtg-cal-title" id="mcal-title">Week of Apr 3</div>
+            <button class="mtg-cal-nav-btn" onclick="mcalNav(1)">›</button>
+          </div>
+          <div class="mtg-cal-views">
+            <button class="mtg-cal-view-btn active" id="mcal-v-week" onclick="mcalSetView('week')">Week</button>
+            <button class="mtg-cal-view-btn" id="mcal-v-month" onclick="mcalSetView('month')">Month</button>
+            <button class="mtg-cal-view-btn" id="mcal-v-year" onclick="mcalSetView('year')">Year</button>
+          </div>
+        </div>
+        <div id="mcal-body"></div>
+      </div>
+
       <div class="card">
         <div class="card-h"><div class="card-t">✦ Ask AI</div></div>
         <div class="ai-resp" id="meet-resp"></div>
@@ -1733,6 +1909,89 @@ Best,
           <div class="ai-resp" id="nresp"></div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     TRAVEL PAGE
+════════════════════════════════════════ -->
+<div class="page" id="page-travel">
+
+  <!-- World Clock -->
+  <div class="wc-wrap" id="wc-wrap">
+    <div class="wc-header">
+      <span class="wc-header-label">🌐 World Time</span>
+      <button class="wc-add-btn" onclick="wcOpenModal()">+ Add City</button>
+    </div>
+    <div class="wc-cards" id="world-clock-bar"><!-- populated by JS --></div>
+    <div class="wc-timeline" id="wc-timeline"><!-- populated by JS --></div>
+  </div>
+  <!-- Add City Modal -->
+  <div class="wc-modal" id="wc-modal" onclick="if(event.target===this)wcCloseModal()">
+    <div class="wc-modal-box">
+      <div class="wc-modal-title">Add City</div>
+      <input class="wc-search-inp" id="wc-search" placeholder="Search city..." oninput="wcFilterCities(this.value)" autocomplete="off"/>
+      <div class="wc-city-list" id="wc-city-list"></div>
+    </div>
+  </div>
+
+  <!-- Travel Calendar -->
+  <div class="travel-cal-wrap" style="margin-bottom:20px;">
+    <div class="travel-cal-header">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button class="mtg-cal-nav-btn" onclick="travelCalNav(-1)">‹</button>
+        <div class="mtg-cal-title" id="travel-cal-title" style="min-width:140px;"></div>
+        <button class="mtg-cal-nav-btn" onclick="travelCalNav(1)">›</button>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="mtg-cal-view-btn active" id="tcal-v-week" onclick="travelCalSetView('week')">Week</button>
+        <button class="mtg-cal-view-btn" id="tcal-v-month" onclick="travelCalSetView('month')">Month</button>
+      </div>
+    </div>
+    <div id="travel-cal-body" style="overflow-x:auto;"></div>
+  </div>
+
+  <div class="g2" style="gap:20px;align-items:flex-start;">
+
+    <!-- Left: Trip list -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h2 style="font-family:var(--f-display);font-size:22px;font-weight:300;">Trips</h2>
+        <button class="btn primary" onclick="travelAddTrip()">+ New Trip</button>
+      </div>
+      <div id="travel-trip-list"><!-- populated by JS --></div>
+    </div>
+
+    <!-- Right: Entry requirements + news -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Entry requirements search -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-t">🛂 Entry Requirements</div>
+        </div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:8px;">
+            <input class="ai-inp" id="entry-search-inp" placeholder='e.g. "US passport to Japan" or "UK visa for China"' style="flex:1;"/>
+            <button class="ai-send" onclick="searchEntryReqs()" style="width:36px;">→</button>
+          </div>
+          <div class="entry-result" id="entry-result" style="display:none;"></div>
+          <div class="entry-disclaimer" id="entry-disclaimer" style="display:none;">⚠️ Always verify with official government sources before travel. Requirements change frequently.</div>
+        </div>
+      </div>
+
+      <!-- Travel news -->
+      <div class="card">
+        <div class="card-h">
+          <div class="card-t">📰 Travel Brief</div>
+          <button class="card-a" onclick="loadTravelNews(this)">✦ Refresh</button>
+        </div>
+        <div id="travel-news-body" style="padding:12px 16px;">
+          <div style="font-size:12.5px;color:var(--ink3);font-style:italic;padding:8px 0;">Click Refresh for today's travel brief.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1970,6 +2229,7 @@ Best,
   <button class="mb" onclick="go('email',this,true)" id="m-email"><div class="mb-ic">📧</div><div class="mb-lbl">Email</div></button>
   <button class="mb" onclick="go('meetings',this,true)" id="m-meetings"><div class="mb-ic">📅</div><div class="mb-lbl">Meet</div></button>
   <button class="mb" onclick="go('projects',this,true)" id="m-projects"><div class="mb-ic">📁</div><div class="mb-lbl">Projects</div></button>
+  <button class="mb" onclick="go('travel',this,true)" id="m-travel"><div class="mb-ic">✈️</div><div class="mb-lbl">Travel</div></button>
   <button class="mb" onclick="go('notes',this,true)" id="m-notes"><div class="mb-ic">🎙️</div><div class="mb-lbl">Notes</div></button>
   <button class="mb" onclick="go('archive',this,true)" id="m-archive"><div class="mb-ic">🗂</div><div class="mb-lbl">Archive</div></button>
 </div>
@@ -2038,6 +2298,8 @@ if(h >= 17) setMode('evening');
 // ── NAVIGATION ──────────────────────────────────────
 const pages = ['home','email','meetings','projects','notes','archive'];
 function go(name, btn, isMobile=false) {
+  if(name==='meetings') setTimeout(mcalRender, 50);
+  if(name==='travel') { setTimeout(()=>{ renderWorldClock(); renderTravelTrips(); renderTravelCalendar(); }, 50); }
   pages.forEach(p => document.getElementById('page-'+p).classList.remove('active'));
   document.querySelectorAll('.ntab,.mb').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
@@ -3257,6 +3519,874 @@ function saveCalTask() {
 // ── INIT ──
 
 
+
+// ════════════════════════════════════════════════
+// MEETINGS CALENDAR (Week / Month / Year)
+// ════════════════════════════════════════════════
+
+let mcalView = 'week';
+let mcalOffset = 0; // weeks/months/years from now
+
+const MCAL_HOURS_START = 6;  // 6 AM
+const MCAL_HOURS_END   = 23; // 11 PM
+const MCAL_SLOT_H      = 36; // px per 30-min slot
+const MCAL_DAYS_SHORT  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MCAL_MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MCAL_MONTHS_SHORT= ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function mcalToday() {
+  return new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
+}
+
+function mcalDayKey(d) {
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+// Get all events for a given day from meetingStore + taskStore
+function mcalEventsForDay(d) {
+  const dk = mcalDayKey(d);
+  const events = [];
+  (meetingStore[dk] || []).forEach(m => {
+    events.push({
+      label: m.title,
+      startMin: m.timeSort,
+      endMin: m.timeSort + (m.duration ? parseInt(m.duration) : 60),
+      type: m.conflict ? 'conflict' : m.done ? 'done' : 'meeting'
+    });
+  });
+  (taskStore[dk] || []).filter(t => t.time && !t.done).forEach(t => {
+    let tsort = 480;
+    const tm = t.time.match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/i);
+    if(tm) {
+      let h = parseInt(tm[1]), mn = parseInt(tm[2]||'0');
+      if(tm[3].toUpperCase()==='PM' && h!==12) h+=12;
+      if(tm[3].toUpperCase()==='AM' && h===12) h=0;
+      tsort = h*60+mn;
+    }
+    events.push({label: t.text, startMin: tsort, endMin: tsort+30, type:'task'});
+  });
+  return events;
+}
+
+function mcalSetView(v) {
+  mcalView = v;
+  mcalOffset = 0;
+  ['week','month','year'].forEach(x => {
+    const btn = document.getElementById('mcal-v-'+x);
+    if(btn) btn.classList.toggle('active', x===v);
+  });
+  mcalRender();
+  renderWorldClock();
+  renderTravelTrips();
+  renderTravelCalendar();
+}
+
+function mcalNav(dir) {
+  mcalOffset += dir;
+  mcalRender();
+  renderWorldClock();
+  renderTravelTrips();
+  renderTravelCalendar();
+}
+
+function mcalRender() {
+  const body = document.getElementById('mcal-body');
+  const title = document.getElementById('mcal-title');
+  if(!body || !title) return;
+  if(mcalView === 'week')  { mcalRenderWeek(body, title); }
+  if(mcalView === 'month') { mcalRenderMonth(body, title); }
+  if(mcalView === 'year')  { mcalRenderYear(body, title); }
+}
+
+// ── WEEK VIEW ──
+function mcalRenderWeek(body, title) {
+  const base = mcalToday();
+  // Go to start of week (Sunday) + offset weeks
+  const dayOfWeek = base.getDay();
+  const weekStart = new Date(base);
+  weekStart.setDate(base.getDate() - dayOfWeek + mcalOffset * 7);
+
+  const days = Array.from({length:7}, (_,i) => {
+    const d = new Date(weekStart); d.setDate(weekStart.getDate()+i); return d;
+  });
+
+  title.textContent = `${MCAL_MONTHS_SHORT[weekStart.getMonth()]} ${weekStart.getDate()} – ${MCAL_MONTHS_SHORT[days[6].getMonth()]} ${days[6].getDate()}, ${days[6].getFullYear()}`;
+
+  const todayKey = mcalDayKey(mcalToday());
+  const now = new Date();
+  const nowMins = now.getHours()*60 + now.getMinutes();
+  const slots = (MCAL_HOURS_END - MCAL_HOURS_START) * 2; // 30-min slots
+
+  // Build header
+  let hdr = `<div class="mcal-week-header"><div class="mcal-week-day-hd" style="border-bottom:1px solid var(--brd);"></div>`;
+  days.forEach(d => {
+    const isToday = mcalDayKey(d) === todayKey;
+    hdr += `<div class="mcal-week-day-hd${isToday?' today-col':''}" style="border-bottom:1px solid var(--brd);">
+      ${MCAL_DAYS_SHORT[d.getDay()]}
+      <span class="mcal-week-day-num">${d.getDate()}</span>
+    </div>`;
+  });
+  hdr += `</div>`;
+
+  // Build time grid
+  let grid = `<div class="mcal-week" style="max-height:520px;overflow-y:auto;">`;
+
+  // ── Before-hours overflow row ──
+  const earlyEvents = days.map(d => mcalEventsForDay(d).filter(e => e.startMin < MCAL_HOURS_START*60));
+  const hasEarly = earlyEvents.some(ev => ev.length > 0);
+  grid += `<div class="mcal-overflow-row" id="mcal-early-row" style="display:${hasEarly?'block':'none'}">
+    <div class="mcal-week-grid">
+      <div class="mcal-time-col" style="font-size:9px;color:var(--ink4);">before<br>${MCAL_HOURS_START}am</div>`;
+  days.forEach((d,i) => {
+    const evs = earlyEvents[i];
+    grid += `<div class="mcal-week-cell" style="height:auto;min-height:32px;padding:2px;">`;
+    evs.forEach(e => {
+      const h = Math.floor(e.startMin/60);
+      const m = e.startMin%60;
+      const ap = h>=12?'pm':'am';
+      const hh = h>12?h-12:h||12;
+      grid += `<div class="mcal-event ${e.type}" style="position:relative;height:auto;margin-bottom:1px;">${hh}:${String(m).padStart(2,'0')}${ap} ${e.label.slice(0,14)}</div>`;
+    });
+    grid += `</div>`;
+  });
+  grid += `</div></div>`;
+
+  // Toggle row for early
+  grid += `<div class="mcal-week-grid" style="border-bottom:1px solid var(--brd);">
+    <div style="grid-column:1/-1;">
+      <button onclick="const r=document.getElementById('mcal-early-row');r.style.display=r.style.display==='none'?'block':'none';this.textContent=r.style.display==='none'?'▸ Before ${MCAL_HOURS_START}:00 AM':'▾ Before ${MCAL_HOURS_START}:00 AM';" 
+        style="width:100%;background:var(--surf);border:none;border-bottom:1px solid var(--brd);padding:4px 8px;font-size:10px;color:var(--ink3);cursor:pointer;text-align:left;font-family:var(--f-body);">
+        ${hasEarly ? '▾' : '▸'} Before ${MCAL_HOURS_START}:00 AM${hasEarly?' ('+earlyEvents.flat().length+' event'+(earlyEvents.flat().length>1?'s':'')+')':`  —  tap to add`}
+      </button>
+    </div>
+  </div>`;
+
+  grid += `<div class="mcal-week-grid">`;
+
+  for(let s=0; s<slots; s++) {
+    const totalMins = (MCAL_HOURS_START * 60) + s * 30;
+    const h = Math.floor(totalMins/60);
+    const m = totalMins%60;
+    const label = m===0 ? `${h>12?h-12:h||12}${h>=12?'pm':'am'}` : '';
+    grid += `<div class="mcal-time-col">${label}</div>`;
+
+    days.forEach(d => {
+      const isToday = mcalDayKey(d) === todayKey;
+      const events = mcalEventsForDay(d).filter(e => {
+        return e.startMin >= totalMins && e.startMin < totalMins+30;
+      });
+
+      // Now-line
+      let nowLine = '';
+      if(isToday && mcalOffset===0 && nowMins >= totalMins && nowMins < totalMins+30) {
+        const pct = ((nowMins - totalMins) / 30) * 100;
+        nowLine = `<div class="mcal-now-line" style="top:${pct}%"></div>`;
+      }
+
+      // Event blocks
+      const evBlocks = events.map(e => {
+        const spanSlots = Math.max(1, Math.round((e.endMin - e.startMin)/30));
+        const h = spanSlots * MCAL_SLOT_H - 4;
+        const title = e.label.length > 18 ? e.label.slice(0,16)+'…' : e.label;
+        return `<div class="mcal-event ${e.type}" style="height:${h}px;top:2px;">${title}</div>`;
+      }).join('');
+
+      grid += `<div class="mcal-week-cell${isToday?' today-col':''}">${nowLine}${evBlocks}</div>`;
+    });
+  }
+  grid += `</div>`;
+
+  // ── After-hours overflow row ──
+  const lateEvents = days.map(d => mcalEventsForDay(d).filter(e => e.startMin >= MCAL_HOURS_END*60));
+  const hasLate = lateEvents.some(ev => ev.length > 0);
+
+  grid += `<div class="mcal-week-grid" style="border-top:1px solid var(--brd);">
+    <div style="grid-column:1/-1;">
+      <button onclick="const r=document.getElementById('mcal-late-row');r.style.display=r.style.display==='none'?'block':'none';this.textContent=r.style.display==='none'?'▸ After ${MCAL_HOURS_END}:00 PM':'▾ After ${MCAL_HOURS_END}:00 PM';"
+        style="width:100%;background:var(--surf);border:none;border-top:1px solid var(--brd);padding:4px 8px;font-size:10px;color:var(--ink3);cursor:pointer;text-align:left;font-family:var(--f-body);">
+        ${hasLate ? '▾' : '▸'} After ${MCAL_HOURS_END}:00 PM${hasLate?' ('+lateEvents.flat().length+' event'+(lateEvents.flat().length>1?'s':'')+')':`  —  tap to add`}
+      </button>
+    </div>
+  </div>
+  <div class="mcal-overflow-row" id="mcal-late-row" style="display:${hasLate?'block':'none'}">
+    <div class="mcal-week-grid">
+      <div class="mcal-time-col" style="font-size:9px;color:var(--ink4);">after<br>${MCAL_HOURS_END-12}pm</div>`;
+  days.forEach((d,i) => {
+    const evs = lateEvents[i];
+    grid += `<div class="mcal-week-cell" style="height:auto;min-height:32px;padding:2px;">`;
+    evs.forEach(e => {
+      const h = Math.floor(e.startMin/60);
+      const m = e.startMin%60;
+      const hh = h>12?h-12:h;
+      grid += `<div class="mcal-event ${e.type}" style="position:relative;height:auto;margin-bottom:1px;">${hh}:${String(m).padStart(2,'0')}pm ${e.label.slice(0,14)}</div>`;
+    });
+    grid += `</div>`;
+  });
+  grid += `</div></div>`;
+
+  grid += `</div>`; // close mcal-week
+  body.innerHTML = hdr + grid;
+
+  // Scroll to 8am (slot 0 = 8am, so scroll to current time)
+  setTimeout(() => {
+    const scrollEl = body.querySelector('.mcal-week');
+    if(scrollEl && mcalOffset===0) {
+      const scrollTo = Math.max(0, (nowMins - MCAL_HOURS_START*60)/30 * MCAL_SLOT_H - 80);
+      scrollEl.scrollTop = scrollTo;
+    }
+  }, 50);
+}
+
+// ── MONTH VIEW ──
+function mcalRenderMonth(body, title) {
+  const base = mcalToday();
+  const viewDate = new Date(base.getFullYear(), base.getMonth() + mcalOffset, 1);
+  title.textContent = `${MCAL_MONTHS_LONG[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+
+  const todayKey = mcalDayKey(mcalToday());
+  const firstDay = viewDate.getDay();
+  const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 0).getDate();
+
+  let html = `<div class="mcal-month">
+    <div class="mcal-month-header">`;
+  MCAL_DAYS_SHORT.forEach(d => { html += `<div class="mcal-month-dh">${d}</div>`; });
+  html += `</div><div class="mcal-month-grid">`;
+
+  // Pad before
+  for(let i=0; i<firstDay; i++) {
+    const pd = new Date(viewDate.getFullYear(), viewDate.getMonth(), -firstDay+i+1);
+    html += `<div class="mcal-month-day other-month"><div class="mcal-month-day-num">${pd.getDate()}</div></div>`;
+  }
+
+  for(let day=1; day<=daysInMonth; day++) {
+    const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+    const dk = mcalDayKey(d);
+    const isToday = dk === todayKey;
+    const events = mcalEventsForDay(d);
+    const maxShow = 3;
+
+    let evHtml = '';
+    events.slice(0, maxShow).forEach(e => {
+      const lbl = e.label.length>16 ? e.label.slice(0,14)+'…' : e.label;
+      evHtml += `<div class="mcal-month-event ${e.type}">${lbl}</div>`;
+    });
+    if(events.length > maxShow) {
+      evHtml += `<div class="mcal-month-event more">+${events.length-maxShow} more</div>`;
+    }
+
+    html += `<div class="mcal-month-day${isToday?' today':''}" onclick="mcalSetView('week');mcalOffset=Math.round((new Date(${d.getFullYear()},${d.getMonth()},${d.getDate()})-mcalToday())/7/86400000/1000*1000);mcalRender();">
+      <div class="mcal-month-day-num">${day}</div>
+      ${evHtml}
+    </div>`;
+  }
+
+  // Pad after
+  const totalCells = firstDay + daysInMonth;
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for(let i=1; i<=remaining; i++) {
+    html += `<div class="mcal-month-day other-month"><div class="mcal-month-day-num">${i}</div></div>`;
+  }
+
+  html += `</div></div>`;
+  body.innerHTML = html;
+}
+
+// ── YEAR VIEW ──
+function mcalRenderYear(body, title) {
+  const base = mcalToday();
+  const year = base.getFullYear() + mcalOffset;
+  title.textContent = `${year}`;
+
+  const todayKey = mcalDayKey(mcalToday());
+  let html = `<div class="mcal-year">`;
+
+  for(let mo=0; mo<12; mo++) {
+    const firstDay = new Date(year, mo, 1).getDay();
+    const daysInMonth = new Date(year, mo+1, 0).getDate();
+
+    html += `<div class="mcal-year-month">
+      <div class="mcal-year-month-title">${MCAL_MONTHS_SHORT[mo]}</div>
+      <div class="mcal-year-mini">`;
+
+    MCAL_DAYS_SHORT.forEach(d => { html += `<div class="mcal-year-dh">${d[0]}</div>`; });
+
+    for(let i=0; i<firstDay; i++) html += `<div></div>`;
+
+    for(let day=1; day<=daysInMonth; day++) {
+      const d = new Date(year, mo, day);
+      const dk = mcalDayKey(d);
+      const isToday = dk === todayKey;
+      const hasEv = mcalEventsForDay(d).length > 0;
+      html += `<div class="mcal-year-day${isToday?' today':''}${hasEv?' has-events':''}" onclick="mcalView='month';mcalOffset=${(year-base.getFullYear())*12+(mo-base.getMonth())};mcalSetView('month');">${day}</div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  html += `</div>`;
+  body.innerHTML = html;
+}
+
+
+// ════════════════════════════════════════════════
+// TRAVEL PAGE
+// ════════════════════════════════════════════════
+
+// ── World Clock ──
+// ══════════════════════════════════════════════
+// WORLD CLOCK — searchable, localStorage-backed
+// ══════════════════════════════════════════════
+
+// City database — 80+ cities with timezone
+const WC_CITY_DB = [
+  // Americas
+  {city:'New York',      region:'Americas', tz:'America/New_York'},
+  {city:'Los Angeles',   region:'Americas', tz:'America/Los_Angeles'},
+  {city:'Chicago',       region:'Americas', tz:'America/Chicago'},
+  {city:'Toronto',       region:'Americas', tz:'America/Toronto'},
+  {city:'Vancouver',     region:'Americas', tz:'America/Vancouver'},
+  {city:'Mexico City',   region:'Americas', tz:'America/Mexico_City'},
+  {city:'São Paulo',     region:'Americas', tz:'America/Sao_Paulo'},
+  {city:'Buenos Aires',  region:'Americas', tz:'America/Argentina/Buenos_Aires'},
+  {city:'Bogotá',        region:'Americas', tz:'America/Bogota'},
+  {city:'Lima',          region:'Americas', tz:'America/Lima'},
+  {city:'Miami',         region:'Americas', tz:'America/New_York'},
+  {city:'San Francisco', region:'Americas', tz:'America/Los_Angeles'},
+  {city:'Boston',        region:'Americas', tz:'America/New_York'},
+  {city:'Denver',        region:'Americas', tz:'America/Denver'},
+  {city:'Seattle',       region:'Americas', tz:'America/Los_Angeles'},
+  // Europe
+  {city:'London',        region:'Europe', tz:'Europe/London'},
+  {city:'Paris',         region:'Europe', tz:'Europe/Paris'},
+  {city:'Berlin',        region:'Europe', tz:'Europe/Berlin'},
+  {city:'Amsterdam',     region:'Europe', tz:'Europe/Amsterdam'},
+  {city:'Zürich',        region:'Europe', tz:'Europe/Zurich'},
+  {city:'Frankfurt',     region:'Europe', tz:'Europe/Berlin'},
+  {city:'Madrid',        region:'Europe', tz:'Europe/Madrid'},
+  {city:'Rome',          region:'Europe', tz:'Europe/Rome'},
+  {city:'Milan',         region:'Europe', tz:'Europe/Rome'},
+  {city:'Brussels',      region:'Europe', tz:'Europe/Brussels'},
+  {city:'Stockholm',     region:'Europe', tz:'Europe/Stockholm'},
+  {city:'Copenhagen',    region:'Europe', tz:'Europe/Copenhagen'},
+  {city:'Oslo',          region:'Europe', tz:'Europe/Oslo'},
+  {city:'Helsinki',      region:'Europe', tz:'Europe/Helsinki'},
+  {city:'Warsaw',        region:'Europe', tz:'Europe/Warsaw'},
+  {city:'Vienna',        region:'Europe', tz:'Europe/Vienna'},
+  {city:'Athens',        region:'Europe', tz:'Europe/Athens'},
+  {city:'Lisbon',        region:'Europe', tz:'Europe/Lisbon'},
+  {city:'Dublin',        region:'Europe', tz:'Europe/Dublin'},
+  // Middle East & Africa
+  {city:'Dubai',         region:'Middle East', tz:'Asia/Dubai'},
+  {city:'Abu Dhabi',     region:'Middle East', tz:'Asia/Dubai'},
+  {city:'Riyadh',        region:'Middle East', tz:'Asia/Riyadh'},
+  {city:'Doha',          region:'Middle East', tz:'Asia/Qatar'},
+  {city:'Kuwait City',   region:'Middle East', tz:'Asia/Kuwait'},
+  {city:'Tel Aviv',      region:'Middle East', tz:'Asia/Jerusalem'},
+  {city:'Istanbul',      region:'Middle East', tz:'Europe/Istanbul'},
+  {city:'Cairo',         region:'Africa', tz:'Africa/Cairo'},
+  {city:'Lagos',         region:'Africa', tz:'Africa/Lagos'},
+  {city:'Nairobi',       region:'Africa', tz:'Africa/Nairobi'},
+  {city:'Johannesburg',  region:'Africa', tz:'Africa/Johannesburg'},
+  {city:'Casablanca',    region:'Africa', tz:'Africa/Casablanca'},
+  // Asia Pacific
+  {city:'Hong Kong',     region:'Asia Pacific', tz:'Asia/Hong_Kong'},
+  {city:'Singapore',     region:'Asia Pacific', tz:'Asia/Singapore'},
+  {city:'Tokyo',         region:'Asia Pacific', tz:'Asia/Tokyo'},
+  {city:'Shanghai',      region:'Asia Pacific', tz:'Asia/Shanghai'},
+  {city:'Beijing',       region:'Asia Pacific', tz:'Asia/Shanghai'},
+  {city:'Seoul',         region:'Asia Pacific', tz:'Asia/Seoul'},
+  {city:'Taipei',        region:'Asia Pacific', tz:'Asia/Taipei'},
+  {city:'Bangkok',       region:'Asia Pacific', tz:'Asia/Bangkok'},
+  {city:'Jakarta',       region:'Asia Pacific', tz:'Asia/Jakarta'},
+  {city:'Kuala Lumpur',  region:'Asia Pacific', tz:'Asia/Kuala_Lumpur'},
+  {city:'Manila',        region:'Asia Pacific', tz:'Asia/Manila'},
+  {city:'Mumbai',        region:'Asia Pacific', tz:'Asia/Kolkata'},
+  {city:'Delhi',         region:'Asia Pacific', tz:'Asia/Kolkata'},
+  {city:'Bangalore',     region:'Asia Pacific', tz:'Asia/Kolkata'},
+  {city:'Karachi',       region:'Asia Pacific', tz:'Asia/Karachi'},
+  {city:'Colombo',       region:'Asia Pacific', tz:'Asia/Colombo'},
+  {city:'Dhaka',         region:'Asia Pacific', tz:'Asia/Dhaka'},
+  {city:'Kathmandu',     region:'Asia Pacific', tz:'Asia/Kathmandu'},
+  {city:'Sydney',        region:'Asia Pacific', tz:'Australia/Sydney'},
+  {city:'Melbourne',     region:'Asia Pacific', tz:'Australia/Melbourne'},
+  {city:'Auckland',      region:'Asia Pacific', tz:'Pacific/Auckland'},
+  {city:'Osaka',         region:'Asia Pacific', tz:'Asia/Tokyo'},
+  // Russia & Central Asia
+  {city:'Moscow',        region:'Europe', tz:'Europe/Moscow'},
+  {city:'St Petersburg', region:'Europe', tz:'Europe/Moscow'},
+];
+
+// Load from localStorage (or default)
+function wcLoadCities() {
+  try {
+    const saved = localStorage.getItem('amelia_world_clocks');
+    if(saved) return JSON.parse(saved);
+  } catch(e) {}
+  return [
+    {city:'New York',   tz:'America/New_York',   home:true},
+    {city:'London',     tz:'Europe/London'},
+    {city:'Dubai',      tz:'Asia/Dubai'},
+    {city:'Hong Kong',  tz:'Asia/Hong_Kong'},
+    {city:'Tokyo',      tz:'Asia/Tokyo'},
+  ];
+}
+
+function wcSaveCities() {
+  try { localStorage.setItem('amelia_world_clocks', JSON.stringify(wcCities)); } catch(e) {}
+}
+
+let wcCities = wcLoadCities();
+
+// Get UTC offset in hours for a timezone
+function getOffsetHours(tz, date) {
+  const utc = new Date(date.toLocaleString('en-US', {timeZone:'UTC'}));
+  const local = new Date(date.toLocaleString('en-US', {timeZone:tz}));
+  return Math.round((local - utc) / 3600000);
+}
+
+// Get local hour (0-23) in a given timezone
+function getLocalHour(tz, date) {
+  return parseInt(date.toLocaleTimeString('en-US', {timeZone:tz, hour:'2-digit', hour12:false}));
+}
+
+function wcGetStatus(hour) {
+  if(hour >= 9 && hour < 18) return {label:'Working hours', cls:'work'};
+  if(hour >= 18 && hour < 22) return {label:'Evening', cls:'evening'};
+  return {label:'Sleeping', cls:'sleep'};
+}
+
+// ── Main render ──
+function renderWorldClock() {
+  renderWcCards();
+  renderWcTimeline();
+}
+
+function renderWcCards() {
+  const bar = document.getElementById('world-clock-bar');
+  if(!bar) return;
+  const now = new Date();
+
+  bar.innerHTML = wcCities.map((wc, i) => {
+    const t12 = now.toLocaleTimeString('en-US', {timeZone:wc.tz, hour:'numeric', minute:'2-digit', hour12:true});
+    const timeParts = t12.match(/^(\d+:\d+)\s*(AM|PM)$/i) || ['','--:--',''];
+    const timeNum = timeParts[1] || t12;
+    const ampm = timeParts[2] || '';
+    const d = now.toLocaleDateString('en-US', {timeZone:wc.tz, weekday:'short', month:'short', day:'numeric'});
+    const hour = getLocalHour(wc.tz, now);
+    const status = wcGetStatus(hour);
+    const offset = getOffsetHours(wc.tz, now);
+    const offsetStr = offset === 0 ? 'UTC' : (offset > 0 ? `UTC+${offset}` : `UTC${offset}`);
+    const isSleeping = status.cls === 'sleep';
+
+    return `<div class="wc-item${wc.home?' home':''}${isSleeping?' sleeping':''}" title="${offsetStr}">
+      ${!wc.home ? `<button class="wc-remove" onclick="wcRemoveCity(${i})" title="Remove">✕</button>` : ''}
+      <div class="wc-city">${wc.city}</div>
+      <div class="wc-time">${timeNum}<span class="wc-ampm"> ${ampm}</span></div>
+      <div class="wc-date">${d}</div>
+      <div class="wc-status ${status.cls}">${status.label}</div>
+    </div>`;
+  }).join('') +
+  `<div style="flex-shrink:0;display:flex;align-items:center;padding:0 4px;">
+    <button onclick="wcOpenModal()" style="background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);border-radius:9px;width:72px;height:100%;min-height:80px;color:rgba(255,255,255,.4);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .13s;" onmouseover="this.style.background='rgba(255,255,255,.1)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">+</button>
+  </div>`;
+}
+
+function renderWcTimeline() {
+  const tl = document.getElementById('wc-timeline');
+  if(!tl) return;
+  const now = new Date();
+  const nowUTCmins = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const nowPct = (nowUTCmins / 1440) * 100;
+
+  // Top axis — 24h UTC labels
+  let html = `<div class="wc-tl-axis">
+    <div class="wc-tl-work" style="left:${(9/24)*100}%;width:${(9/24)*100}%;"></div>
+    <div class="wc-tl-now" style="left:${nowPct}%;"></div>
+  </div>
+  <div class="wc-tl-labels">
+    <span class="wc-tl-label">12 AM</span>
+    <span class="wc-tl-label">6 AM</span>
+    <span class="wc-tl-label">12 PM</span>
+    <span class="wc-tl-label">6 PM</span>
+    <span class="wc-tl-label">12 AM</span>
+  </div>
+  <div class="wc-tl-rows">`;
+
+  wcCities.forEach(wc => {
+    const offset = getOffsetHours(wc.tz, now);
+    const localHour = getLocalHour(wc.tz, now);
+    const t = now.toLocaleTimeString('en-US', {timeZone:wc.tz, hour:'numeric', minute:'2-digit', hour12:true});
+
+    // Work hours in UTC for this city: 9am-6pm local = 9-offset to 18-offset in UTC
+    let workStartUTC = (9 - offset + 24) % 24;
+    let workEndUTC   = (18 - offset + 24) % 24;
+    const workStartPct = (workStartUTC / 24) * 100;
+    const workW = (9 / 24) * 100; // 9 hour work day
+
+    // Current local time position on bar
+    const localMins = (now.getUTCHours() + offset + 24) % 24 * 60 + now.getUTCMinutes();
+    const localPct = ((localMins % 1440) / 1440) * 100;
+
+    const status = wcGetStatus(localHour);
+
+    html += `<div class="wc-tl-row">
+      <div class="wc-tl-city">${wc.city}</div>
+      <div class="wc-tl-bar">
+        <div class="wc-tl-work-seg" style="left:${workStartPct}%;width:${workW}%;"></div>
+        <div class="wc-tl-cur" style="left:${localPct}%;"></div>
+        <div class="wc-tl-time-label" style="left:${Math.min(localPct,80)}%;">${t}</div>
+      </div>
+    </div>`;
+  });
+
+  html += `</div>`;
+  tl.innerHTML = html;
+}
+
+// ── City management ──
+function wcRemoveCity(i) {
+  if(wcCities[i].home) return; // can't remove home
+  wcCities.splice(i, 1);
+  wcSaveCities();
+  renderWorldClock();
+}
+
+function wcAddCity(cityObj) {
+  if(wcCities.find(c => c.tz === cityObj.tz && c.city === cityObj.city)) return;
+  wcCities.push({city:cityObj.city, tz:cityObj.tz});
+  wcSaveCities();
+  renderWorldClock();
+  wcCloseModal();
+}
+
+// ── Modal ──
+function wcOpenModal() {
+  document.getElementById('wc-modal').classList.add('on');
+  document.getElementById('wc-search').value = '';
+  wcFilterCities('');
+  setTimeout(() => document.getElementById('wc-search').focus(), 100);
+}
+
+function wcCloseModal() {
+  document.getElementById('wc-modal').classList.remove('on');
+}
+
+function wcFilterCities(q) {
+  const list = document.getElementById('wc-city-list');
+  if(!list) return;
+  const filtered = q.trim()
+    ? WC_CITY_DB.filter(c => c.city.toLowerCase().includes(q.toLowerCase()) || c.region.toLowerCase().includes(q.toLowerCase()))
+    : WC_CITY_DB;
+
+  list.innerHTML = filtered.slice(0, 40).map(c => {
+    const already = wcCities.find(wc => wc.city === c.city);
+    const now = new Date();
+    const t = now.toLocaleTimeString('en-US', {timeZone:c.tz, hour:'numeric', minute:'2-digit', hour12:true});
+    return `<div class="wc-city-opt${already?' added':''}" onclick="${already?'':` wcAddCity({city:'${c.city}',tz:'${c.tz}'})`}">
+      <span>${c.city} <span style="font-size:10px;color:var(--ink4);">${c.region}</span></span>
+      <span style="font-size:12px;font-weight:600;color:var(--ink2);">${t}${already?' <span style="color:var(--ink4);font-size:10px;">added</span>':''}</span>
+    </div>`;
+  }).join('');
+}
+
+setInterval(renderWorldClock, 30000);
+
+// ── Trip Data Store ──
+const travelTrips = [
+  {
+    id: 'trip1',
+    destination: 'Tokyo, Japan',
+    dates: 'Apr 15 – Apr 22, 2026',
+    status: 'planning', // planning | booked | inprogress
+    travelers: [
+      {name:'James Sullivan (CEO)', from:'JFK', to:'NRT', pref:'Business class', flight:'', hotel:''},
+      {name:'Sarah Chen (CFO)', from:'EWR', to:'NRT', pref:'Business class', flight:'', hotel:''},
+    ],
+    notes: 'Annual investor summit. Nikkei conference Apr 17.',
+    open: false
+  },
+  {
+    id: 'trip2',
+    destination: 'London, UK',
+    dates: 'May 3 – May 5, 2026',
+    status: 'booked',
+    travelers: [
+      {name:'James Sullivan (CEO)', from:'JFK', to:'LHR', pref:'First class', flight:'BA112 · Dep 9:00PM · Arr 9:05AM', hotel:'Claridge\'s · Confirmation #CL8821'},
+    ],
+    notes: 'Board meeting at Mayfair office.',
+    open: false
+  }
+];
+
+// ── Trip List Render ──
+function renderTravelTrips() {
+  const container = document.getElementById('travel-trip-list');
+  if(!container) return;
+
+  if(!travelTrips.length) {
+    container.innerHTML = '<div style="padding:24px;text-align:center;font-size:13px;color:var(--ink3);font-style:italic;">No trips yet. Click + New Trip to start.</div>';
+    return;
+  }
+
+  container.innerHTML = travelTrips.map((trip, ti) => {
+    const travelerRows = trip.travelers.map((tr, pi) => `
+      <div class="traveler-row">
+        <div class="traveler-name">👤 ${tr.name}</div>
+        <div class="traveler-fields">
+          <div>
+            <div class="tf-label">From Airport</div>
+            <input class="tf-input" value="${tr.from}" placeholder="IATA code (e.g. JFK)"
+              oninput="travelTrips[${ti}].travelers[${pi}].from=this.value;renderTravelCalendar()"/>
+          </div>
+          <div>
+            <div class="tf-label">To Airport</div>
+            <input class="tf-input" value="${tr.to}" placeholder="IATA code (e.g. NRT)"
+              oninput="travelTrips[${ti}].travelers[${pi}].to=this.value"/>
+          </div>
+          <div>
+            <div class="tf-label">Flight Preference</div>
+            <input class="tf-input" value="${tr.pref}" placeholder="e.g. Business class, aisle"
+              oninput="travelTrips[${ti}].travelers[${pi}].pref=this.value"/>
+          </div>
+          <div>
+            <div class="tf-label">Confirmed Flight</div>
+            <input class="tf-input" value="${tr.flight}" placeholder="e.g. AA100 · JFK→NRT · Apr 15 8PM"
+              oninput="travelTrips[${ti}].travelers[${pi}].flight=this.value"/>
+          </div>
+          <div style="grid-column:1/-1;">
+            <div class="tf-label">Hotel / Accommodation</div>
+            <input class="tf-input" value="${tr.hotel}" placeholder="Hotel name · Confirmation #"
+              oninput="travelTrips[${ti}].travelers[${pi}].hotel=this.value"/>
+          </div>
+        </div>
+        ${tr.flight ? `<div class="flight-block confirmed" style="margin-top:10px;">
+          <div class="flight-route">✈️ ${tr.from} <span class="flight-route-arrow">→</span> ${tr.to}</div>
+          <div style="font-size:12px;color:var(--green);font-weight:500;">${tr.flight}</div>
+          ${tr.hotel ? `<div style="font-size:11.5px;color:var(--ink3);margin-top:4px;">🏨 ${tr.hotel}</div>`:''}
+        </div>` : `<div class="flight-block" style="margin-top:10px;">
+          <div class="flight-route">✈️ ${tr.from} <span class="flight-route-arrow">→</span> ${tr.to}</div>
+          <div style="font-size:11.5px;color:var(--blue);">Pending — enter confirmed flight above</div>
+        </div>`}
+      </div>`).join('');
+
+    const allBooked = trip.travelers.every(t => t.flight);
+    const actualStatus = allBooked && trip.status==='planning' ? 'booked' : trip.status;
+
+    return `<div class="trip-card">
+      <div class="trip-card-header" onclick="travelTrips[${ti}].open=!travelTrips[${ti}].open;renderTravelTrips()">
+        <div class="trip-status ${actualStatus}"></div>
+        <div class="trip-meta">
+          <div class="trip-dest">✈️ ${trip.destination}</div>
+          <div class="trip-dates">${trip.dates} · ${trip.travelers.length} traveler${trip.travelers.length>1?'s':''}</div>
+        </div>
+        <div class="trip-badge ${actualStatus}">${actualStatus.charAt(0).toUpperCase()+actualStatus.slice(1)}</div>
+        <span style="color:var(--ink3);font-size:14px;">${trip.open?'▾':'▸'}</span>
+      </div>
+      <div class="trip-body${trip.open?' open':''}">
+        ${travelerRows}
+        <div style="margin-top:10px;">
+          <div class="tf-label">Trip Notes</div>
+          <textarea class="tf-input" rows="2" style="resize:vertical;" oninput="travelTrips[${ti}].notes=this.value">${trip.notes}</textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn ghost sm" onclick="travelAddTraveler(${ti})">+ Add Traveler</button>
+          <button class="btn ghost sm" onclick="travelAISuggest(${ti},this)">✦ AI Suggest Flights</button>
+          <button class="btn ghost sm" style="color:var(--red);" onclick="if(confirm('Remove this trip?')){travelTrips.splice(${ti},1);renderTravelTrips();renderTravelCalendar();}">Delete Trip</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function travelAddTrip() {
+  travelTrips.unshift({
+    id:'trip'+Date.now(),
+    destination:'', dates:'', status:'planning',
+    travelers:[{name:'', from:'', to:'', pref:'', flight:'', hotel:''}],
+    notes:'', open:true
+  });
+  renderTravelTrips();
+}
+
+function travelAddTraveler(ti) {
+  travelTrips[ti].travelers.push({name:'', from:'', to:'', pref:'', flight:'', hotel:''});
+  renderTravelTrips();
+}
+
+async function travelAISuggest(ti, btn) {
+  const trip = travelTrips[ti];
+  const orig = btn.textContent;
+  btn.textContent = '✦ Thinking...'; btn.disabled = true;
+  try {
+    const travelers = trip.travelers.map(t => `${t.name}: ${t.from}→${t.to}, pref: ${t.pref||'any'}`).join('; ');
+    const res = await claude(
+      `For a ${trip.destination} trip (${trip.dates}), suggest realistic flight options for:\n${travelers}\nFormat: airline, flight number, rough schedule, class. Be concise.`,
+      'You are a professional travel coordinator for executive assistants. Give practical, specific flight suggestions.'
+    );
+    // Show result in a small panel below the button
+    let panel = document.getElementById('ai-suggest-'+ti);
+    if(!panel) {
+      panel = document.createElement('div');
+      panel.id = 'ai-suggest-'+ti;
+      panel.style.cssText = 'margin-top:10px;padding:12px;background:var(--surf);border:1px solid var(--brd);border-radius:8px;font-size:12.5px;color:var(--ink2);line-height:1.7;white-space:pre-wrap;';
+      btn.parentNode.parentNode.appendChild(panel);
+    }
+    panel.textContent = res;
+  } catch(e) {
+    alert('Could not connect. Check proxy.');
+  }
+  btn.textContent = orig; btn.disabled = false;
+}
+
+// ── Entry Requirements ──
+async function searchEntryReqs() {
+  const inp = document.getElementById('entry-search-inp');
+  const result = document.getElementById('entry-result');
+  const disc = document.getElementById('entry-disclaimer');
+  const q = inp.value.trim();
+  if(!q) return;
+
+  result.style.display = 'block';
+  result.textContent = '✦ Looking up requirements...';
+  disc.style.display = 'none';
+
+  try {
+    const res = await claude(
+      `Entry requirements query: "${q}"\n\nProvide a clear, structured answer covering: visa requirements, passport validity needed, vaccination requirements if any, customs limits, and any current travel advisories. Be specific and practical for an executive assistant booking corporate travel.`,
+      'You are a knowledgeable travel coordinator. Provide accurate entry requirement information as of your knowledge cutoff, structured clearly. Always note that requirements should be verified with official sources.'
+    );
+    result.textContent = res;
+    disc.style.display = 'block';
+  } catch(e) {
+    result.textContent = 'Could not fetch. Please check connection.';
+  }
+}
+document.addEventListener('keydown', e => {
+  if(e.key==='Enter' && document.activeElement?.id==='entry-search-inp') searchEntryReqs();
+});
+
+// ── Travel News ──
+async function loadTravelNews(btn) {
+  const body = document.getElementById('travel-news-body');
+  if(!body) return;
+  const orig = btn.textContent;
+  btn.textContent = '✦ Loading...'; btn.disabled = true;
+  body.innerHTML = '<div style="padding:8px;font-size:12.5px;color:var(--ink3);font-style:italic;">Generating travel brief...</div>';
+
+  try {
+    const trips = travelTrips.map(t => `${t.destination} (${t.dates})`).join(', ');
+    const res = await claude(
+      `Generate a concise daily travel brief for an EA managing corporate travel${trips ? ` (upcoming trips: ${trips})` : ''}. Cover: 1) any major airline disruptions or strikes worth monitoring, 2) key regulatory changes for business travel, 3) one practical travel tip. Format as 3 short bullet points with emoji labels. Keep each point under 2 sentences.`,
+      'You are a corporate travel coordinator. Provide practical, actionable travel intelligence for executive assistants.'
+    );
+    // Parse into items
+    const lines = res.split('\n').filter(l => l.trim());
+    body.innerHTML = lines.map(l => `<div class="travel-news-item">${l}</div>`).join('');
+  } catch(e) {
+    body.innerHTML = '<div style="padding:8px;font-size:12.5px;color:var(--red);">Could not load. Check connection.</div>';
+  }
+  btn.textContent = orig; btn.disabled = false;
+}
+
+// ── Travel Calendar ──
+let travelCalView = 'week';
+let travelCalOffset = 0;
+
+function travelCalSetView(v) {
+  travelCalView = v;
+  travelCalOffset = 0;
+  ['week','month'].forEach(x => {
+    const b = document.getElementById('tcal-v-'+x);
+    if(b) b.classList.toggle('active', x===v);
+  });
+  renderTravelCalendar();
+}
+
+function travelCalNav(dir) { travelCalOffset += dir; renderTravelCalendar(); }
+
+function renderTravelCalendar() {
+  const body = document.getElementById('travel-cal-body');
+  const title = document.getElementById('travel-cal-title');
+  if(!body || !title) return;
+
+  const base = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate());
+  const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS_S = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const todayKey = `${base.getFullYear()}-${base.getMonth()}-${base.getDate()}`;
+
+  // Build trip event map: date -> [{dest, status, type}]
+  const tripMap = {};
+  travelTrips.forEach(trip => {
+    if(!trip.dates) return;
+    // Try to parse date range like "Apr 15 – Apr 22, 2026"
+    const parts = trip.dates.split(/[–-]/);
+    if(parts.length < 2) return;
+    const year = trip.dates.match(/\d{4}/)?.[0] || NOW.getFullYear();
+    const parseD = (s) => {
+      s = s.trim().replace(/,?\s*\d{4}/, '');
+      return new Date(`${s} ${year}`);
+    };
+    try {
+      const start = parseD(parts[0]);
+      const end = parseD(parts[1]);
+      if(isNaN(start) || isNaN(end)) return;
+      for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) {
+        const dk = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        if(!tripMap[dk]) tripMap[dk] = [];
+        const isFirst = dk === `${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`;
+        const isLast = dk === `${end.getFullYear()}-${end.getMonth()}-${end.getDate()}`;
+        tripMap[dk].push({dest:trip.destination.split(',')[0], status:trip.status, isFirst, isLast});
+      }
+    } catch(e) {}
+  });
+
+  if(travelCalView === 'week') {
+    const dayOfWeek = base.getDay();
+    const weekStart = new Date(base);
+    weekStart.setDate(base.getDate() - dayOfWeek + travelCalOffset * 7);
+    const days = Array.from({length:7}, (_,i) => { const d=new Date(weekStart); d.setDate(weekStart.getDate()+i); return d; });
+    title.textContent = `${MONTHS_S[weekStart.getMonth()]} ${weekStart.getDate()} – ${MONTHS_S[days[6].getMonth()]} ${days[6].getDate()}, ${days[6].getFullYear()}`;
+
+    let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);min-width:480px;">`;
+    days.forEach(d => {
+      const dk = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const isToday = dk === todayKey;
+      const events = tripMap[dk] || [];
+      html += `<div style="border-right:1px solid var(--brd);padding:8px 6px;min-height:90px;${isToday?'background:rgba(41,82,204,.03)':''}">
+        <div style="font-size:10px;font-weight:700;color:${isToday?'var(--blue)':'var(--ink3)'};text-transform:uppercase;letter-spacing:.5px;">${DAYS_S[d.getDay()]}</div>
+        <div style="font-size:17px;font-weight:400;font-family:var(--f-display);color:${isToday?'var(--ink)':'var(--ink2)'};">${d.getDate()}</div>
+        ${events.map(e => `<div style="font-size:9.5px;font-weight:600;padding:2px 5px;border-radius:3px;margin-top:3px;background:${e.status==='booked'?'var(--green-s)':'var(--gold-s)'};color:${e.status==='booked'?'var(--green)':'var(--gold)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.isFirst?'✈ ':e.isLast?'🏁 ':''}${e.dest}</div>`).join('')}
+      </div>`;
+    });
+    html += `</div>`;
+    body.innerHTML = html;
+
+  } else {
+    // Month view
+    const viewDate = new Date(base.getFullYear(), base.getMonth() + travelCalOffset, 1);
+    title.textContent = `${['January','February','March','April','May','June','July','August','September','October','November','December'][viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+    const firstDay = viewDate.getDay();
+    const daysInMonth = new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 0).getDate();
+
+    let html = `<div style="padding:8px;"><div style="display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;">`;
+    DAYS_S.forEach(d => { html += `<div style="text-align:center;font-size:10px;font-weight:700;color:var(--ink4);padding:4px 0;text-transform:uppercase;">${d}</div>`; });
+    html += `</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">`;
+    for(let i=0;i<firstDay;i++) html += `<div></div>`;
+    for(let day=1;day<=daysInMonth;day++) {
+      const d = new Date(viewDate.getFullYear(), viewDate.getMonth(), day);
+      const dk = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const isToday = dk === todayKey;
+      const events = tripMap[dk] || [];
+      html += `<div style="min-height:60px;border:1px solid var(--brd);border-radius:5px;padding:4px 5px;${isToday?'border-color:var(--ink);':''}">
+        <div style="font-size:11px;font-weight:600;color:${isToday?'var(--ink)':'var(--ink2)'};">${day}</div>
+        ${events.map(e=>`<div style="font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;margin-top:2px;background:${e.status==='booked'?'var(--green-s)':'var(--gold-s)'};color:${e.status==='booked'?'var(--green)':'var(--gold)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.isFirst?'✈ ':''}${e.dest}</div>`).join('')}
+      </div>`;
+    }
+    html += `</div></div>`;
+    body.innerHTML = html;
+  }
+}
+
 // ── FINAL INIT ──
 function ameliaInit() {
   renderArcTasks();
@@ -3265,6 +4395,10 @@ function ameliaInit() {
   renderMtgNav();
   updateClock();
   updateAlerts();
+  mcalRender();
+  renderWorldClock();
+  renderTravelTrips();
+  renderTravelCalendar();
 }
 
 if(document.readyState === 'loading') {
