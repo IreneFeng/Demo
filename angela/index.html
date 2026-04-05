@@ -534,17 +534,29 @@ async function triggerHistorical(){
   if(btn){btn.disabled=true;btn.textContent='📅 Searching...';}
   showSaving('Angela searching past 6 months of IPO filings...');
 
-  let totalAdded=0, round=0;
-  while(round<50){
+  let totalAdded=0, round=0, consecutive_errors=0;
+  // Max 200 rounds — 6 months of RSS pages (each ~2 weeks back) + processing queue
+  while(round<200){
     round++;
-    if(statusEl) statusEl.textContent=`Searching historical filings — batch ${round}...`;
+    if(statusEl) statusEl.textContent=`Batch ${round} — searching... (${totalAdded} added so far)`;
     try {
       const result=await wPost({action:'historicalFetch',months:6});
+      consecutive_errors=0; // reset on success
       totalAdded+=result.added||0;
-      if(statusEl) statusEl.textContent=`Batch ${round}: found ${result.found||0} · added ${result.added||0} · total ${totalAdded}`;
-      if(!result.remaining||result.remaining<=0) break;
-      await new Promise(r=>setTimeout(r,1000));
-    } catch(e){ console.error('Historical fetch error:',e.message); break; }
+      const rem=result.remaining||0;
+      if(statusEl) statusEl.textContent=`Batch ${round}: +${result.added||0} companies · ${totalAdded} total · ${rem} remaining`;
+      // Refresh display every 5 batches so user sees progress
+      if(round%5===0) { updateStats(); }
+      if(rem<=0) break;
+      // 2s gap — gives Worker time to finish KV writes before next call
+      await new Promise(r=>setTimeout(r,2000));
+    } catch(e){
+      console.error('Historical fetch error:',e.message);
+      consecutive_errors++;
+      // Allow up to 3 consecutive errors (transient timeouts) before giving up
+      if(consecutive_errors>=3) break;
+      await new Promise(r=>setTimeout(r,3000));
+    }
   }
 
   if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
