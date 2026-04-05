@@ -528,35 +528,52 @@ async function triggerFetch(){
   }
 }
 
-async function triggerHistorical(){
+function triggerHistorical(){
   const btn=document.getElementById('histFetchBtn');
   const statusEl=document.getElementById('feedStatusText');
   if(btn){btn.disabled=true;btn.textContent='📅 Searching...';}
-  showSaving('Angela searching past 6 months...');
 
-  // Kick off background loop in Worker (runs via waitUntil — no timeout)
-  try { await wPost({action:'startHistoricalLoop',months:6}); } catch(e){}
+  let totalAdded=0, round=0;
+  let isRunning=true;
 
-  // Poll for status every 3 seconds until done
-  let polls=0;
-  const pollInterval = setInterval(async ()=>{
-    polls++;
-    try {
-      const s = await wPost({action:'pollHistorical'});
-      if(statusEl) statusEl.textContent = s.status || 'Running...';
-      if(s.histTotalAdded > 0) showSaving('↻ ' + s.histTotalAdded + ' companies added so far...');
-      // Refresh table every 5 polls
-      if(polls%5===0) await loadData();
-      if(s.done || !s.running || polls>120){
-        clearInterval(pollInterval);
-        if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
-        await loadData();
-        hideSaving();
-        const st=document.getElementById('feedStatusText');
-        if(st) st.textContent = s.status || ('✓ Done — ' + (s.histTotalAdded||0) + ' companies added');
-      }
-    } catch(e){ polls++; }
-  }, 3000);
+  function stop(msg){
+    isRunning=false;
+    if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
+    loadData();
+    hideSaving();
+    const st=document.getElementById('feedStatusText');
+    if(st) st.textContent=msg;
+  }
+
+  function runBatch(){
+    if(!isRunning) return;
+    round++;
+    if(statusEl) statusEl.textContent='Batch '+round+' — searching... ('+totalAdded+' added)';
+    showSaving('Angela searching past 6 months...');
+
+    wPost({action:'historicalFetch',months:6})
+      .then(result=>{
+        if(!isRunning) return;
+        totalAdded += result.added||0;
+        const rem = result.remaining||0;
+        if(statusEl) statusEl.textContent='Batch '+round+': +'+(result.added||0)+' · '+totalAdded+' total · '+rem+' remaining';
+        showSaving('↻ '+totalAdded+' companies added...');
+        if(round%10===0) loadData();
+        if(rem<=0 || round>=200){
+          stop('✓ Found '+totalAdded+' companies from past 6 months · Next auto-fetch: tomorrow 9am EST');
+        } else {
+          setTimeout(runBatch, 1500);
+        }
+      })
+      .catch(err=>{
+        console.error('Batch error:',err);
+        if(!isRunning) return;
+        // On error, wait 4s and retry — don't stop
+        setTimeout(runBatch, 4000);
+      });
+  }
+
+  runBatch();
 }
 
 async function saveRow(id){
