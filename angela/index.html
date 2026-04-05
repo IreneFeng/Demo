@@ -532,41 +532,31 @@ async function triggerHistorical(){
   const btn=document.getElementById('histFetchBtn');
   const statusEl=document.getElementById('feedStatusText');
   if(btn){btn.disabled=true;btn.textContent='📅 Searching...';}
-  showSaving('Angela searching past 6 months of IPO filings...');
+  showSaving('Angela searching past 6 months...');
 
-  let totalAdded=0, round=0, consecutive_errors=0;
-  // Max 200 rounds — 6 months of RSS pages (each ~2 weeks back) + processing queue
-  while(round<200){
-    round++;
-    if(statusEl) statusEl.textContent=`Batch ${round} — searching... (${totalAdded} added so far)`;
+  // Kick off background loop in Worker (runs via waitUntil — no timeout)
+  try { await wPost({action:'startHistoricalLoop',months:6}); } catch(e){}
+
+  // Poll for status every 3 seconds until done
+  let polls=0;
+  const pollInterval = setInterval(async ()=>{
+    polls++;
     try {
-      const result=await wPost({action:'historicalFetch',months:6});
-      consecutive_errors=0; // reset on success
-      totalAdded+=result.added||0;
-      const rem=result.remaining||0;
-      if(statusEl) statusEl.textContent=`Batch ${round}: +${result.added||0} companies · ${totalAdded} total · ${rem} remaining`;
-      // Refresh display every 5 batches so user sees progress
-      if(round%5===0) { updateStats(); }
-      if(rem<=0) break;
-      // 2s gap — gives Worker time to finish KV writes before next call
-      await new Promise(r=>setTimeout(r,2000));
-    } catch(e){
-      console.error('Historical fetch error:',e.message);
-      consecutive_errors++;
-      // Allow up to 3 consecutive errors (transient timeouts) before giving up
-      if(consecutive_errors>=3) break;
-      await new Promise(r=>setTimeout(r,3000));
-    }
-  }
-
-  if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
-  showSaving('✓ Historical search complete · '+totalAdded+' companies added');
-  await loadData();
-  hideSaving();
-  const st=document.getElementById('feedStatusText');
-  if(st) st.textContent=totalAdded>0
-    ?'✓ Found '+totalAdded+' companies from past 6 months · Next auto-fetch: tomorrow 9am EST'
-    :'✓ Historical search complete · 0 new relevant companies found';
+      const s = await wPost({action:'pollHistorical'});
+      if(statusEl) statusEl.textContent = s.status || 'Running...';
+      if(s.histTotalAdded > 0) showSaving('↻ ' + s.histTotalAdded + ' companies added so far...');
+      // Refresh table every 5 polls
+      if(polls%5===0) await loadData();
+      if(s.done || !s.running || polls>120){
+        clearInterval(pollInterval);
+        if(btn){btn.disabled=false;btn.textContent='📅 Past 6 Months';}
+        await loadData();
+        hideSaving();
+        const st=document.getElementById('feedStatusText');
+        if(st) st.textContent = s.status || ('✓ Done — ' + (s.histTotalAdded||0) + ' companies added');
+      }
+    } catch(e){ polls++; }
+  }, 3000);
 }
 
 async function saveRow(id){
