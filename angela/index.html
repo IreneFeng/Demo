@@ -264,6 +264,7 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
     <div style="margin-left:auto;display:flex;gap:6px">
       <button class="btn-fetch" id="fetchNowBtn" onclick="triggerFetch()">⚡ Fetch Now</button>
       <button class="btn-fetch" id="histFetchBtn" onclick="triggerHistorical()" style="background:#f5f3ff;border-color:#c4b5fd;color:#7c3aed" title="Search past 6 months of IPO filings">📅 Past 6 Months</button>
+      <button class="btn-fetch" id="ipoFetchBtn" onclick="triggerIPOFetch()" style="background:#f0fdf4;border-color:#86efac;color:#15803d" title="Find already-public small cap companies (market cap under $500M)">📈 IPO'd Co.</button>
       <button class="btn-manual" onclick="openAddFiling()">+ Add Manual</button>
       <button class="btn-manual" style="background:#fef2f2;border-color:#fecaca;color:#dc2626" onclick="clearAndRestart()" title="Clear auto-fetched companies and fetch fresh batch">🔄 Reset & Refetch</button>
     </div>
@@ -570,6 +571,53 @@ function triggerHistorical(){
         if(!isRunning) return;
         // On error, wait 4s and retry — don't stop
         setTimeout(runBatch, 4000);
+      });
+  }
+
+  runBatch();
+}
+
+function triggerIPOFetch(){
+  const btn=document.getElementById('ipoFetchBtn');
+  const statusEl=document.getElementById('feedStatusText');
+  if(btn){btn.disabled=true;btn.textContent='📈 Searching...';}
+
+  let totalAdded=0, round=0;
+  let isRunning=true;
+
+  function stop(msg){
+    isRunning=false;
+    if(btn){btn.disabled=false;btn.textContent="📈 IPO'd Co.";}
+    loadData();
+    hideSaving();
+    const st=document.getElementById('feedStatusText');
+    if(st) st.textContent=msg;
+  }
+
+  function runBatch(){
+    if(!isRunning) return;
+    round++;
+    if(statusEl) statusEl.textContent='IPO batch '+round+' — checking market caps... ('+totalAdded+' added)';
+    showSaving('Checking market caps via Yahoo Finance...');
+
+    wPost({action:'ipoFetch'})
+      .then(result=>{
+        if(!isRunning) return;
+        totalAdded+=result.added||0;
+        const rem=result.remaining||0;
+        if(statusEl) statusEl.textContent='IPO batch '+round+': checked '+(result.analyzed||0)+' · +'+(result.added||0)+' qualified · '+totalAdded+' total';
+        showSaving('↻ '+totalAdded+' IPO companies added...');
+        if(round%5===0) loadData();
+        if(rem<=0||round>=100){
+          stop('✓ IPO search complete · '+totalAdded+' small cap companies added (market cap <$500M)');
+        } else {
+          setTimeout(runBatch,2000);
+        }
+      })
+      .catch(err=>{
+        console.error('IPO batch error:',err);
+        if(!isRunning) return;
+        setTimeout(runBatch,4000);
       });
   }
 
