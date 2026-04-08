@@ -276,6 +276,7 @@ footer{background:var(--navy);padding:18px 30px;display:flex;align-items:center;
     <button class="chip" onclick="setFType('S-1',this)">S-1</button>
     <button class="chip" onclick="setFType('F-1',this)">F-1</button>
     <button class="chip" onclick="setFType('8-K',this)">8-K</button>
+    <button class="chip" onclick="setFType('424B4',this)">424B4 IPO'd</button>
     <span class="fl" style="margin-left:8px">Status</span>
     <button class="chip on" onclick="setFStatus('all',this)">All</button>
     <button class="chip" onclick="setFStatus('not_contacted',this)">Not Contacted</button>
@@ -863,13 +864,24 @@ function setTab(t,btn){
 
 function setFType(v,btn){
   state.filterType=v;
-  let i=0; document.querySelectorAll('.fbar .chip').forEach(b=>{if(i<4)b.classList.remove('on');i++;});
+  // Reset all filing-type chips (first group before the Status label)
+  const chips=[...document.querySelectorAll('.fbar .chip')];
+  const statusIdx=chips.findIndex((_,i)=>{
+    const prev=chips[i-1]; return prev && prev.classList.contains('fl') && prev.textContent.trim()==='Status';
+  });
+  const cutoff = statusIdx>0 ? statusIdx : 5;
+  chips.forEach((b,i)=>{ if(i<cutoff) b.classList.remove('on'); });
   btn.classList.add('on'); render();
 }
 
 function setFStatus(v,btn){
   state.filterStatus=v;
-  let i=0; document.querySelectorAll('.fbar .chip').forEach(b=>{if(i>=4)b.classList.remove('on');i++;});
+  const chips=[...document.querySelectorAll('.fbar .chip')];
+  const statusIdx=chips.findIndex((_,i)=>{
+    const prev=chips[i-1]; return prev && prev.classList.contains('fl') && prev.textContent.trim()==='Status';
+  });
+  const cutoff = statusIdx>0 ? statusIdx : 5;
+  chips.forEach((b,i)=>{ if(i>=cutoff) b.classList.remove('on'); });
   btn.classList.add('on'); render();
 }
 
