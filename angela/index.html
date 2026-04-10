@@ -687,16 +687,42 @@ async function saveClient(id){
 }
 
 // ── CONTACT FINDER ────────────────────────────────────────────────
+let _lastVerifyTime = 0;
+const VERIFY_COOLDOWN_MS = 8000; // 8s between verify calls to avoid rate limiting
+
 async function findContact(id){
   const seed=SEED.find(s=>s.id===id); if(!seed) return;
   const btn=document.getElementById('cf-btn-'+id);
   const res=document.getElementById('cf-res-'+id);
+
+  // Check cache first — if verified within 24h, use cached result
+  const cached = contactCache[id];
+  if(cached && cached._verifiedDate){
+    const cacheAge = Date.now() - (cached._cachedAt||0);
+    if(cacheAge < 24*60*60*1000 && cached.contacts && cached.contacts.length > 0){
+      if(btn){btn.className='cf-btn done';btn.textContent='✓ Found (cached)';}
+      if(res){res.style.display='block';res.innerHTML=renderCFExtra(cached)||'';}
+      return;
+    }
+  }
+
+  // Enforce cooldown between API calls
+  const now = Date.now();
+  const elapsed = now - _lastVerifyTime;
+  if(elapsed < VERIFY_COOLDOWN_MS){
+    const wait = Math.ceil((VERIFY_COOLDOWN_MS - elapsed)/1000);
+    if(btn){btn.disabled=true;btn.textContent='⏳ Wait '+wait+'s...';}
+    await new Promise(r=>setTimeout(r, VERIFY_COOLDOWN_MS - elapsed));
+  }
+  _lastVerifyTime = Date.now();
+
   if(btn){btn.disabled=true;btn.className='cf-btn searching';btn.textContent='🔍 Searching web...';}
   if(res){res.style.display='block';res.innerHTML='<span style="color:var(--amber)">⏳ Searching web for verified contact...</span>';}
   try {
     const data=await wPost({action:'findContact',company:seed.company,sector:seed.sector,hq:seed.hq,exchange:seed.exchange,ticker:seed.ticker||'',cik:seed.cik||''});
     data._verifiedDate=new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'});
     data._verifiedBy=CURRENT_USER;
+    data._cachedAt = Date.now();
     contactCache[id]=data;
     try{localStorage.setItem('angela_contacts',JSON.stringify(contactCache));}catch(e){}
     if(data.companyNameResolved && seed.company && seed.company.startsWith('[CIK')){
